@@ -1,65 +1,20 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta http-equiv="Permissions-Policy" content="autoplay=(self),encrypted-media=(self)">
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Your Profile| ReelTime</title>
-  <link rel="stylesheet" href="../css/styles.css">
-  <link rel="stylesheet" href="../css/profile.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <link rel="shortcut icon" href="../imgs/movie.png" type="image/x-icon">
+@extends('layouts.app')
 
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-  <script src="../js/profile.js" defer></script>
-  <script src="../js/watchlist.js" defer></script>
-  <script src="../js/script.js" defer></script>
-  <script src="../js/scriptJQ.js" defer></script>
-  <script src="../js/config.js" ></script>
+@section('title', 'Your Profile | ReelTime')
 
-</head>
-<body>
- <header>
+@push('styles')
+<link rel="stylesheet" href="{{ asset('css/profile.css') }}">
+@endpush
+
+@push('scripts')
+<script src="{{ asset('js/profile.js') }}" defer></script>
+<script src="{{ asset('js/watchlist.js') }}" defer></script>
+@endpush
+
+@section('content')
+<div class="Profile-container">
     
-     <div class="brand">
-        <div class="logo"><img src="../imgs/movie.png" alt=""></div>
-        <span class="brand-name">ReelTime</span>
-      </div>
-
-
-    <nav class="main-nav" id="mainNav">
-      <ul>
-        <li><a href="../index.html">Home</a></li>
-        <li><a href="../pages/bookings.html">Bookings</a></li> 
-         <li><a href="../pages/trivia.html">Games</a></li>  
-        <li><a href="../pages/about.html">About</a></li>
-         <li>       <button id="loginToggleBtn" class="login-toggle-btn">
-        <i class="fas fa-user"></i> Login
-    </button></li>
-      </ul>
-    </nav>
-
-
-    <div class="hamburger" id="hamburger">
-      <span></span> <!-- Line 1 of the hamburger menu -->
-      <span></span> <!-- Line 2 of the hamburger menu -->
-      <span></span> <!-- Line 3 of the hamburger menu -->
-    </div>
-
-
-    <div class="search">
-      <!-- <input id="SearchInput" placeholder="Search movies, actors, genres..." /> -->
-      <a href="../pages/search.html" class="search-icon" id="searchToggle">
-      <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-      </a>
-    </div>
-    
-  </header>
-
-
-  <div class="Profile-container">
-    
-  </div>
+</div>
 
 <main>
     <div id="watchlist-container" class="gallery"></div>
@@ -81,75 +36,4 @@
     </div>
 
 </main>
-  
-
-<footer class="cinema-footer">
-  <div class="film-strip">
-    <div class="film-perfs">
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-    </div>
-  </div>
-  
-  <div class="footer-main">
-    <div class="footer-section">
-       <div class="brand">
-        <div class="logo"><img src="../imgs/movie.png" alt=""></div>
-        <span class="brand-name">ReelTime</span>
-      </div>
-      <p class="tagline">Where stories come to life</p>
-    </div>
-    
-    <div class="footer-nav">
-      <div class="nav-column">
-        <strong>Movies</strong>
-        <a href="../index.html">Home</a>
-        <a href="../pages/bookings.html">Bookings</a>
-        <a href="../pages/Profile.html">My profile</a>
-        <a href="../pages/about.html">About US</a>
-      </div>
-     
-      <div class="nav-column">
-        <strong>Social media </strong>
-        <a href="#">Instagram</a>
-        <a href="#">Facebook</a>
-        <a href="#">Tiktok</a>
-      </div>
-    </div>
-  </div>
-  
-  <div class="footer-credits">
-    <p>Made with <i class="fas fa-heart"></i> for movie lovers</p>
-    <p>&copy; 2024 ReelTime Cinemas</p>
-  </div>
-</footer>
- <div class="login">
-                <div class="login-background">
-  
-              <div class="login-content-panel">
-                  <div class="login-header">
-                      <div class="logo-text">Log In</div>
-                      <p class="welcome-message">Welcome back! Please enter your details</p>
-                  </div>
-
-                  <form class="login-form">
-                      <label >User name</label>
-                      <input id="username"  placeholder=" " required>
-
-                      <label for="password">Password</label>
-                      <div class="password-group">
-                          <input type="password" id="password" name="password" required>
-                
-                      </div>
-            
-            
-                      <button type="submit" class="login-button">Log In</button>
-                      <p id="loginError" class="login-error" aria-live="polite"></p>
-                  </form>
-                </div>
-
-</body>
-</html>
+@endsection

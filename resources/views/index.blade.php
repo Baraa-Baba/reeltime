@@ -1,104 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ReelTime - Discover, Rate & Watch</title>
-  <link rel="shortcut icon" href="imgs/movie.png" type="image/x-icon">
-  <link rel="stylesheet" href="{{ asset('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css') }}">
-  <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-  <script>
-    window.routes = {
-        profile: "{{ route('profile') }}",
-        home: "{{ route('home') }}",
-        // you can add other routes if needed
-    };
-</script>
-  <script src="{{ asset('js/script.js') }}" defer></script>
-  <script src="{{ asset('js/scriptJQ.js') }}" defer></script>
- <script src="{{ asset('js/watchlist.js') }}" defer></script>
- <script src="{{ asset('js/config.js') }}" ></script>
- 
-</head>
+@extends('layouts.app')
 
-<body>
-  <header>
-    
-     <div class="brand">
-        <div class="logo"><img src="{{ asset('imgs/movie.png') }}" alt=""></div>
-        <span class="brand-name">ReelTime</span>
-      </div>
+@section('title', 'ReelTime - Discover, Rate & Watch')
 
+@push('scripts')
+<script src="{{ asset('js/watchlist.js') }}" defer></script>
+@endpush
 
-    <nav class="main-nav" id="mainNav">
-      <ul>
-        <li><a style="background-color: blueviolet;" href="{{ route('home') }}">Home</a></li>
-        <li><a href="{{ route('bookings') }}">Bookings</a></li> 
-         <li><a href="{{ route('trivia') }}">Games</a></li>  
-        <li><a href="{{ route('about') }}">About</a></li>
-        <li>
-  <button id="loginToggleBtn" class="login-toggle-btn">
-    <i class="fas fa-user"></i> Login
-  </button>
-</li>
-      </ul>
-    </nav>
-
-
-    <div class="hamburger" id="hamburger">
-      <span></span> <!-- Line 1 of the hamburger menu -->
-      <span></span> <!-- Line 2 of the hamburger menu -->
-      <span></span> <!-- Line 3 of the hamburger menu -->
-    </div>
-
-
-    <div class="search">
-     <a href="pages/search.html" class="search-icon" id="searchToggle">
-          <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-      </a>
-    </div>
-   
-
-  </header>
-
-  <main>
-    
-          <div class="login">
-                <div class="login-background">
-  
-              <div class="login-content-panel">
-                  <div class="login-header">
-                      <div class="logo-text">Log In</div>
-                      <p class="welcome-message">Welcome back! Please enter your details</p>
-                  </div>
-
-                  <form class="login-form">
-                      <label >User name</label>
-                      <input id="username"  placeholder=" " required>
-
-                      <label for="password">Password</label>
-                      <div class="password-group">
-                          <input type="password" id="password" name="password" required>
-                
-                      </div>
-            
-            
-                      <button type="submit" class="login-button">Log In</button>
-                      <p id="loginError" class="login-error" aria-live="polite"></p>
-                  </form>
-                </div>
-
-
-      
-
-              </div>
-      </div>
-
-
-
-
-          <div class="welcome-box" id="heroBox">
+@section('content')
+<main>
+  <div class="welcome-box" id="heroBox">
             <button class="hero-btn prev" onclick="prevImage()">&#10094;</button>
             <button class="hero-btn next" onclick="nextImage()">&#10095;</button>
 
@@ -110,84 +20,36 @@
           </div>
 
         <section class="gallery" id="gallery"></section>
-  </main>
+</main>
 
-  <div class="modal" id="card-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-    <div class="modal__backdrop" data-close-modal></div>
-    <div class="modal__dialog" role="document">
-      <button class="modal__close" id="modal-close" aria-label="Close dialog" data-close-modal>&times;</button>
+<div class="modal" id="card-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="modal__backdrop" data-close-modal></div>
+  <div class="modal__dialog" role="document">
+    <button class="modal__close" id="modal-close" aria-label="Close dialog" data-close-modal>&times;</button>
 
-      <div class="modal__media">
-        <div id="trailer-container">
-          <iframe id="modal-trailer" width="100%" height="315" src="" frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowfullscreen>
-          </iframe>
-        </div>
-        <div id="movieinfo">
-          <p><strong>Cast:</strong> <span id="modal-cast"></span></p>
-          <p><strong>Genres:</strong> <span id="modal-genres"></span></p>
-          <p><strong>This movie is:</strong> <span id="modal-this-movie-is"></span></p>
-        </div>
+    <div class="modal__media">
+      <div id="trailer-container">
+        <iframe id="modal-trailer" width="100%" height="315" src="" frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen>
+        </iframe>
       </div>
+      <div id="movieinfo">
+        <p><strong>Cast:</strong> <span id="modal-cast"></span></p>
+        <p><strong>Genres:</strong> <span id="modal-genres"></span></p>
+        <p><strong>This movie is:</strong> <span id="modal-this-movie-is"></span></p>
+      </div>
+    </div>
 
-      <div class="modal__body">
-        <h3 id="modal-title">movie</h3>
-        <p id="modal-text"></p>
-         <button  class="add-watchlist-btn">+ Add to Watchlist</button>
-         <div class="comments-section">
-          <h4>Reviews</h4>
-          <div id="comments-list"></div>
-        </div>
-          
+    <div class="modal__body">
+      <h3 id="modal-title">movie</h3>
+      <p id="modal-text"></p>
+      <button class="add-watchlist-btn">+ Add to Watchlist</button>
+      <div class="comments-section">
+        <h4>Reviews</h4>
+        <div id="comments-list"></div>
       </div>
     </div>
   </div>
-
-<footer class="cinema-footer">
-  <div class="film-strip">
-    <div class="film-perfs">
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-    </div>
-  </div>
-  
-  <div class="footer-main">
-    <div class="footer-section">
-       <div class="brand">
-        <div class="logo"><img src="{{ asset('imgs/movie.png') }}" alt=""></div>
-        <span class="brand-name">ReelTime</span>
-      </div>
-      <p class="tagline">Where stories come to life</p>
-    </div>
-    
-    <div class="footer-nav">
-      <div class="nav-column">
-        <strong>Movies</strong>
-        <a href="{{ route('home') }}">Home</a>
-        <a href="{{ route('bookings') }}">Bookings</a>
-        <a href="{{ route('profile') }}">My profile</a>
-        <a href="{{ route('about') }}">About US</a>
-      </div>
-      
-      <div class="nav-column">
-        <strong>Social media </strong>
-        <a href="#">Instagram</a>
-        <a href="#">Facebook</a>
-        <a href="#">Tiktok</a>
-      </div>
-    </div>
-  </div>
-  
-  <div class="footer-credits">
-    <p>Made with <i class="fas fa-heart"></i> for movie lovers</p>
-    <p>&copy; 2024 ReelTime Cinemas</p>
-  </div>
-</footer>
-
-</body>
-
-</html>
+</div>
+@endsection

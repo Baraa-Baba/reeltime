@@ -227,7 +227,7 @@ let bookingMovieComments = {
             if (!loggedInUser) {
                 $('.login').fadeIn(300);
             } else {
-                window.location.href = getProfileUrl();
+                window.location.href = '/profile';
             }
         });
         

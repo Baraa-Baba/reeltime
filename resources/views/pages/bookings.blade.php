@@ -1,93 +1,20 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta http-equiv="Permissions-Policy" content="autoplay=(self),encrypted-media=(self)">
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Bookings | ReelTime</title>
-  <link rel="shortcut icon" href="../imgs/movie.png" type="image/x-icon">
-   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"> <!-- for search icon-->
-  <link rel="stylesheet" href="../css/styles.css">
-  <link rel="stylesheet" href="../css/bookings.css">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-  <script src="../js/script.js" defer></script>
-  <script src="../js/watchlist.js"></script>
-  <script src="../js/scriptJQ.js" defer></script>
-  <script src="../js/config.js" ></script>
+@extends('layouts.app')
 
-</head>
-<body>
-  <header>
-    
-     <div class="brand">
-        <div class="logo"><img src="../imgs/movie.png" alt=""></div>
-        <span class="brand-name">ReelTime</span>
-      </div>
+@section('title', 'Bookings | ReelTime')
 
-      <nav class="main-nav" id="mainNav">
-        <ul>
-          <li><a href="../index.html">Home</a></li>
-          <li><a href="../pages/bookings.html" style="background-color: blueviolet;">Bookings</a></li> 
-           <li><a href="../pages/trivia.html">Games</a></li>  
-          <li><a href="../pages/about.html">About</a></li>
-           <li>       <button id="loginToggleBtn" class="login-toggle-btn">
-        <i class="fas fa-user"></i> Login
-    </button></li>
-        </ul>
-      </nav>
+@push('styles')
+<link rel="stylesheet" href="{{ asset('css/bookings.css') }}">
+@endpush
 
+@push('scripts')
+<script src="{{ asset('js/watchlist.js') }}" defer></script>
+@endpush
 
-      <div class="hamburger" id="hamburger">
-        <span></span> <!-- Line 1 of the hamburger menu -->
-        <span></span> <!-- Line 2 of the hamburger menu -->
-        <span></span> <!-- Line 3 of the hamburger menu -->
-      </div>
-
-
-      <div class="search">
-      <!-- <input id="SearchInput" placeholder="Search movies, actors, genres..." /> -->
-      <a href="../pages/search.html" class="search-icon" id="searchToggle">
-              <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-      </a>
-        </button>
-      </div>
-      
-
-    </header>
+@section('content')
 <div id="searchOverlay" class="search-overlay">
   <div class="search-results"></div>
 </div>
 <main>
-      
-    <div class="login">
-      <div class="login-background">
-  
-    <div class="login-content-panel">
-        <div class="login-header">
-            <div class="logo-text">Log In</div>
-            <p class="welcome-message">Welcome back! Please enter your details</p>
-        </div>
-
-        <form class="login-form">
-            <label >User name</label>
-            <input id="username"  placeholder=" " required>
-
-            <label for="password">Password</label>
-            <div class="password-group">
-                <input type="password" id="password" name="password" required>
-                
-            </div>
-            
-            
-            <button type="submit" class="login-button">Log In</button>
-        </form>
-      </div>
-
-
-      
-
-</div>
-</div>
   <div class="box1">
     <div class="booking">
         <button class="stepsbtn default enabled" id="btn1" onclick="showStep(1)">1</button>
@@ -187,7 +114,7 @@
             data-this-movie-is="Intense, Violent, Futuristic"
             data-rating="4.3"
             data-time="115 min">
-            <img src="../imgs/therunningman-min.png" alt="The Running Man">
+            <img src="{{ asset('imgs/therunningman-min.png') }}" alt="The Running Man">
             <button class="showShowTimes-btn">
               Show ShowTimes
             </button>
@@ -202,7 +129,7 @@
             data-this-movie-is="Gory, Suspenseful, Alien Hunt"
             data-rating="3.3"
             data-time="125 min">
-            <img src="../imgs/predator badlands-min.png" alt="Predator: Badlands">
+            <img src="{{ asset('imgs/predator badlands-min.png') }}" alt="Predator: Badlands">
             <button class="showShowTimes-btn">
               Show ShowTimes
             </button>
@@ -218,7 +145,7 @@
             data-this-movie-is="Emotional, Lebanese, Gritty"
             data-rating="4.1"
             data-time="155 min">
-            <img src="../imgs/hardabsht-min.png" alt="HardaBasht poster">
+            <img src="{{ asset('imgs/hardabsht-min.png') }}" alt="HardaBasht poster">
             <button class="showShowTimes-btn">
               Show ShowTimes
             </button>
@@ -234,7 +161,7 @@
             data-this-movie-is="Exciting, Supernatural, Intense"
             data-rating="4.7"
             data-time="175 min">
-            <img src="../imgs/jujutsu kaisen-min.png" alt="Jujutsu Kaisen:Execution poster">
+            <img src="{{ asset('imgs/jujutsu kaisen-min.png') }}" alt="Jujutsu Kaisen:Execution poster">
             <button class="showShowTimes-btn">
               Show ShowTimes
             </button>
@@ -250,7 +177,7 @@
             data-this-movie-is="Funny, Suspenseful, Action-Packed"
             data-rating="4.2"
             data-time="185 min">
-            <img src="../imgs/playdate-min.png" alt="Playdate poster">
+            <img src="{{ asset('imgs/playdate-min.png') }}" alt="Playdate poster">
             <button class="showShowTimes-btn">
               Show ShowTimes
             </button>
@@ -265,7 +192,7 @@
             data-this-movie-is="Emotional, Romantic, Thought-Provoking"
             data-rating="2.3"
             data-time="168 min">
-            <img src="../imgs/El Selem W El Thoban-min.png" alt="El Selem W El Thoban">
+            <img src="{{ asset('imgs/El Selem W El Thoban-min.png') }}" alt="El Selem W El Thoban">
             <button class="showShowTimes-btn">
               Show ShowTimes
             </button>
@@ -312,58 +239,9 @@
       </div>
     </div> 
   </div>  
-</div>   
+</div>
 
- 
-
-<footer class="cinema-footer">
-  <div class="film-strip">
-    <div class="film-perfs">
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-    </div>
-  </div>
-  
-  <div class="footer-main">
-    <div class="footer-section">
-       <div class="brand">
-        <div class="logo"><img src="../imgs/movie.png" alt=""></div>
-        <span class="brand-name">ReelTime</span>
-      </div>
-      <p class="tagline">Where stories come to life</p>
-    </div>
-    
-    <div class="footer-nav">
-      <div class="nav-column">
-        <strong>Movies</strong>
-        <a href="../index.html">Home</a>
-        <a href="../pages/bookings.html">Bookings</a>
-        <a href="../pages/Profile.html">My profile</a>
-        <a href="../pages/about.html">About US</a>
-      </div>
-      <!-- <div class="nav-column">
-        <strong>Experience</strong>
-        <a href="#">Theaters</a>
-        <a href="#">Premium</a>
-        <a href="#">3D</a>
-      </div> -->
-      <div class="nav-column">
-        <strong>Social media </strong>
-        <a href="#">Instagram</a>
-        <a href="#">Facebook</a>
-        <a href="#">Tiktok</a>
-      </div>
-    </div>
-  </div>
-  
-  <div class="footer-credits">
-    <p>Made with <i class="fas fa-heart"></i> for movie lovers</p>
-    <p>&copy; 2024 ReelTime Cinemas</p>
-  </div>
-</footer>
+@push('scripts')
 <script>
  document.querySelectorAll(".gallery2 .movie-card").forEach(card => {
     let title = card.dataset.title 
@@ -387,30 +265,5 @@
     card.appendChild(overlay);
   });
 </script>
- <div class="login">
-                <div class="login-background">
-  
-              <div class="login-content-panel">
-                  <div class="login-header">
-                      <div class="logo-text">Log In</div>
-                      <p class="welcome-message">Welcome back! Please enter your details</p>
-                  </div>
-
-                  <form class="login-form">
-                      <label >User name</label>
-                      <input id="username"  placeholder=" " required>
-
-                      <label for="password">Password</label>
-                      <div class="password-group">
-                          <input type="password" id="password" name="password" required>
-                
-                      </div>
-            
-            
-                      <button type="submit" class="login-button">Log In</button>
-                      <p id="loginError" class="login-error" aria-live="polite"></p>
-                  </form>
-                </div>
-
-</body>
-</html>
+@endpush
+@endsection

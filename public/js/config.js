@@ -1,8 +1,8 @@
 
 function getProfileUrl() {
     if (window.location.pathname.includes('/pages/')) {
-        return 'Profile.html';          
+        return 'profile';          
     } else {
-        return 'pages/Profile.html';    
+        return 'pages/profile';    
     }
 }

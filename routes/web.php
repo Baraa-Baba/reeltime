@@ -6,22 +6,22 @@ Route::get('/', function () {
     return view('index');
 })->name('home');
 
-Route::get('/pages/about', function () {
+Route::get('/about', function () {
     return view('pages.about');
 })->name('about');
 
-Route::get('/pages/bookings', function () {
+Route::get('/bookings', function () {
     return view('pages.bookings');
 })->name('bookings');
 
-Route::get('/pages/profile', function () {
-    return view('pages.profile'); // use 'pages.Profile' if filename has capital P
+Route::get('/profile', function () {
+    return view('pages.profile');
 })->name('profile');
 
-Route::get('/pages/search', function () {
+Route::get('/search', function () {
     return view('pages.search');
 })->name('search');
 
-Route::get('/pages/trivia', function () {
+Route::get('/trivia', function () {
     return view('pages.trivia');
 })->name('trivia');
