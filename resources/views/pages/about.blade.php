@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About Us | ReelTime</title>
+  <link rel="shortcut icon" href="../imgs/movie.png" type="image/x-icon">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="../css/about.css">
+  <link rel="stylesheet" href="../css/styles.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  
+   <script src="../js/scriptJQ.js" defer></script>
+  <script src="../js/script.js" defer></script>
+  <script src="../js/config.js" ></script>
+
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="logo"><img src="../imgs/movie.png" alt=""></div>
+      <span class="brand-name">ReelTime</span>
+    </div>
+    <nav class="main-nav" id="mainNav">
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../pages/bookings.html">Bookings</a></li>
+        <li><a href="../pages/trivia.html">Games</a></li>   
+        <li><a href="../pages/about.html" style="background-color: blueviolet;">About</a></li>
+         <li>       <button id="loginToggleBtn" class="login-toggle-btn">
+        <i class="fas fa-user"></i> Login
+    </button></li>
+      </ul>
+    </nav>
+
+    <div class="hamburger" id="hamburger">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+
+    <div class="search">
+      <!-- <input id="SearchInput" placeholder="Search movies, actors, genres..." /> -->
+      <a href="../pages/search.html" class="search-icon" id="searchToggle">
+      <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+      </a>
+    </div>
+    
+  </header>
+<section class="about">
+    <!-- Hero Section -->
+    <div class="about-hero">
+      <div class="hero-content">
+        <h1>Explore. Rate. Book.</h1>
+        <p class="tagline">Your gateway to cinematic adventures — anytime, anywhere</p>
+      </div>
+    </div>
+
+    <!-- Story Section with Image on Right -->
+    <div class="story-section">
+      <div class="story-grid">
+        <div class="story-content">
+          <h2>Welcome to ReelTime</h2>
+          <p>ReelTime is your all-in-one movie companion. Whether you're booking tickets, rating your favorite films, or watching trailers, we make it effortless and exciting.</p>
+          <p>Our platform is designed for movie lovers who want more than just streaming. Discover new releases, preview trailers, and curate your personal watchlist — all in one place.</p>
+          <p>Founded by film enthusiasts and tech innovators, ReelTime brings together convenience and passion. Dive into our catalog, explore stories that move you, and make every movie moment count.</p>
+          
+          <div class="story-stats">
+            <div class="story-stat">
+              <span class="stat-number">500+</span>
+              <span class="stat-label">Movies to Rate</span>
+            </div>
+            <div class="story-stat">
+              <span class="stat-number">50K+</span>
+              <span class="stat-label">Watchlists Created</span>
+            </div>
+            <div class="story-stat">
+              <span class="stat-number">24/7</span>
+              <span class="stat-label">Booking Access</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="story-visual">
+          <div class="image-container">
+            <img src="../imgs/for welcome page.png" alt="ReelTime Cinema Experience" />
+            <div class="image-overlay"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Values Section -->
+    <div class="values-section">
+      <div class="section-header">
+        <h2>Why Choose ReelTime</h2>
+        <p>We simplify your movie journey — from discovery to booking</p>
+      </div>
+      <div class="values-grid">
+        <div class="value-card">
+          <div class="value-icon"><i class="fas fa-bullseye" style="color: #ffd700; font-size: 60px; margin: 15px;"></i></div>
+          <h3>Smart Booking</h3>
+          <p>Reserve your seats instantly with real-time availability and location-based options.</p>
+        </div>
+        <div class="value-card">
+          <div class="value-icon"><i class="fas fa-bolt" style="color: #ff6b35; font-size: 60px; margin: 15px;"></i>
+</div>
+          <h3>Trailer First</h3>
+          <p>Watch trailers before you commit — preview the vibe, then book or add to your list.</p>
+        </div>
+        <div class="value-card">
+          <div class="value-icon"><i class="fas fa-heart" style="color: #e91e63; font-size: 60px; margin: 15px;"></i></div>
+          <h3>Rate & Remember</h3>
+          <p>Leave your mark with ratings and reviews, and build a watchlist that reflects your taste.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="stats-section">
+      <div class="stats-grid">
+        <div class="stat-item">
+          <span class="stat-number">100+</span>
+          <span class="stat-label">Trailers Uploaded</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">Millions</span>
+          <span class="stat-label">Ratings Submitted</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">Global</span>
+          <span class="stat-label">Booking Partners</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">95%</span>
+          <span class="stat-label">User Satisfaction</span>
+        </div>
+      </div>
+    </div>
+
+    <section class="about-section">
+      <div class="about-block">
+        <img src="../imgs/badge.png" alt="Achievements Icon" class="about-icon">
+        <h3>Achievements</h3>
+        <p>We've enabled thousands of bookings, hosted hundreds of trailers, and built a thriving rating community.</p>
+      </div>
+      <div class="about-block">
+        <img src="../imgs/shared-vision.png" alt="Vision Icon" class="about-icon">
+        <h3>Vision</h3>
+        <p>To be the go-to platform for discovering, rating, and booking movies — with trailers at your fingertips.</p>
+      </div>
+      <div class="about-block">
+        <img src="../imgs/mission.png" alt="Mission Icon" class="about-icon">
+        <h3>Mission</h3>
+        <p>Empower movie lovers to explore, evaluate, and enjoy cinema through seamless booking and personalized watchlists.</p>
+      </div>
+    </section>
+
+    <div class="cta-section">
+      <div class="cta-content">
+        <h2>Ready to Book or Browse?</h2>
+        <p class="tagline">Watch trailers, rate movies, and build your watchlist — all in one place.</p>
+        <div class="cta-buttons">
+          <a href="../index.html" class="btn-primary">Start Watching</a>
+          <a href="../pages/bookings.html" class="btn-secondary">Book Tickets</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="cinema-footer">
+    <div class="film-strip">
+      <div class="film-perfs">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+    
+    <div class="footer-main">
+      <div class="footer-section">
+        <div class="brand">
+          <div class="logo"><img src="../imgs/movie.png" alt=""></div>
+          <span class="brand-name">ReelTime</span>
+        </div>
+        <p class="tagline">Where stories come to life</p>
+      </div>
+      
+      <div class="footer-nav">
+        <div class="nav-column">
+          <strong>Movies</strong>
+          <a href="../index.html">Home</a>
+          <a href="../pages/bookings.html">Bookings</a>
+          <a href="../pages/Profile.html">My Profile</a>
+          <a href="../pages/about.html">About Us</a>
+        </div>
+       
+        <div class="nav-column">
+          <strong>Social Media</strong>
+          <a href="#">Instagram</a>
+          <a href="#">Facebook</a>
+          <a href="#">TikTok</a>
+        </div>
+      </div>
+    </div>
+    
+    <div class="footer-credits">
+      <p>Made with <i class="fas fa-heart"></i> for movie lovers</p>
+      <p>&copy; 2024 ReelTime Cinemas</p>
+    </div>
+  </footer>
+   <div class="login">
+                <div class="login-background">
+  
+              <div class="login-content-panel">
+                  <div class="login-header">
+                      <div class="logo-text">Log In</div>
+                      <p class="welcome-message">Welcome back! Please enter your details</p>
+                  </div>
+
+                  <form class="login-form">
+                      <label >User name</label>
+                      <input id="username"  placeholder=" " required>
+
+                      <label for="password">Password</label>
+                      <div class="password-group">
+                          <input type="password" id="password" name="password" required>
+                
+                      </div>
+            
+            
+                      <button type="submit" class="login-button">Log In</button>
+                      <p id="loginError" class="login-error" aria-live="polite"></p>
+                  </form>
+                </div>
+
+  </body>
+  </html>

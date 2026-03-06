@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Movies| ReelTime</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/search.css">
+    <link rel="shortcut icon" href="../imgs/movie.png" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="../js/search.js" defer></script>
+    <script src="../js/script.js" defer></script>
+    <script src="../js/scriptJQ.js" defer></script>
+    <script src="../js/watchlist.js"></script>
+    <script src="../js/config.js" ></script>
+</head>
+
+<body class="search-page">
+    <header>
+        <div class="brand">
+            <div class="logo"><img src="../imgs/movie.png" alt=""></div>
+            <span class="brand-name">ReelTime</span>
+        </div>
+
+        <nav class="main-nav" id="mainNav">
+            <ul>
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="../pages/bookings.html">Bookings</a></li>
+                <li><a href="../pages/trivia.html">Games</a></li>
+                <li><a href="../pages/about.html">About</a></li>
+                 <li>       <button id="loginToggleBtn" class="login-toggle-btn">
+        <i class="fas fa-user"></i> Login
+    </button></li>
+            </ul>
+        </nav>
+        <div class="hamburger" id="hamburger">
+            <span></span> <!-- Line 1 of the hamburger menu -->
+            <span></span> <!-- Line 2 of the hamburger menu -->
+            <span></span> <!-- Line 3 of the hamburger menu -->
+        </div>
+
+        <div class="search">
+        <a href="../pages/search.html" class="search-icon" id="searchToggle">
+            <i class="fa-solid fa-magnifying-glass" style="color: blueviolet;" aria-hidden="true"></i>
+        </a>
+        </div>
+
+        
+    </header>
+
+    <main class="search-main">
+
+        <section class="search-hero">
+            <p class="search-pill">Discover · Rate · Book</p>
+            <h1>Discover Your Next Favorite</h1>
+            <p class="search-subtitle">
+                Search through our ReelTime collection of movies and find what to watch next.
+            </p>
+
+            <div class="search-bar-large">
+                <div class="search-type">
+                    <i class="fa-solid fa-film"></i>
+                    <span>Movies</span>
+                </div>
+                <input id="mainSearchInput" type="text" placeholder="Type a movie title, genre, or keyword..." />
+                <button id="mainSearchBtn">
+                    <i class="fa fa-search"></i>
+                </button>
+            </div>
+        </section>
+
+        <section class="search-results-section">
+            <div class="results-header">
+                <div>
+                    <h2>Results</h2>
+                    <p id="resultsCount">Loading movies...</p>
+                </div>
+                <select id="searchSort">
+                    <option value="relevance">Relevance</option>
+                    <option value="title-asc">Title A–Z</option>
+                    <option value="title-desc">Title Z–A</option>
+                    <option value="rating-desc">Rating High → Low</option>
+                    <option value="rating-asc">Rating Low → High</option>
+                </select>
+            </div>
+
+            <section id="searchResults">
+      
+            </section>
+
+            <div id="searchEmpty" class="search-empty" style="display:none;">
+                <h3>No results found</h3>
+                <p>Try another title, genre, or keyword.</p>
+            </div>
+        </section>
+    </main>
+    <div class="modal" id="card-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div class="modal__backdrop" data-close-modal></div>
+        <div class="modal__dialog" role="document">
+            <button class="modal__close" id="modal-close" aria-label="Close dialog" data-close-modal>&times;</button>
+
+            <div class="modal__media">
+                <div id="trailer-container">
+                    <iframe id="modal-trailer" width="100%" height="315" src="" frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen>
+                    </iframe>
+                </div>
+                <div id="movieinfo">
+                    <p><strong>Cast:</strong> <span id="modal-cast"></span></p>
+                    <p><strong>Genres:</strong> <span id="modal-genres"></span></p>
+                    <p><strong>This movie is:</strong> <span id="modal-this-movie-is"></span></p>
+                </div>
+            </div>
+
+            <div class="modal__body">
+                <h3 id="modal-title">movie</h3>
+                <p id="modal-text"></p>
+                <button class="add-watchlist-btn">+ Add to Watchlist</button>
+                <div class="comments-section">
+                    <h4>Reviews</h4>
+                    <div id="comments-list"></div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+<footer class="cinema-footer">
+    <div class="film-strip">
+        <div class="film-perfs">
+            <span></span><span></span><span></span><span></span><span></span>
+        </div>
+    </div>
+    <div class="footer-main">
+        <div class="footer-section">
+            <div class="brand">
+                <div class="logo"><img src="../imgs/movie.png" alt=""></div>
+                <span class="brand-name">ReelTime</span>
+            </div>
+            <p class="tagline">Where stories come to life</p>
+        </div>
+        <div class="footer-nav">
+            <div class="nav-column">
+                <strong>Movies</strong>
+                <a href="../index.html">Home</a>
+                <a href="../pages/bookings.html">Bookings</a>
+                <a href="../pages/Profile.html">My profile</a>
+                <a href="../pages/about.html">About Us</a>
+            </div>
+            <div class="nav-column">
+                <strong>Social media</strong>
+                <a href="#">Instagram</a>
+                <a href="#">Facebook</a>
+                <a href="#">TikTok</a>
+            </div>
+        </div>
+    </div>
+    <div class="footer-credits">
+        <p>Made with <i class="fas fa-heart"></i> for movie lovers</p>
+        <p>&copy; 2024 ReelTime Cinemas</p>
+    </div>
+</footer>
+ <div class="login">
+                <div class="login-background">
+  
+              <div class="login-content-panel">
+                  <div class="login-header">
+                      <div class="logo-text">Log In</div>
+                      <p class="welcome-message">Welcome back! Please enter your details</p>
+                  </div>
+
+                  <form class="login-form">
+                      <label >User name</label>
+                      <input id="username"  placeholder=" " required>
+
+                      <label for="password">Password</label>
+                      <div class="password-group">
+                          <input type="password" id="password" name="password" required>
+                
+                      </div>
+            
+            
+                      <button type="submit" class="login-button">Log In</button>
+                      <p id="loginError" class="login-error" aria-live="polite"></p>
+                  </form>
+                </div>
+
+</body>
+
+  
+</html>
