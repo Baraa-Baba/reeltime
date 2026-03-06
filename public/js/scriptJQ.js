@@ -80,7 +80,7 @@ let bookingMovieComments = {
 
     let $gallery = $("#gallery");
 //was getting errors when hosting
-    const basePath = window.location.pathname.includes("/pages/")
+    const basePath = window.location.pathname.includes("/")
         ? "../"
         : "./";
     $.getJSON(basePath + "data/movies.json")

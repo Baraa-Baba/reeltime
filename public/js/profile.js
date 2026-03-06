@@ -128,7 +128,7 @@ function loadWatchlist(user) {
                 <div class="empty-watchlist" style="grid-column: 1 / -1;">
                     <h3>Your Watchlist is Empty</h3>
                     <p>Start adding movies to build your personalized collection!</p>
-                    <a href="../pages/search.html" style="color: #8a2be2; text-decoration: none; font-weight: bold;">Browse Movies <i class="fas fa-arrow-right"></i></a>
+                    <a href="/search" style="color: #8a2be2; text-decoration: none; font-weight: bold;">Browse Movies <i class="fas fa-arrow-right"></i></a>
                 </div>
             `);
             return;
@@ -269,7 +269,7 @@ function loadBookedMovies(user) {
                     <div class="empty-icon"><i class="fas fa-ticket-alt"></i></div>
                     <h3>No Bookings Yet</h3>
                     <p>Book a movie from the bookings page and it will appear here.</p>
-                    <a href="../pages/bookings.html" style="color: #8a2be2; text-decoration: none; font-weight: bold;">Book a Movie <i class="fas fa-arrow-right"></i></a>
+                    <a href="/bookings" style="color: #8a2be2; text-decoration: none; font-weight: bold;">Book a Movie <i class="fas fa-arrow-right"></i></a>
                 </div>
             `);
             return;
