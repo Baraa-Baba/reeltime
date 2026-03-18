@@ -15,11 +15,64 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        $users = \App\Models\User::factory(20)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        $movies = \App\Models\Movie::factory(15)->create();
+
+        $cinemas = \App\Models\Cinema::factory(5)->create();
+
+        $games = \App\Models\Game::factory(3)->create();
+
+        foreach ($users->random(10) as $user) {
+            foreach ($movies->random(3) as $movie) {
+                \App\Models\Rating::factory()->create([
+                    'user_id' => $user->user_id,
+                    'movie_id' => $movie->movie_id,
+                ]);
+            }
+        }
+
+        foreach ($users->random(10) as $user) {
+            foreach ($movies->random(2) as $movie) {
+                \App\Models\Watchlist::factory()->create([
+                    'user_id' => $user->user_id,
+                    'movie_id' => $movie->movie_id,
+                ]);
+            }
+        }
+
+        foreach ($movies as $movie) {
+            foreach ($cinemas->random(2) as $cinema) {
+                \App\Models\Showtime::factory(2)->create([
+                    'movie_id' => $movie->movie_id,
+                    'cinema_id' => $cinema->cinema_id,
+                ]);
+            }
+        }
+
+        $showtimes = \App\Models\Showtime::all();
+        foreach ($users->random(15) as $user) {
+            foreach ($showtimes->random(2) as $showtime) {
+                \App\Models\Booking::factory()->create([
+                    'user_id' => $user->user_id,
+                    'showtime_id' => $showtime->showtime_id,
+                ]);
+            }
+        }
+
+        foreach ($games as $game) {
+            \App\Models\Question::factory(5)->create([
+                'game_id' => $game->game_id,
+            ]);
+        }
+
+        foreach ($users->random(10) as $user) {
+            foreach ($games->random(2) as $game) {
+                \App\Models\GameRound::factory()->create([
+                    'user_id' => $user->user_id,
+                    'game_id' => $game->game_id,
+                ]);
+            }
+        }
     }
 }
