@@ -25,3 +25,6 @@ Route::get('/search', function () {
 Route::get('/trivia', function () {
     return view('pages.trivia');
 })->name('trivia');
+Route::get('/admin', function() {
+    return view('admin.profile');
+})->name('admin.profile');
