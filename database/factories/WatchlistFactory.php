@@ -2,23 +2,23 @@
 
 namespace Database\Factories;
 
+use App\Models\User;
+use App\Models\Movie;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Watchlist>
+ * @extends Factory<\App\Models\Watchlist>
  */
 class WatchlistFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
+        $userId  = User::query()->inRandomOrder()->value('user_id')  ?? User::factory();
+        $movieId = Movie::query()->inRandomOrder()->value('movie_id') ?? Movie::factory();
+
         return [
-            'user_id' => \App\Models\User::factory(),
-            'movie_id' => \App\Models\Movie::factory(),
+            'user_id'  => $userId,
+            'movie_id' => $movieId,
         ];
     }
 }
