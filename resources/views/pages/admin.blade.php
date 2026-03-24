@@ -144,7 +144,7 @@
                                 <tr class="border-b border-white/10 hover:bg-white/5">
                                     <td class="py-3 px-4">{{ $game->game_id }}</td>
                                     <td class="py-3 px-4">
-                                        <i class="fas fa-gamepad text-xl text-[#8a2be2]"></i>
+                                        <i class="fas {{ $game->icon }} text-xl text-[#8a2be2]"></i>
                                     </td>
                                     <td class="py-3 px-4">{{ $game->title }}</td>
                                     <td class="py-3 px-4">{{ $game->game_type }}</td>
