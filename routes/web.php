@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AdminController;
+
 
 Route::get('/', function () {
     return view('index');
@@ -25,6 +27,4 @@ Route::get('/search', function () {
 Route::get('/trivia', function () {
     return view('pages.trivia');
 })->name('trivia');
-Route::get('/admin', function() {
-    return view('pages.admin');
-})->name('admin');
+Route::get('/admin', [AdminController::class, 'index'])->name('admin');

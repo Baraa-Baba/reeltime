@@ -8,7 +8,7 @@
        <div class="bg-gradient-to-r from-[#1e1e2d] to-[#2a2a3e] rounded-2xl p-6 md:p-8 mb-8 border border-[#8a2be2]/20 shadow-lg">
             <div class="flex flex-col md:flex-row items-center gap-6">
                 <div class="relative">
-                    <img src="" alt="Admin" class="w-20 h-20 md:w-24 md:h-24 rounded-full border-4 border-[#8a2be2] object-cover shadow-xl">
+                    <img src="https://robohash.org/d" alt="Admin" class="w-20 h-20 md:w-24 md:h-24 rounded-full border-4 border-[#8a2be2] object-cover shadow-xl">
                      </div>
                 <div class="flex-1 text-center md:text-left">
                     <h1 class="text-2xl md:text-3xl font-bold text-white mb-2">Welcome back</h1>
@@ -33,6 +33,7 @@
                     </div>
                     <div>
                         <p class="text-gray-400 text-sm">Total Movies</p>
+                        <p class="text-2xl font-bold text-white">{{ $movieCount }}</p>
                     </div>
                 </div>
             </div>
@@ -43,6 +44,7 @@
                     </div>
                     <div>
                         <p class="text-gray-400 text-sm">Total Games</p>
+                        <p class="text-2xl font-bold text-white">{{ $gameCount }}</p>
                     </div>
                 </div>
             </div>
@@ -53,6 +55,7 @@
                     </div>
                     <div>
                         <p class="text-gray-400 text-sm">Total Users</p>
+                         <p class="text-2xl font-bold text-white">{{ $userCount }}</p>
                     </div>
                 </div>
             </div>
@@ -63,6 +66,7 @@
                     </div>
                     <div>
                         <p class="text-gray-400 text-sm">Total Bookings</p>
+                        <p class="text-2xl font-bold text-white">{{ $bookingCount }}</p>
                     </div>
                 </div>
             </div>
@@ -99,8 +103,24 @@
                             </tr>
                         </thead>
                         <tbody>
-                          
-                        </tbody>
+                            @foreach($movies as $movie)
+                            <tr class="border-b border-white/10 hover:bg-white/5">
+                                <td class="py-3 px-4">{{ $movie->movie_id }}</td>
+                                <td class="py-3 px-4">
+                                    @if($movie->poster)
+                                    <img src="{{ asset($movie->poster) }}" class="w-12 h-12 object-cover rounded" alt="poster">
+                                    @endif
+                                </td>
+                                <td class="py-3 px-4">{{ $movie->title }}></td>
+                                <td class="py-3 px-4">{{ $movie->rating }}</td>
+                                <td class="py-3 px-4">{{ $movie->duration }} min</td>
+                                <td class="py-3 px-4">
+                                    <button class="text-blue-400 hover:text-blue-300 mr-2"><i class="fas fa-edit"></i></button>
+                                    <button class="text-red-400 hover:text-red-300"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>              
                     </table>
                 </div>
             </div>
@@ -116,12 +136,24 @@
                                 <th class="text-left py-4 px-4 text-[#8a2be2] font-semibold">Icon</th>
                                 <th class="text-left py-4 px-4 text-[#8a2be2] font-semibold">Title</th>
                                 <th class="text-left py-4 px-4 text-[#8a2be2] font-semibold">Type</th>
-                                <th class="text-left py-4 px-4 text-[#8a2be2] font-semibold">Questions</th>
                                 <th class="text-left py-4 px-4 text-[#8a2be2] font-semibold">Actions</th>
                             </tr>
                         </thead>
                        <tbody>
-
+                            @foreach($games as $game)
+                                <tr class="border-b border-white/10 hover:bg-white/5">
+                                    <td class="py-3 px-4">{{ $game->game_id }}</td>
+                                    <td class="py-3 px-4">
+                                        <i class="fas fa-gamepad text-xl text-[#8a2be2]"></i>
+                                    </td>
+                                    <td class="py-3 px-4">{{ $game->title }}</td>
+                                    <td class="py-3 px-4">{{ $game->game_type }}</td>
+                                    <td class="py-3 px-4">
+                                        <button class="text-blue-400 hover:text-blue-300 mr-2"><i class="fas fa-edit"></i></button>
+                                        <button class="text-red-400 hover:text-red-300"><i class="fas fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                                @endforeach
                        </tbody>
                     </table>
                 </div>
@@ -166,9 +198,35 @@
                             </tr>
                         </thead>
                         <tbody>
-                          
+                          @foreach($users as $user)
+                            <tr class="border-b border-white/10 hover:bg-white/5">
+                                <td class="py-3 px-4">{{ $user->user_id }}</td>
+                                <td class="py-3 px-4">
+                                 @if($user->profile_image)
+                                        <img src="{{ asset($user->profile_image) }}" class="w-8 h-8 rounded-full object-cover">
+                                 @else
+                                        <div class="w-8 h-8 bg-gray-700 rounded-full"></div>
+                                    @endif
+                                </td>
+                                <td class="py-3 px-4">{{ $user->username }}</td>
+                                <td class="py-3 px-4">{{ $user->email }}</td>
+                                <td class="py-3 px-4">{{ $user->member_since}}</td>
+                                <td class="py-3 px-4">
+                                    <span class="px-2 py-1 rounded-full text-xs 
+                                        @if($user->role == 'admin') bg-purple-500/20 text-purple-400
+                                        @else bg-blue-500/20 text-blue-400 @endif">
+                                        {{ $user->role }}
+                                    </span>
+                                </td>
+                                <td class="py-3 px-4">
+                                    <button class="text-blue-400 hover:text-blue-300 mr-2"><i class="fas fa-edit"></i></button>
+                                    <button class="text-red-400 hover:text-red-300"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            @endforeach
+                        
                         </tbody>
-                    </table>
+                        </table>
                 </div>
             </div>
         </div>
