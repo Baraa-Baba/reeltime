@@ -111,7 +111,7 @@
                                     <img src="{{ asset($movie->poster) }}" class="w-12 h-12 object-cover rounded" alt="poster">
                                     @endif
                                 </td>
-                                <td class="py-3 px-4">{{ $movie->title }}></td>
+                                <td class="py-3 px-4">{{ $movie->title }}</td>
                                 <td class="py-3 px-4">{{ $movie->rating }}</td>
                                 <td class="py-3 px-4">{{ $movie->duration }} min</td>
                                 <td class="py-3 px-4">
