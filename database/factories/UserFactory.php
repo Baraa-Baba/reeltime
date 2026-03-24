@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -11,6 +12,8 @@ use Illuminate\Support\Str;
  */
 class UserFactory extends Factory
 {
+    protected $model = User::class;
+
     /**
      * The current password being used by the factory.
      */
@@ -23,14 +26,17 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
+        $username = fake()->userName();
+
         return [
-            'username' => fake()->unique()->userName(),
+            'username' => $username,
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
-            'profile_image' => fake()->imageUrl(200, 200, 'people'),
-            'member_since' => now(),
+            'profile_image' => 'https://robohash.org/' . $username,
+            'member_since' => now()->subDays(rand(0, 365)),
             'remember_token' => Str::random(10),
+            'role' => 'user',
         ];
     }
 

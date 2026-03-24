@@ -75,5 +75,9 @@ class DatabaseSeeder extends Seeder
                 ]);
             }
         }
+
+        $this->call([
+            HeroBannerSeeder::class,
+        ]);
     }
 }

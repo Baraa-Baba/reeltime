@@ -9,17 +9,23 @@
 @section('content')
 <main>
   <div class="welcome-box" id="heroBox">
-            <button class="hero-btn prev" onclick="prevImage()">&#10094;</button>
-            <button class="hero-btn next" onclick="nextImage()">&#10095;</button>
+    <button class="hero-btn prev" onclick="prevImage()">&#10094;</button>
+    <button class="hero-btn next" onclick="nextImage()">&#10095;</button>
 
-            <div class="Welcome2">
-              <p style="font-style: italic;">YOUR MOVIES IN ONE PLACE</p>
-              <h1>Welcome to ReelTime</h1>
-              <a href="{{ route('about') }}">Learn More</a>
-            </div>
-          </div>
+    @foreach($heroBanners ?? [] as $banner)
+      <div class="Welcome2 hero-slide {{ $loop->first ? 'active' : '' }}" data-position="{{ $banner->position }}">
+        @if($banner->subtitle)
+          <p style="font-style: italic;">{{ $banner->subtitle }}</p>
+        @endif
+        <h1>{{ $banner->title }}</h1>
+        @if($banner->cta_label && $banner->cta_route_name)
+          <a href="{{ route($banner->cta_route_name) }}">{{ $banner->cta_label }}</a>
+        @endif
+      </div>
+    @endforeach
+  </div>
 
-        <section class="gallery" id="gallery"></section>
+  <section class="gallery" id="gallery"></section>
 </main>
 
 <div class="modal" id="card-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modal-title">

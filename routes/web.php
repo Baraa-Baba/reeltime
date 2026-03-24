@@ -3,9 +3,11 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
 
+use App\Models\HeroBanner;
 
 Route::get('/', function () {
-    return view('index');
+    $heroBanners = HeroBanner::orderBy('position')->get();
+    return view('index', compact('heroBanners'));
 })->name('home');
 
 Route::get('/about', function () {

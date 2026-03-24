@@ -158,6 +158,10 @@ function setHero(i) {
   document.querySelectorAll('.indicator').forEach((indicator, index) => {
     indicator.classList.toggle('active', index === heroIndex);
   });
+  // Update hero slide text (sync text with image)
+  document.querySelectorAll('#heroBox .hero-slide').forEach((slide, index) => {
+    slide.classList.toggle('active', index === heroIndex);
+  });
   // Reset transitioning flag after transition completes
   setTimeout(() => {
     isTransitioning = false;
