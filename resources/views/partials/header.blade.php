@@ -11,9 +11,15 @@
       <li><a href="{{ route('trivia') }}" @if(Route::currentRouteName() == 'trivia') style="background-color: blueviolet;" @endif>Games</a></li>
       <li><a href="{{ route('about') }}" @if(Route::currentRouteName() == 'about') style="background-color: blueviolet;" @endif>About</a></li>
       <li>
-        <button id="loginToggleBtn" class="login-toggle-btn">
-          <i class="fas fa-user"></i> Login
-        </button>
+        @auth
+          <button id="loginToggleBtn" class="login-toggle-btn logged-in">
+            <i class="fas fa-user"></i> {{ Auth::user()->username }}
+          </button>
+        @else
+          <button id="loginToggleBtn" class="login-toggle-btn">
+            <i class="fas fa-user"></i> Login
+          </button>
+        @endauth
       </li>
     </ul>
   </nav>

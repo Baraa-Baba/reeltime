@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AuthController;
 
 use App\Models\HeroBanner;
 
@@ -18,10 +19,6 @@ Route::get('/bookings', function () {
     return view('pages.bookings');
 })->name('bookings');
 
-Route::get('/profile', function () {
-    return view('pages.profile');
-})->name('profile');
-
 Route::get('/search', function () {
     return view('pages.search');
 })->name('search');
@@ -29,4 +26,25 @@ Route::get('/search', function () {
 Route::get('/trivia', function () {
     return view('pages.trivia');
 })->name('trivia');
-Route::get('/admin', [AdminController::class, 'index'])->name('admin');
+
+// Admin Area
+Route::middleware(['check.admin'])->group(function () {
+    Route::get('/admin', [AdminController::class, 'index'])->name('admin');
+});
+
+// Protected routes
+Route::middleware(['check.auth'])->group(function () {
+    Route::get('/profile', function () {
+        return view('pages.profile');
+    })->name('profile');
+
+    Route::post('/auth/logout', [AuthController::class, 'logout'])->name('auth.logout');
+});
+
+// Authentication routes (AJAX) - Guests only
+Route::middleware(['guest'])->group(function () {
+    Route::post('/auth/login', [AuthController::class, 'login'])->name('auth.login');
+    Route::post('/auth/register', [AuthController::class, 'register'])->name('auth.register');
+});
+
+Route::get('/auth/user', [AuthController::class, 'currentUser'])->name('auth.user');

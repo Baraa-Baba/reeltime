@@ -7,79 +7,79 @@ window.movieComments = {};
 $(function () {
     window.movieComments = window.movieComments || {};
     // comments lal movies in bookings
-let bookingMovieComments = {
-  "The Running Man": [
-      {
-        user: "user1",
-        rating: 5,
-        text: "Great movie, def recommend!"
-      },
-      {
-        user: "movieFan99",
-        rating: 4,
-        text: "Loved the show concept and action."
-      },
-      {
-        user: "retroAddict",
-        rating: 5,
-        text: "Pure 80s chaos in the best way."
-      }
-    ],
+    let bookingMovieComments = {
+        "The Running Man": [
+            {
+                user: "user1",
+                rating: 5,
+                text: "Great movie, def recommend!"
+            },
+            {
+                user: "movieFan99",
+                rating: 4,
+                text: "Loved the show concept and action."
+            },
+            {
+                user: "retroAddict",
+                rating: 5,
+                text: "Pure 80s chaos in the best way."
+            }
+        ],
 
-  "Predator:Badlands": [
-      {
-        user: "sciFiNerd",
-        rating: 4,
-        time: "155 min",
-        text: "Cool expansion of the Predator universe."
-      } 
-    ],
+        "Predator:Badlands": [
+            {
+                user: "sciFiNerd",
+                rating: 4,
+                time: "155 min",
+                text: "Cool expansion of the Predator universe."
+            }
+        ],
 
-  "HardaBasht": [
-      {
-        user: "beirutWatcher",
-        rating: 5,
-        time: "169 min",
-        text: "Hits hard. Really good Lebanese drama."
-      }
-    ],
+        "HardaBasht": [
+            {
+                user: "beirutWatcher",
+                rating: 5,
+                time: "169 min",
+                text: "Hits hard. Really good Lebanese drama."
+            }
+        ],
 
-  "Jujutsu Kaisen:Execution": [
-      {
-        user: "animeFan",
-        rating: 5,
-        time: "175 min",
-        text: "Peak JJK energy, fights are insane."
-      }
-    ],
+        "Jujutsu Kaisen:Execution": [
+            {
+                user: "animeFan",
+                rating: 5,
+                time: "175 min",
+                text: "Peak JJK energy, fights are insane."
+            }
+        ],
 
-  "Playdate": [
-      {
-        user: "dadJokes",
-        rating: 4,
-        time: "135 min",
-        text: "Weird but fun, loved the dynamic."
-      }
-    ],
+        "Playdate": [
+            {
+                user: "dadJokes",
+                rating: 4,
+                time: "135 min",
+                text: "Weird but fun, loved the dynamic."
+            }
+        ],
 
-  "El Selem W El Thoban": [
-      {
-        user: "dramaQueen",
-        rating: 5,
-        time: "125 min",
-        text: "Beautiful story, really liked the chemistry."
-      }
-    ]
-};
+        "El Selem W El Thoban": [
+            {
+                user: "dramaQueen",
+                rating: 5,
+                time: "125 min",
+                text: "Beautiful story, really liked the chemistry."
+            }
+        ]
+    };
     // Merge booking movie comments into global movieComments kermel el render te2dar testa3mela
     Object.entries(bookingMovieComments).forEach(([title, comments]) => {
-    // if title already exists from movies.json, we append
-    let existing = window.movieComments[title] || [];
-    window.movieComments[title] = existing.concat(comments);
-  });
+        // if title already exists from movies.json, we append
+        let existing = window.movieComments[title] || [];
+        window.movieComments[title] = existing.concat(comments);
+    });
 
     let $gallery = $("#gallery");
-//was getting errors when hosting
+    //was getting errors when hosting
     const basePath = window.location.pathname.includes("/")
         ? "../"
         : "./";
@@ -140,7 +140,7 @@ let bookingMovieComments = {
                     </div>
                     `);
 
-                
+
                     $card.append($overlay);
 
                     $row.append($card);
@@ -207,101 +207,242 @@ let bookingMovieComments = {
 
     updateReserveBtn();
 
-    //login 
-
-    let users = [
-        { username: "Tasneem", password: "AbdAlkareem", img: "https://robohash.org/Amar", email: "tasneem@gmail.com", id: 2025001, since: 2023, watchlist: [], booking: [], },
-        { username: "Amar", password: "444", img: "https://robohash.org/tasneem", email: "Amar444@gmail.com", id: 2025002, since: 2024, watchlist: [], booking: [] },
-        { username: "roaa", password: "soloh", img: "https://robohash.org/roaa", email: "roaasoloh@gmail.com", id: 2025003, since: 2024, watchlist: [], booking: [] },
-    ];
+    //login - Real Laravel Authentication
 
     let currentUser = null;
 
+    // Setup AJAX to always send CSRF token
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+
     $(document).ready(function () {
-      $('.login').hide();
-        
-        $('#loginToggleBtn').click(function(e) {
-            e.preventDefault();
-            
-            let loggedInUser = sessionStorage.getItem('loggedInUser');
-            if (!loggedInUser) {
-                $('.login').fadeIn(300);
+        $('.login').hide();
+
+        // Initialize auth state from server
+        if (window.authUser) {
+            currentUser = window.authUser.username;
+            // Mirror to sessionStorage for backward compatibility with profile.js
+            sessionStorage.setItem('loggedInUser', JSON.stringify(window.authUser));
+        } else {
+            sessionStorage.removeItem('loggedInUser');
+        }
+
+        // Tab switching
+        $(document).on('click', '.auth-tab', function () {
+            let tab = $(this).data('tab');
+            $('.auth-tab').removeClass('active');
+            $(this).addClass('active');
+
+            if (tab === 'login') {
+                $('#loginPanel').show();
+                $('#signupPanel').hide();
             } else {
+                $('#loginPanel').hide();
+                $('#signupPanel').show();
+            }
+            // Clear errors/success on tab switch
+            $('#loginError, #signupError, #loginSuccess, #signupSuccess').text('');
+        });
+
+        // Login toggle button click
+        $('#loginToggleBtn').click(function (e) {
+            e.preventDefault();
+            if (window.authUser) {
                 window.location.href = '/profile';
+            } else {
+                $('.login').fadeIn(300);
             }
         });
-        
-      $('.login-background').click(function(e) {
+
+        // Close modal on background click
+        $('.login-background').click(function (e) {
             if (e.target === this) {
                 $('.login').fadeOut(300);
             }
         });
-        
-        $('.login-form').on('submit', function (e) {
+
+        // ==== LOGIN FORM SUBMISSION ====
+        $('#loginForm').on('submit', function (e) {
             e.preventDefault();
 
-            let enteredUsername = $('#username').val().trim();
-            let enteredPassword = $('#password').val();
+            let $btn = $('#loginSubmitBtn');
+            let $btnText = $btn.find('.btn-text');
+            let $btnLoader = $btn.find('.btn-loader');
 
-            let matchedUser = users.find(user =>
-                user.username === enteredUsername && user.password === enteredPassword
-            );
+            let username = $('#loginUsername').val().trim();
+            let password = $('#loginPassword').val();
 
-            if (matchedUser) {
-                currentUser = matchedUser.username;
-
-                // the user's watchlist array from localStorage
-                let savedWatchlist = JSON.parse(localStorage.getItem('watchlist')) || [];
-                let userWatchlist = savedWatchlist.filter(movie => movie.username === matchedUser.username);
-
-                // Ensure the user object has the watchlist array
-                matchedUser.watchlist = userWatchlist;
-                sessionStorage.setItem('loggedInUser', JSON.stringify(matchedUser));
-                $('.login').fadeOut();
-                
-                updateLoginStatus();
-              
-                $('#username').val('');
-                $('#password').val('');
-                $('#loginError').text('');
-                
-              
-                setTimeout(() => location.reload(), 500);
-            } else {
-                 $('#loginError').text('Invalid username or password. Please try again.');
+            if (!username || !password) {
+                $('#loginError').text('Please fill in all fields.');
+                return;
             }
+
+            // Show loading state
+            $btn.prop('disabled', true);
+            $btnText.hide();
+            $btnLoader.show();
+            $('#loginError').text('');
+            $('#loginSuccess').text('');
+
+            $.ajax({
+                url: '/auth/login',
+                method: 'POST',
+                data: {
+                    username: username,
+                    password: password
+                },
+                success: function (response) {
+                    if (response.success) {
+                        currentUser = response.user.username;
+                        window.authUser = response.user;
+
+                        // Mirror to sessionStorage for backward compatibility
+                        sessionStorage.setItem('loggedInUser', JSON.stringify(response.user));
+
+                        $('#loginSuccess').text(response.message);
+                        $('#loginError').text('');
+
+                        updateLoginStatus();
+
+                        setTimeout(function () {
+                            $('.login').fadeOut(300);
+                            $('#loginUsername').val('');
+                            $('#loginPassword').val('');
+                            $('#loginSuccess').text('');
+                            location.reload();
+                        }, 800);
+                    }
+                },
+                error: function (xhr) {
+                    let msg = 'Login failed. Please try again.';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        msg = typeof xhr.responseJSON.message === 'string'
+                            ? xhr.responseJSON.message
+                            : Object.values(xhr.responseJSON.message).flat().join(' ');
+                    }
+                    $('#loginError').text(msg);
+                },
+                complete: function () {
+                    $btn.prop('disabled', false);
+                    $btnText.show();
+                    $btnLoader.hide();
+                }
+            });
         });
-       
+
+        // ==== SIGNUP FORM SUBMISSION ====
+        $('#signupForm').on('submit', function (e) {
+            e.preventDefault();
+
+            let $btn = $('#signupSubmitBtn');
+            let $btnText = $btn.find('.btn-text');
+            let $btnLoader = $btn.find('.btn-loader');
+
+            let username = $('#signupUsername').val().trim();
+            let email = $('#signupEmail').val().trim();
+            let password = $('#signupPassword').val();
+            let passwordConfirm = $('#signupPasswordConfirm').val();
+
+            // Client-side validations
+            if (!username || !email || !password || !passwordConfirm) {
+                $('#signupError').text('Please fill in all fields.');
+                return;
+            }
+
+            if (password !== passwordConfirm) {
+                $('#signupError').text('Passwords do not match.');
+                return;
+            }
+
+            if (password.length < 6) {
+                $('#signupError').text('Password must be at least 6 characters.');
+                return;
+            }
+
+            // Show loading state
+            $btn.prop('disabled', true);
+            $btnText.hide();
+            $btnLoader.show();
+            $('#signupError').text('');
+            $('#signupSuccess').text('');
+
+            $.ajax({
+                url: '/auth/register',
+                method: 'POST',
+                data: {
+                    username: username,
+                    email: email,
+                    password: password,
+                    password_confirmation: passwordConfirm
+                },
+                success: function (response) {
+                    if (response.success) {
+                        currentUser = response.user.username;
+                        window.authUser = response.user;
+
+                        sessionStorage.setItem('loggedInUser', JSON.stringify(response.user));
+
+                        $('#signupSuccess').text(response.message);
+                        $('#signupError').text('');
+
+                        updateLoginStatus();
+
+                        setTimeout(function () {
+                            $('.login').fadeOut(300);
+                            $('#signupUsername, #signupEmail, #signupPassword, #signupPasswordConfirm').val('');
+                            $('#signupSuccess').text('');
+                            location.reload();
+                        }, 1200);
+                    }
+                },
+                error: function (xhr) {
+                    let msg = 'Registration failed. Please try again.';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        if (typeof xhr.responseJSON.message === 'object') {
+                            msg = Object.values(xhr.responseJSON.message).flat().join(' ');
+                        } else {
+                            msg = xhr.responseJSON.message;
+                        }
+                    }
+                    $('#signupError').text(msg);
+                },
+                complete: function () {
+                    $btn.prop('disabled', false);
+                    $btnText.show();
+                    $btnLoader.hide();
+                }
+            });
+        });
+
         updateLoginStatus();
     });
 
     function updateLoginStatus() {
-        let loggedInUser = sessionStorage.getItem('loggedInUser');
         let $loginToggleBtn = $('#loginToggleBtn');
-        
-        if (loggedInUser) {
-        
-                let userData = JSON.parse(loggedInUser);
-                $loginToggleBtn.html(`<i class="fas fa-user"></i> ${userData.username}`);
-                $loginToggleBtn.addClass('logged-in');
-           
+
+        if (window.authUser) {
+            $loginToggleBtn.html(`<i class="fas fa-user"></i> ${window.authUser.username}`);
+            $loginToggleBtn.addClass('logged-in');
         } else {
             $loginToggleBtn.html('<i class="fas fa-user"></i> Login');
             $loginToggleBtn.removeClass('logged-in');
         }
     }
 
-   
-    
-     $(document).on("click", ".add-watchlist-btn.login-required", function(e) {
+
+
+    $(document).on("click", ".add-watchlist-btn.login-required", function (e) {
         e.preventDefault();
         e.stopPropagation();
-        
+
         $('.login').fadeIn();
-        
+
         showMessage("Please login to add movies to your watchlist!", 'info');
     });
-    
+
     function showMessage(message, type) {
         let $message = $('<div class="alert-message"></div>')
             .text(message)
@@ -309,7 +450,7 @@ let bookingMovieComments = {
             .hide()
             .appendTo('body')
             .fadeIn();
-        
+
         setTimeout(() => {
             $message.fadeOut(() => $(this).remove());
         }, 3000);
@@ -356,29 +497,29 @@ function completeStep() {
 function isNumeric(value) {
     return /^[0-9]+$/.test(value);
 }
-function isValidBookingDate(date){
+function isValidBookingDate(date) {
     if (!date) return false;
     let [y, m, d] = date.split("-").map(Number);
     let selected = new Date(y, m - 1, d); // midnight
-    selected.setHours(0,0,0,0);
+    selected.setHours(0, 0, 0, 0);
     let today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    return selected>= today;
+    return selected >= today;
 }
 $("#dateselect").on("input change", function () {
     let date = $(this).val();
     $("#datecompletestep").empty();
 
     if (!date) {
-      $("#Datebtn").prop("disabled", true);
-      return;
+        $("#Datebtn").prop("disabled", true);
+        return;
     }
 
     if (!isValidBookingDate(date)) {
-      $("#Datebtn").prop("disabled", true);
-      $("#datecompletestep").html(`<span style="color:#ff6b6b; position: relative; top:10px; bottom: 10px;">Please pick a valid date.</span>`);
-      return;
+        $("#Datebtn").prop("disabled", true);
+        $("#datecompletestep").html(`<span style="color:#ff6b6b; position: relative; top:10px; bottom: 10px;">Please pick a valid date.</span>`);
+        return;
     }
 
     $("#Datebtn").prop("disabled", false);
@@ -393,7 +534,7 @@ $("#Datebtn").on("click", function (e) {
 // confirm booing
 $("#confirmbtn").on("click", function () {
     let userData = sessionStorage.getItem("loggedInUser");
-    
+
     if (!userData) {
         // User is not logged in
         $("#confirmation").empty();
@@ -417,14 +558,14 @@ $("#confirmbtn").on("click", function () {
                 </button>
             </div>
         `);
-        
+
         setTimeout(() => {
-            $("#loginFromBookingBtn").on("click", function() {
+            $("#loginFromBookingBtn").on("click", function () {
                 $('.login').fadeIn();
             });
         }, 100);
-        
-        return; 
+
+        return;
     }
 
 
@@ -435,21 +576,21 @@ $("#confirmbtn").on("click", function () {
     let date = $("#dateselect").val();
     let time = $("#timeselect").val();
     let name = $("#Name").val();
-     let email=$("#Email").val();
+    let email = $("#Email").val();
     let card = $("#CardNumber").val();
     let cvv = $("#CVV").val();
     let phone = $("#PhoneNumber").val();
     let seats = JSON.parse(sessionStorage.getItem("selectedSeats")) || [];
     let price = sessionStorage.getItem("totalPrice") || 0;
-   
+
     if (!name.trim()) {
         $("#confirmation").empty();
         $("#confirmation").html(`<span style=" color: #ff6b6b;">Please enter your full name.</span>`);
         return;
     }
-    if(!email.trim()){
+    if (!email.trim()) {
         $("#confirmation").empty();
-        $("#confirmation").html(`<span style=" color: #ff6b6b;">Please enter your email.</span>`); 
+        $("#confirmation").html(`<span style=" color: #ff6b6b;">Please enter your email.</span>`);
         return;
     }
     if (!phone.trim()) {
@@ -457,7 +598,7 @@ $("#confirmbtn").on("click", function () {
         $("#confirmation").html(`<span style=" color: #ff6b6b;">Please enter your Phone Number.</span>`);
         return;
     }
-    
+
     if (!isNumeric(phone)) {
         $("#confirmation").empty();
         $("#confirmation").html(`<span style=" color: #ff6b6b;">Please enter a valid phone number.</span>`);
@@ -478,8 +619,8 @@ $("#confirmbtn").on("click", function () {
         $("#confirmation").html(`<span style=" color: #ff6b6b;">Please enter your CVV.</span>`);
         return;
     }
-        if (!isNumeric(cvv) || cvv.length!=3) {
-            $("#confirmation").empty();
+    if (!isNumeric(cvv) || cvv.length != 3) {
+        $("#confirmation").empty();
         $("#confirmation").html(`<span style=" color: #ff6b6b;">Please enter a valid 3-character CVV.</span>`);
         return;
     }
@@ -487,7 +628,7 @@ $("#confirmbtn").on("click", function () {
     // if (!date) {
     //     $("#confirmation").empty();
     //     $("#confirmation").html(
-            
+
     //         `<span style=" color: #ff6b6b;">Please choose a date. Returning to Step 3...</span>`
     //     );
     //     setTimeout(() => showStep(3), 800);
@@ -495,7 +636,7 @@ $("#confirmbtn").on("click", function () {
     // }
 
     let booking = { name, cinema, movie, date, time, seats, price, status: 'upcoming' };//by default upcoming
-  
+
     let allBookings = JSON.parse(localStorage.getItem("bookings")) || {};
 
     if (!allBookings[username]) {
@@ -511,13 +652,13 @@ $("#confirmbtn").on("click", function () {
     let $confirmBtn = $("#confirmbtn");
     $confirmBtn.prop("disabled", true);
     $confirmBtn.text("Processing...");
-     $("#confirmation").html(`
+    $("#confirmation").html(`
         <p style="margin-top:8px;font-size:0.95rem;opacity:0.9;">
           Processing your booking, please wait...
         </p>
     `);
     setTimeout(() => {
-             $("#confirmation").html(`
+        $("#confirmation").html(`
         <p>Thank you, <strong>${name}</strong>!</p>
         <p>Your booking is confirmed:</p>
         <ul style="margin-left:15px;">
@@ -529,44 +670,44 @@ $("#confirmbtn").on("click", function () {
             <li><strong>Total Price:</strong> $${price}</li>
         </ul>
         <p style="color:#7a5cff;">Enjoy your movie!</p>
-    `); 
-         //small msg tahet l confirm
-    $("#confirmation").append(`
+    `);
+        //small msg tahet l confirm
+        $("#confirmation").append(`
         <p style="margin-top:8px;font-size:0.9rem;opacity:0.8;  color: #ff6b6b;;">
         Going back to Step 1 so you can make another booking in 10 seconds...
         </p>
     `);
-    // After 10 secs, reset w back to Step 1
-    setTimeout(() => {
-        //clear
-        $("#Name, #Email, #PhoneNumber, #CardNumber, #CVV").val("");
-        $("#TotalPrice").empty();
-        $("#confirmation").empty();
-        $("#movieselect").prop("selectedIndex", 0); 
-        $("#dateselect").val("");                 
-        $("#timeselect").prop("selectedIndex", 0);
-        $("#cinemasSelect").prop("selectedIndex", 0);
-        // Reset seats
-        selectedSeats.clear();
-        $(".seat.selected").removeClass("selected");
-        sessionStorage.removeItem("selectedSeats");
-        sessionStorage.removeItem("totalPrice");
-        $("#reserveBtn").prop("disabled", true);
+        // After 10 secs, reset w back to Step 1
+        setTimeout(() => {
+            //clear
+            $("#Name, #Email, #PhoneNumber, #CardNumber, #CVV").val("");
+            $("#TotalPrice").empty();
+            $("#confirmation").empty();
+            $("#movieselect").prop("selectedIndex", 0);
+            $("#dateselect").val("");
+            $("#timeselect").prop("selectedIndex", 0);
+            $("#cinemasSelect").prop("selectedIndex", 0);
+            // Reset seats
+            selectedSeats.clear();
+            $(".seat.selected").removeClass("selected");
+            sessionStorage.removeItem("selectedSeats");
+            sessionStorage.removeItem("totalPrice");
+            $("#reserveBtn").prop("disabled", true);
 
-        // Reset
-        $(".stepsbtn").removeClass("default enabled").css("cursor", "default");
-        $("#btn1").addClass("default enabled").css("cursor", "pointer");
-        $(".step-content").removeClass("default");
-        $("#step1").addClass("default");
-        current = 1;
-        showStep(1);
-        //10 secs
-        $confirmBtn.prop("disabled", false);
-        $confirmBtn.text("Confirm");
-        }, 10000); 
+            // Reset
+            $(".stepsbtn").removeClass("default enabled").css("cursor", "default");
+            $("#btn1").addClass("default enabled").css("cursor", "pointer");
+            $(".step-content").removeClass("default");
+            $("#step1").addClass("default");
+            current = 1;
+            showStep(1);
+            //10 secs
+            $confirmBtn.prop("disabled", false);
+            $confirmBtn.text("Confirm");
+        }, 10000);
     }, 3000); // Simulate processing delay
 });
-$(".showShowTimes-btn").on("click", function(){
+$(".showShowTimes-btn").on("click", function () {
     let card = e.target.closest(".movie-card");
     openMovieModal(card);
 }

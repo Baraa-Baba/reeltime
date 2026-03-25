@@ -1,46 +1,55 @@
 const MAX_COMMENT_CHARS = 100;
-$(document).ready(function() {
+$(document).ready(function () {
     initializeProfile();
     initializeToastStyles();
-   
 
 
-function initializeProfile() {
-        let userData = sessionStorage.getItem('loggedInUser'); 
-        if (!userData) {
+
+    function initializeProfile() {
+        // Use server auth state first, fallback to sessionStorage
+        let user = window.authUser || null;
+        if (!user) {
+            let userData = sessionStorage.getItem('loggedInUser');
+            if (userData) user = JSON.parse(userData);
+        }
+        if (!user) {
             showLoginRequired();
             return;
         }
-        let user = JSON.parse(userData);
         renderProfile(user);
         loadWatchlist(user);
         loadRatedMovies(user);
         loadBookedMovies(user);
         //.off to remove previous handlers and .on to add new handler and rerender booked movies
         $(document).off('change', '#booked-sort').on('change', '#booked-sort', function () {
-          loadBookedMovies(user);
+            loadBookedMovies(user);
         });
         setupProfileSearch();
-}
+    }
 
 
-//this function if no one login
-function showLoginRequired() {
-    $('main').html(`
+    //this function if no one login
+    function showLoginRequired() {
+        $('main').html(`
         <div class="profile-modern">
             <div class="empty-watchlist">
                 <div class="empty-icon"><i class="fas fa-film"></i></div>
                 <h3>Please Log In</h3>
                 <p>You need to be logged in to view your profile and ratings.</p>
-                <a href="../../index.html" style="color: #8a2be2; text-decoration: none; font-weight: bold;">Go to Login <i class="fas fa-arrow-right"></i></a>
+                <a href="#" id="profileLoginBtn" style="color: #8a2be2; text-decoration: none; font-weight: bold;">Go to Login <i class="fas fa-arrow-right"></i></a>
             </div>
         </div>
     `);
-}
+        // Open login modal
+        $(document).on('click', '#profileLoginBtn', function (e) {
+            e.preventDefault();
+            $('.login').fadeIn(300);
+        });
+    }
 
-//this function giv all part of DOM in html
-function renderProfile(user) {
-    $('main').html(`
+    //this function giv all part of DOM in html
+    function renderProfile(user) {
+        $('main').html(`
         <div class="profile-modern">
             <div class="profile-hero">
                 <div class="user-avatar-container">
@@ -69,6 +78,9 @@ function renderProfile(user) {
                             <span class="stat-label">Member Since</span>
                         </div>
                     </div>
+                    <button class="logout-btn" id="logoutBtn">
+                        <i class="fas fa-sign-out-alt"></i> Log Out
+                    </button>
                 </div>
             </div>
             <div class="search">
@@ -113,14 +125,38 @@ function renderProfile(user) {
             </div>
         </div>
     `);
-     }
+
+        // Logout handler
+        $('#logoutBtn').on('click', function () {
+            let $btn = $(this);
+            $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Logging out...');
+
+            $.ajax({
+                url: '/auth/logout',
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function () {
+                    sessionStorage.removeItem('loggedInUser');
+                    window.authUser = null;
+                    window.location.href = '/';
+                },
+                error: function () {
+                    // Even if AJAX fails, try to navigate to logout
+                    sessionStorage.removeItem('loggedInUser');
+                    window.location.href = '/';
+                }
+            });
+        });
+    }
 
 
-//this function load the movies in watch list and its rating if it has
-function loadWatchlist(user) {
-        let saved= JSON.parse(localStorage.getItem('watchlist')) || [];
+    //this function load the movies in watch list and its rating if it has
+    function loadWatchlist(user) {
+        let saved = JSON.parse(localStorage.getItem('watchlist')) || [];
         let userWatchlist = saved.filter(movie => movie.username === user.username);
-       $('#watchlist-count').text(userWatchlist.length);
+        $('#watchlist-count').text(userWatchlist.length);
         $('#watchlist-counter').text(userWatchlist.length + ' movie' + (userWatchlist.length !== 1 ? 's' : ''));
         let $modernWatchlist = $('#modern-watchlist');
         if (userWatchlist.length === 0) {
@@ -138,8 +174,8 @@ function loadWatchlist(user) {
         savedRatings = JSON.parse(localStorage.getItem('movieRatings')) || {};
         const userRatings = savedRatings[user.username] || {};
         const watchlistHTML = userWatchlist.map(movie => {
-        const isRated = userRatings[movie.title];
-        const safeImage = movie.image || '../../imgs/default-movie.jpg';
+            const isRated = userRatings[movie.title];
+            const safeImage = movie.image || '../../imgs/default-movie.jpg';
             return `
                 <div class="watchlist-card-modern">
                     <img src="${safeImage}" alt="${movie.title}" class="card-image" onerror="this.src='../../imgs/default-movie.jpg'">
@@ -161,22 +197,22 @@ function loadWatchlist(user) {
         }).join('');
         $modernWatchlist.html(watchlistHTML);
         // Add event handlers
-        $modernWatchlist.off('click', '.btn-rate-large').on('click', '.btn-rate-large', function() {
+        $modernWatchlist.off('click', '.btn-rate-large').on('click', '.btn-rate-large', function () {
             const title = $(this).data('title');
             const currentRating = userRatings[title] ? userRatings[title].rating : 0;
             openLargeRatingModal(title, currentRating);
         });
-        $modernWatchlist.off('click', '.btn-remove').on('click', '.btn-remove', function() {
+        $modernWatchlist.off('click', '.btn-remove').on('click', '.btn-remove', function () {
             const title = $(this).data('title');
             removeFromWatchlist(title);
         });
-}
+    }
 
 
-//this function load the movies that is rated and we can edit the rate or remove
-function loadRatedMovies(user) {
+    //this function load the movies that is rated and we can edit the rate or remove
+    function loadRatedMovies(user) {
         let savedRatings = {};
-            savedRatings = JSON.parse(localStorage.getItem('movieRatings')) || {};
+        savedRatings = JSON.parse(localStorage.getItem('movieRatings')) || {};
         const userRatings = savedRatings[user.username] || {};
         const ratedCount = Object.keys(userRatings).length;
         $('#rated-count').text(ratedCount);
@@ -194,7 +230,7 @@ function loadRatedMovies(user) {
         }
         const ratedHTML = Object.entries(userRatings).map(([movieTitle, ratingData]) => {
             const safeImage = ratingData.image || '../imgs/default-movie.jpg';
-            
+
             return `
                 <div class="rated-card-modern">
                     <img src="${safeImage}" alt="${movieTitle}" class="card-image" onerror="this.src='../imgs/default-movie.jpg'">
@@ -211,55 +247,55 @@ function loadRatedMovies(user) {
         }).join('');
         $ratedGrid.html(ratedHTML);
         // Add event handlers
-        $ratedGrid.off('click', '.btn-edit-rating').on('click', '.btn-edit-rating', function() {
+        $ratedGrid.off('click', '.btn-edit-rating').on('click', '.btn-edit-rating', function () {
             const title = $(this).data('title');
             const currentRating = userRatings[title].rating;
             openLargeRatingModal(title, currentRating);
         });
-        $ratedGrid.off('click', '.btn-remove-rated').on('click', '.btn-remove-rated', function() {
+        $ratedGrid.off('click', '.btn-remove-rated').on('click', '.btn-remove-rated', function () {
             const title = $(this).data('title');
             removeMovieRating(title);
         });
-}
-
-
-function loadBookedMovies(user) {
-        let allBookings = {};
-        
-            allBookings = JSON.parse(localStorage.getItem('bookings')) || {};
-    
-    let userBookings = allBookings[user.username] || [];
-    let $bookedGrid = $('#booked-grid');
-    let $bookedCounter = $('#booked-counter');
-
-    let now = new Date();
-    let changed = false;
-
-    userBookings.forEach((b)=> {
-        let dateObj = parseBookingDate(b);
-
-        // Only change if aana a valid date and eza mara2 w its not already cancelled
-        if (dateObj && dateObj < now && b.status !== 'cancelled') {
-            if (b.status !== 'watched') {
-                b.status = 'watched';
-                b.watchedDate = new Date().toISOString();
-                changed = true;
-            }
-        } else if (!b.status) {
-            // upcoming
-            b.status = 'upcoming';
-            changed = true;
-        }
-    });
-
-    if (changed){
-        allBookings[user.username] =userBookings;
-        localStorage.setItem('bookings', JSON.stringify(allBookings));
     }
 
 
+    function loadBookedMovies(user) {
+        let allBookings = {};
+
+        allBookings = JSON.parse(localStorage.getItem('bookings')) || {};
+
+        let userBookings = allBookings[user.username] || [];
+        let $bookedGrid = $('#booked-grid');
+        let $bookedCounter = $('#booked-counter');
+
+        let now = new Date();
+        let changed = false;
+
+        userBookings.forEach((b) => {
+            let dateObj = parseBookingDate(b);
+
+            // Only change if aana a valid date and eza mara2 w its not already cancelled
+            if (dateObj && dateObj < now && b.status !== 'cancelled') {
+                if (b.status !== 'watched') {
+                    b.status = 'watched';
+                    b.watchedDate = new Date().toISOString();
+                    changed = true;
+                }
+            } else if (!b.status) {
+                // upcoming
+                b.status = 'upcoming';
+                changed = true;
+            }
+        });
+
+        if (changed) {
+            allBookings[user.username] = userBookings;
+            localStorage.setItem('bookings', JSON.stringify(allBookings));
+        }
+
+
         let bookedCount = userBookings.length;
-        
+
         $('#total-bookings').text(bookedCount);
         $bookedCounter.text(bookedCount + (bookedCount === 1 ? ' booking' : ' bookings'));
 
@@ -277,23 +313,23 @@ function loadBookedMovies(user) {
         let sortMode = $('#booked-sort').val() || 'nearest';
         let sortedBookings = sortBookingsByMode(userBookings, sortMode);
         let bookedHTML = sortedBookings.map((b, index) => {
-        let originalIndex = userBookings.findIndex(booking => 
-        booking.movie === b.movie && 
-        booking.date === b.date && 
-        booking.time === b.time
-    );
-        
-    let status = b.status || 'upcoming';
-    let statusClass = status === 'cancelled' ? 'status-cancelled' : 
-                       status === 'watched' ? 'status-watched' : 'status-upcoming';
-    // here i used <i> tag which is used for icons
-    return `
+            let originalIndex = userBookings.findIndex(booking =>
+                booking.movie === b.movie &&
+                booking.date === b.date &&
+                booking.time === b.time
+            );
+
+            let status = b.status || 'upcoming';
+            let statusClass = status === 'cancelled' ? 'status-cancelled' :
+                status === 'watched' ? 'status-watched' : 'status-upcoming';
+            // here i used <i> tag which is used for icons
+            return `
         <div class="booked-card-modern" data-index="${originalIndex}">
             <div class="booked-header">
                 <h3 class="booked-movie-title">${b.movie || 'Unknown Movie'}</h3>
                 <div class="booked-status ${statusClass}">
-                    ${status === 'cancelled' ? '<i class="fas fa-times"></i> Cancelled' : 
-                      status === 'watched' ? '<i class="fas fa-check"></i> Watched' : '<i class="fas fa-clock"></i> Upcoming'}
+                    ${status === 'cancelled' ? '<i class="fas fa-times"></i> Cancelled' :
+                    status === 'watched' ? '<i class="fas fa-check"></i> Watched' : '<i class="fas fa-clock"></i> Upcoming'}
                 </div>
             </div>
             <div class="booked-meta">
@@ -312,62 +348,62 @@ function loadBookedMovies(user) {
             </div>
             ` : ''}
         </div>`;
-}).join('');
+        }).join('');
 
 
-$bookedGrid.html(bookedHTML);
+        $bookedGrid.html(bookedHTML);
         // Add event handlers for booking actions
-$bookedGrid.off('click', '.btn-watch-small').on('click', '.btn-watch-small', function(e) {
-    e.stopPropagation();
-    const userData = JSON.parse(sessionStorage.getItem('loggedInUser'));
-    const index = $(this).data('index');
-    updateBookingStatus(userData, index, 'watched');
-});
+        $bookedGrid.off('click', '.btn-watch-small').on('click', '.btn-watch-small', function (e) {
+            e.stopPropagation();
+            const userData = JSON.parse(sessionStorage.getItem('loggedInUser'));
+            const index = $(this).data('index');
+            updateBookingStatus(userData, index, 'watched');
+        });
 
-$bookedGrid.off('click', '.btn-cancel-small').on('click', '.btn-cancel-small', function(e) {
-    e.stopPropagation();
-    const index = $(this).data('index');
-    openCancelConfirmModal(index);
-});
+        $bookedGrid.off('click', '.btn-cancel-small').on('click', '.btn-cancel-small', function (e) {
+            e.stopPropagation();
+            const index = $(this).data('index');
+            openCancelConfirmModal(index);
+        });
 
-$bookedGrid.off('click', '.booked-card-modern').on('click', '.booked-card-modern', function(e) {
-    if ($(e.target).closest('.btn-action-small').length) {
-        return;
+        $bookedGrid.off('click', '.booked-card-modern').on('click', '.booked-card-modern', function (e) {
+            if ($(e.target).closest('.btn-action-small').length) {
+                return;
+            }
+
+            const userData = JSON.parse(sessionStorage.getItem('loggedInUser'));
+            const index = $(this).data('index');
+            const allBookings = JSON.parse(localStorage.getItem("bookings")) || {};
+            const userBookings = allBookings[userData.username] || [];
+
+            if (index >= 0 && index < userBookings.length) {
+                openBookingDetailsModal(userBookings[index], index);
+            }
+        });
     }
-    
-    const userData = JSON.parse(sessionStorage.getItem('loggedInUser'));
-    const index = $(this).data('index');
-    const allBookings = JSON.parse(localStorage.getItem("bookings")) || {};
-    const userBookings = allBookings[userData.username] || [];
-    
-    if (index >= 0 && index < userBookings.length) {
-        openBookingDetailsModal(userBookings[index], index);
-    }
-});
-}
-// Add after loadBookedMovies function in profile.js
+    // Add after loadBookedMovies function in profile.js
 
-function updateBookingStatus(user, bookingIndex, status) {
-    let allBookings = JSON.parse(localStorage.getItem("bookings")) || {};
-    const userBookings = allBookings[user.username] || [];
-    
-    if (bookingIndex >= 0 && bookingIndex < userBookings.length) {
-        userBookings[bookingIndex].status = status;
-        if (status === 'cancelled') {
-            userBookings[bookingIndex].cancelledDate = new Date().toISOString();
-        } else if (status === 'watched') {
-            userBookings[bookingIndex].watchedDate = new Date().toISOString();
+    function updateBookingStatus(user, bookingIndex, status) {
+        let allBookings = JSON.parse(localStorage.getItem("bookings")) || {};
+        const userBookings = allBookings[user.username] || [];
+
+        if (bookingIndex >= 0 && bookingIndex < userBookings.length) {
+            userBookings[bookingIndex].status = status;
+            if (status === 'cancelled') {
+                userBookings[bookingIndex].cancelledDate = new Date().toISOString();
+            } else if (status === 'watched') {
+                userBookings[bookingIndex].watchedDate = new Date().toISOString();
+            }
+
+            localStorage.setItem("bookings", JSON.stringify(allBookings));
+            loadBookedMovies(user);
+            const movieTitle = userBookings[bookingIndex].movie || 'Booking';
+            showToast(`${movieTitle} marked as ${status}`, status === 'cancelled' ? 'removed' : 'rated');
         }
-        
-        localStorage.setItem("bookings", JSON.stringify(allBookings));
-        loadBookedMovies(user);
-        const movieTitle = userBookings[bookingIndex].movie || 'Booking';
-        showToast(`${movieTitle} marked as ${status}`, status === 'cancelled' ? 'removed' : 'rated');
     }
-}
 
-function openBookingDetailsModal(booking, bookingIndex) {
-    const modalHTML = `
+    function openBookingDetailsModal(booking, bookingIndex) {
+        const modalHTML = `
         <div class="booking-modal-overlay" id="bookingDetailsModal">
             <div class="booking-modal-large">
                 <div class="booking-modal-header">
@@ -422,40 +458,40 @@ function openBookingDetailsModal(booking, bookingIndex) {
             </div>
         </div>
     `;
-    
-    $('body').append(modalHTML);
-    
-    $('#closeBookingModal, #bookingDetailsModal').click(function(e) {
-        if (e.target === this || $(e.target).hasClass('modal-close-btn')) {
+
+        $('body').append(modalHTML);
+
+        $('#closeBookingModal, #bookingDetailsModal').click(function (e) {
+            if (e.target === this || $(e.target).hasClass('modal-close-btn')) {
+                $('#bookingDetailsModal').remove();
+            }
+        });
+
+        $('#bookingActions').on('click', '.btn-watch', function () {
+            const userData = JSON.parse(sessionStorage.getItem('loggedInUser'));
+            const index = $(this).data('index');
+            updateBookingStatus(userData, index, 'watched');
             $('#bookingDetailsModal').remove();
-        }
-    });
-    
-    $('#bookingActions').on('click', '.btn-watch', function() {
+        })
+
+        $('#bookingActions').on('click', '.btn-cancel', function () {
+            const index = $(this).data('index');
+            $('#bookingDetailsModal').remove();
+            openCancelConfirmModal(index);
+        })
+
+        $(document).on('keydown.bookingModal', function (e) {
+            if (e.key === 'Escape') {
+                $('#bookingDetailsModal').remove();
+                $(document).off('keydown.bookingModal');
+            }
+        });
+    }
+    function openCancelConfirmModal(bookingIndex) {
         const userData = JSON.parse(sessionStorage.getItem('loggedInUser'));
-        const index = $(this).data('index');
-        updateBookingStatus(userData, index, 'watched');
-        $('#bookingDetailsModal').remove();
-    })
+        if (!userData) return;
 
-    $('#bookingActions').on('click', '.btn-cancel', function() {
-        const index = $(this).data('index');
-        $('#bookingDetailsModal').remove();
-        openCancelConfirmModal(index);
-    })
-
-    $(document).on('keydown.bookingModal', function(e) {
-        if (e.key === 'Escape') {
-            $('#bookingDetailsModal').remove();
-            $(document).off('keydown.bookingModal');
-        }
-    });
-}
-function openCancelConfirmModal(bookingIndex) {
-    const userData = JSON.parse(sessionStorage.getItem('loggedInUser'));
-    if (!userData) return;
-
-    const modalHTML = `
+        const modalHTML = `
         <div class="booking-modal-overlay" id="cancelBookingModal">
             <div class="booking-modal-large">
                 <div class="booking-modal-header">
@@ -480,95 +516,95 @@ function openCancelConfirmModal(bookingIndex) {
         </div>
     `;
 
-    $('body').append(modalHTML);
+        $('body').append(modalHTML);
 
-    // Close handlers
-    $('#closeCancelBookingModal, .btn-cancel-keep').on('click', function () {
-        $('#cancelBookingModal').remove();
-    });
-
-    // Confirm cancel
-    $('.btn-cancel-confirm').on('click', function () {
-        updateBookingStatus(userData, bookingIndex, 'cancelled');
-        $('#cancelBookingModal').remove();
-    });
-
-    // Close by clicking backdrop
-    $('#cancelBookingModal').on('click', function (e) {
-        if (e.target === this) {
+        // Close handlers
+        $('#closeCancelBookingModal, .btn-cancel-keep').on('click', function () {
             $('#cancelBookingModal').remove();
-        }
-    });
+        });
 
-    // Close with ESC
-    $(document).on('keydown.cancelBooking', function(e) {
-        if (e.key === 'Escape') {
+        // Confirm cancel
+        $('.btn-cancel-confirm').on('click', function () {
+            updateBookingStatus(userData, bookingIndex, 'cancelled');
             $('#cancelBookingModal').remove();
-            $(document).off('keydown.cancelBooking');
-        }
-    });
-}
+        });
 
+        // Close by clicking backdrop
+        $('#cancelBookingModal').on('click', function (e) {
+            if (e.target === this) {
+                $('#cancelBookingModal').remove();
+            }
+        });
 
-
-function parseBookingDate(booking) {
-    if (!booking || !booking.date) return null;
-
-    // booking.date aam yethawwal la "YYYY-MM-DD" wl time la "HH:MM"
-     const [year, month, day] = booking.date.split("-").map(Number);
-     let hour=0, minute=0;
-     if(booking.time){
-        const[h,m]=booking.time.split(":").map(Number);
-        hour=h;
-        minute=m;
-     }
-    return new Date(year, month - 1, day, hour, minute);
-}
-
-function sortBookingsByMode(bookings, mode) {
-    // Keep original index in case we need to preserve order
-    const withMeta = bookings.map((b, idx) => ({
-        ...b,
-        _idx: idx,
-        _dateObj: parseBookingDate(b)
-    }));
-
-    // First filter based on status if needed
-    let filteredBookings = withMeta;
-    if (mode === "watched") {
-        filteredBookings = withMeta.filter(b => b.status === "watched");
-    } else if (mode === "cancelled") {
-        filteredBookings = withMeta.filter(b => b.status === "cancelled");
-    } else if (mode === "upcoming") {
-        filteredBookings = withMeta.filter(b => b.status === "upcoming" || !b.status);
+        // Close with ESC
+        $(document).on('keydown.cancelBooking', function (e) {
+            if (e.key === 'Escape') {
+                $('#cancelBookingModal').remove();
+                $(document).off('keydown.cancelBooking');
+            }
+        });
     }
 
-    if (mode === "nearest") {
-        // Ascending date (earliest first)
-        withMeta.sort((a, b) => {
-            if (!a._dateObj && !b._dateObj) return a._idx - b._idx;
-            if (!a._dateObj) return 1;   // no date => push to bottom
-            if (!b._dateObj) return -1;
-            return a._dateObj - b._dateObj;
-        });
-    } else if (mode === "latest") {
-        // Descending date (latest first)
-        filteredBookings.sort((a, b) => {
-            if (!a._dateObj && !b._dateObj) return a._idx - b._idx;
-            if (!a._dateObj) return 1;
-            if (!b._dateObj) return -1;
-            return b._dateObj - a._dateObj;
-        });
-    } else {
-        //not all bookings only the filtered ones for that i use filterBooking
-        filteredBookings.sort((a, b) => a._idx - b._idx);
-    }
-    return filteredBookings.map(({ _idx, _dateObj, ...rest }) => rest);
-}
 
-//this function open RATING MODAL FUNCTIONS 
-function openLargeRatingModal(movieTitle, currentRating = 0) {
-   
+
+    function parseBookingDate(booking) {
+        if (!booking || !booking.date) return null;
+
+        // booking.date aam yethawwal la "YYYY-MM-DD" wl time la "HH:MM"
+        const [year, month, day] = booking.date.split("-").map(Number);
+        let hour = 0, minute = 0;
+        if (booking.time) {
+            const [h, m] = booking.time.split(":").map(Number);
+            hour = h;
+            minute = m;
+        }
+        return new Date(year, month - 1, day, hour, minute);
+    }
+
+    function sortBookingsByMode(bookings, mode) {
+        // Keep original index in case we need to preserve order
+        const withMeta = bookings.map((b, idx) => ({
+            ...b,
+            _idx: idx,
+            _dateObj: parseBookingDate(b)
+        }));
+
+        // First filter based on status if needed
+        let filteredBookings = withMeta;
+        if (mode === "watched") {
+            filteredBookings = withMeta.filter(b => b.status === "watched");
+        } else if (mode === "cancelled") {
+            filteredBookings = withMeta.filter(b => b.status === "cancelled");
+        } else if (mode === "upcoming") {
+            filteredBookings = withMeta.filter(b => b.status === "upcoming" || !b.status);
+        }
+
+        if (mode === "nearest") {
+            // Ascending date (earliest first)
+            withMeta.sort((a, b) => {
+                if (!a._dateObj && !b._dateObj) return a._idx - b._idx;
+                if (!a._dateObj) return 1;   // no date => push to bottom
+                if (!b._dateObj) return -1;
+                return a._dateObj - b._dateObj;
+            });
+        } else if (mode === "latest") {
+            // Descending date (latest first)
+            filteredBookings.sort((a, b) => {
+                if (!a._dateObj && !b._dateObj) return a._idx - b._idx;
+                if (!a._dateObj) return 1;
+                if (!b._dateObj) return -1;
+                return b._dateObj - a._dateObj;
+            });
+        } else {
+            //not all bookings only the filtered ones for that i use filterBooking
+            filteredBookings.sort((a, b) => a._idx - b._idx);
+        }
+        return filteredBookings.map(({ _idx, _dateObj, ...rest }) => rest);
+    }
+
+    //this function open RATING MODAL FUNCTIONS 
+    function openLargeRatingModal(movieTitle, currentRating = 0) {
+
         const userData = JSON.parse(sessionStorage.getItem('loggedInUser'));
         if (!userData) {
             alert('Please log in to rate movies.');
@@ -576,10 +612,10 @@ function openLargeRatingModal(movieTitle, currentRating = 0) {
         }
 
         let savedRatingsAll = {};
-      
-            savedRatingsAll = JSON.parse(localStorage.getItem('movieRatings')) || {};
-       
-        
+
+        savedRatingsAll = JSON.parse(localStorage.getItem('movieRatings')) || {};
+
+
         const userRatingsAll = savedRatingsAll[userData.username] || {};
         const existingRatingData = userRatingsAll[movieTitle];
         const existingComment = existingRatingData ? (existingRatingData.comment || "") : "";
@@ -621,20 +657,20 @@ function openLargeRatingModal(movieTitle, currentRating = 0) {
                 </div>
             </div>
         `;
-        
+
         $('body').append(modalHTML);
-        
+
         let selectedRating = currentRating;
         let $confirmBtn = $('#confirmLargeRating');
-        
+
         let $comment = $('#largeRatingComment');
         let $counter = $('#commentCounter');
 
         if ($comment.length && $counter.length) {
             let max = MAX_COMMENT_CHARS;
             let updateCounter = () => {
-            let len = $comment.val().length;
-            $counter.text(`${len}/${max}`);
+                let len = $comment.val().length;
+                $counter.text(`${len}/${max}`);
             };
             updateCounter();
             $comment.on('input', updateCounter);
@@ -643,28 +679,28 @@ function openLargeRatingModal(movieTitle, currentRating = 0) {
         if (currentRating > 0) {
             highlightLargeStars(currentRating);
         }
-        
+
         // Star interactions
         $('#largeRatingStars .rating-star-large').hover(
-            function() {
+            function () {
                 const rating = $(this).data('rating');
                 highlightLargeStars(rating);
             },
-            function() {
+            function () {
                 highlightLargeStars(selectedRating);
             }
-        ).click(function() {
+        ).click(function () {
             selectedRating = $(this).data('rating');
             highlightLargeStars(selectedRating);
             $('#largeRatingValue').text(`Your Rating: ${selectedRating}/5`);
             $confirmBtn.prop('disabled', false).css('opacity', '1');
         });
-        
+
         // Button events
         $('#cancelLargeRating').click(() => {
             $('#largeRatingModal').remove();
         });
-        
+
         $('#confirmLargeRating').click(() => {
             if (selectedRating > 0) {
                 const commentText = $('#largeRatingComment').val().trim();
@@ -673,43 +709,43 @@ function openLargeRatingModal(movieTitle, currentRating = 0) {
                 showToast(`"${movieTitle}" rated ${selectedRating}/5 stars!`, 'rated');
             }
         });
-        
+
         // Close modal on outside click
-        $('#largeRatingModal').click(function(e) {
+        $('#largeRatingModal').click(function (e) {
             if (e.target === this) {
                 $(this).remove();
             }
         });
-        
+
         // Close with Escape key
-        $(document).on('keydown.ratingModal', function(e) {
+        $(document).on('keydown.ratingModal', function (e) {
             if (e.key === 'Escape') {
                 $('#largeRatingModal').remove();
                 $(document).off('keydown.ratingModal');
             }
         });
-}
+    }
 
 
 
-function highlightLargeStars(rating) {
-    $('#largeRatingStars .rating-star-large').each(function() {
-        if ($(this).data('rating') <= rating) {
-            $(this).addClass('active');
-        } else {
-            $(this).removeClass('active');
-        }
-    });
-}
+    function highlightLargeStars(rating) {
+        $('#largeRatingStars .rating-star-large').each(function () {
+            if ($(this).data('rating') <= rating) {
+                $(this).addClass('active');
+            } else {
+                $(this).removeClass('active');
+            }
+        });
+    }
 
-function saveMovieRating(movieTitle, rating, commentText = "") {
+    function saveMovieRating(movieTitle, rating, commentText = "") {
         const userData = JSON.parse(sessionStorage.getItem('loggedInUser'));
         if (!userData) return;
 
         let savedRatings = {};
-       
-            savedRatings = JSON.parse(localStorage.getItem('movieRatings')) || {};
-      
+
+        savedRatings = JSON.parse(localStorage.getItem('movieRatings')) || {};
+
 
         if (!savedRatings[userData.username]) {
             savedRatings[userData.username] = {};
@@ -717,15 +753,15 @@ function saveMovieRating(movieTitle, rating, commentText = "") {
 
         // Get movie image from watchlist
         let movieImage = '../imgs/default-movie.jpg';
-     
-            const savedWatchlist = JSON.parse(localStorage.getItem('watchlist')) || [];
-            const movieFromWatchlist = savedWatchlist.find(
-                m => m.title === movieTitle && m.username === userData.username
-            );
-            if (movieFromWatchlist) {
-                movieImage = movieFromWatchlist.image || '../imgs/default-movie.jpg';
-            }
-       
+
+        const savedWatchlist = JSON.parse(localStorage.getItem('watchlist')) || [];
+        const movieFromWatchlist = savedWatchlist.find(
+            m => m.title === movieTitle && m.username === userData.username
+        );
+        if (movieFromWatchlist) {
+            movieImage = movieFromWatchlist.image || '../imgs/default-movie.jpg';
+        }
+
         // Save rating
         savedRatings[userData.username][movieTitle] = {
             rating: rating,
@@ -738,18 +774,18 @@ function saveMovieRating(movieTitle, rating, commentText = "") {
 
         // Save comment to extra comments if provided
         if (commentText.trim()) {
-            
-            
-               let extraComments = JSON.parse(localStorage.getItem('movieCommentsExtra')) || {};
-          
-            
-            if (!extraComments[movieTitle]){
-                
-            }extraComments[movieTitle] = [];
 
-             extraComments[movieTitle] = extraComments[movieTitle].filter(
-        c => c.user !== userData.username
-    ); 
+
+            let extraComments = JSON.parse(localStorage.getItem('movieCommentsExtra')) || {};
+
+
+            if (!extraComments[movieTitle]) {
+
+            } extraComments[movieTitle] = [];
+
+            extraComments[movieTitle] = extraComments[movieTitle].filter(
+                c => c.user !== userData.username
+            );
 
             extraComments[movieTitle].push({
                 user: userData.username,
@@ -760,110 +796,110 @@ function saveMovieRating(movieTitle, rating, commentText = "") {
 
             localStorage.setItem('movieCommentsExtra', JSON.stringify(extraComments));
         }
-         else {
-    // If comment is empty, remove user's comment if exists
-    let extraComments = JSON.parse(localStorage.getItem('movieCommentsExtra')) || {};
-    if (extraComments[movieTitle]) {
-        extraComments[movieTitle] = extraComments[movieTitle].filter(
-            c => c.user !== userData.username
-        );
-        
-        if (extraComments[movieTitle].length === 0) {
-            delete extraComments[movieTitle];
+        else {
+            // If comment is empty, remove user's comment if exists
+            let extraComments = JSON.parse(localStorage.getItem('movieCommentsExtra')) || {};
+            if (extraComments[movieTitle]) {
+                extraComments[movieTitle] = extraComments[movieTitle].filter(
+                    c => c.user !== userData.username
+                );
+
+                if (extraComments[movieTitle].length === 0) {
+                    delete extraComments[movieTitle];
+                }
+
+                localStorage.setItem('movieCommentsExtra', JSON.stringify(extraComments));
+            }
         }
-        
-        localStorage.setItem('movieCommentsExtra', JSON.stringify(extraComments));
-    }
-}
 
         // Refresh profile
         loadWatchlist(userData);
         loadRatedMovies(userData);
-        
-}
 
-function removeMovieRating(movieTitle) {
-   
+    }
+
+    function removeMovieRating(movieTitle) {
+
         const userData = JSON.parse(sessionStorage.getItem('loggedInUser'));
         let savedRatings = JSON.parse(localStorage.getItem('movieRatings')) || {};
-        
+
         if (savedRatings[userData.username] && savedRatings[userData.username][movieTitle]) {
             delete savedRatings[userData.username][movieTitle];
             localStorage.setItem('movieRatings', JSON.stringify(savedRatings));
         }
-        
+
         let extraComments = JSON.parse(localStorage.getItem('movieCommentsExtra')) || {};
         if (extraComments[movieTitle]) {
-        extraComments[movieTitle] = extraComments[movieTitle].filter(
-            c => c.user !== userData.username
-        );
+            extraComments[movieTitle] = extraComments[movieTitle].filter(
+                c => c.user !== userData.username
+            );
 
-        if (extraComments[movieTitle].length === 0) {
-            delete extraComments[movieTitle];
+            if (extraComments[movieTitle].length === 0) {
+                delete extraComments[movieTitle];
+            }
+
+            localStorage.setItem('movieCommentsExtra', JSON.stringify(extraComments));
         }
+        loadWatchlist(userData);
+        loadRatedMovies(userData);
 
-        localStorage.setItem('movieCommentsExtra', JSON.stringify(extraComments));
-        }    
-            loadWatchlist(userData);
-            loadRatedMovies(userData);
-            
-            showToast(`Rating for "${movieTitle}" removed`, 'removed');
-        
-        
-    
-}
+        showToast(`Rating for "${movieTitle}" removed`, 'removed');
 
 
 
-function removeFromWatchlist(title) {
+    }
+
+
+
+    function removeFromWatchlist(title) {
         const userData = JSON.parse(sessionStorage.getItem('loggedInUser'));
-        
+
         // Remove from watchlist
         let saved = JSON.parse(localStorage.getItem('watchlist')) || [];
         saved = saved.filter(m => !(m.title === title && m.username === userData.username));
         localStorage.setItem('watchlist', JSON.stringify(saved));
-        
+
         // Remove rating if exists
         removeMovieRating(title);
-        
+
         // Update session storage
         userData.watchlist = saved.filter(m => m.username === userData.username);
         sessionStorage.setItem('loggedInUser', JSON.stringify(userData));
-        
+
         // Reload
         loadWatchlist(userData);
         loadRatedMovies(userData);
-        
-        showToast(`"${title}" removed from watchlist and ratings`, 'removed');
-        
-  
-}
 
-function showToast(message, type) {
-    
+        showToast(`"${title}" removed from watchlist and ratings`, 'removed');
+
+
+    }
+
+    function showToast(message, type) {
+
         $('.toast').remove();
-        
+
         const toast = $(`
             <div class="toast toast-${type}">
                 ${message}
             </div>
         `);
-        
+
         $('body').append(toast);
-        
+
         setTimeout(() => toast.addClass('show'), 10);
-        
+
         setTimeout(() => {
             toast.removeClass('show');
             setTimeout(() => toast.remove(), 300);
         }, 3000);
-   
-}
 
-// Initialize toast styles
-function initializeToastStyles() {
-    if (!$('#toast-styles').length) {
-        $('head').append(`
+    }
+
+    // Initialize toast styles
+    function initializeToastStyles() {
+        if (!$('#toast-styles').length) {
+            $('head').append(`
             <style id="toast-styles">
                 .toast {
                     position: fixed;
@@ -922,85 +958,85 @@ function initializeToastStyles() {
                 }
             </style>
         `);
+        }
     }
-}
 
-   
+
 });
 //profile search 
 function setupProfileSearch() {
-  const searchInput = document.getElementById("SearchInput");
-  if (!searchInput) return;
+    const searchInput = document.getElementById("SearchInput");
+    if (!searchInput) return;
 
-  // To avoid adding multiple listeners if initializeProfile() is ever called again
-  searchInput.oninput = null;
+    // To avoid adding multiple listeners if initializeProfile() is ever called again
+    searchInput.oninput = null;
 
-  searchInput.addEventListener("input", () => {
-    const q = searchInput.value.toLowerCase().trim();
+    searchInput.addEventListener("input", () => {
+        const q = searchInput.value.toLowerCase().trim();
 
-    const watchContainer = document.getElementById("modern-watchlist");
-    const ratedContainer = document.getElementById("modern-rated");
-    if (!watchContainer && !ratedContainer) return;
+        const watchContainer = document.getElementById("modern-watchlist");
+        const ratedContainer = document.getElementById("modern-rated");
+        if (!watchContainer && !ratedContainer) return;
 
-    const watchCards = watchContainer
-      ? watchContainer.querySelectorAll(".watchlist-card-modern")
-      : [];
-    const ratedCards = ratedContainer
-      ? ratedContainer.querySelectorAll(".rated-card-modern")
-      : [];
+        const watchCards = watchContainer
+            ? watchContainer.querySelectorAll(".watchlist-card-modern")
+            : [];
+        const ratedCards = ratedContainer
+            ? ratedContainer.querySelectorAll(".rated-card-modern")
+            : [];
 
-    const filterCards = (cards) => {
-      cards.forEach((card) => {
-        const titleEl = card.querySelector(".card-title");
-        const ratingEl = card.querySelector(".rated-badge, .card-rating");
+        const filterCards = (cards) => {
+            cards.forEach((card) => {
+                const titleEl = card.querySelector(".card-title");
+                const ratingEl = card.querySelector(".rated-badge, .card-rating");
 
-        const titleText = (titleEl?.textContent || "").toLowerCase();
-        const ratingText = (ratingEl?.textContent || "").toLowerCase();
+                const titleText = (titleEl?.textContent || "").toLowerCase();
+                const ratingText = (ratingEl?.textContent || "").toLowerCase();
 
-        const matches =
-          !q || titleText.includes(q) || ratingText.includes(q);
+                const matches =
+                    !q || titleText.includes(q) || ratingText.includes(q);
 
-        card.style.display = matches ? "" : "none";
-      });
-    };
+                card.style.display = matches ? "" : "none";
+            });
+        };
 
-    const updateEmptyMessage = (container, cardsNodeList, sectionLabel) => {
-      if (!container) return;
+        const updateEmptyMessage = (container, cardsNodeList, sectionLabel) => {
+            if (!container) return;
 
-      const existingMsg = container.querySelector(".search-empty-msg");
+            const existingMsg = container.querySelector(".search-empty-msg");
 
-      // no query => remove message
-      if (!q) {
-        if (existingMsg) existingMsg.remove();
-        return;
-      }
+            // no query => remove message
+            if (!q) {
+                if (existingMsg) existingMsg.remove();
+                return;
+            }
 
-      const visibleCount = Array.from(cardsNodeList).filter(
-        (card) => card.style.display !== "none"
-      ).length;
+            const visibleCount = Array.from(cardsNodeList).filter(
+                (card) => card.style.display !== "none"
+            ).length;
 
-      if (visibleCount === 0) {
-        if (!existingMsg) {
-          const msg = document.createElement("div");
-          msg.className = "search-empty-msg";
-          msg.style.gridColumn = "1 / -1";
-          msg.style.textAlign = "center";
-          msg.style.padding = "20px";
-          msg.style.opacity = "0.8";
-          msg.textContent = `No movies match your search in ${sectionLabel}.`;
-          container.appendChild(msg);
-        }
-      } else {
-        if (existingMsg) existingMsg.remove();
-      }
-    };
+            if (visibleCount === 0) {
+                if (!existingMsg) {
+                    const msg = document.createElement("div");
+                    msg.className = "search-empty-msg";
+                    msg.style.gridColumn = "1 / -1";
+                    msg.style.textAlign = "center";
+                    msg.style.padding = "20px";
+                    msg.style.opacity = "0.8";
+                    msg.textContent = `No movies match your search in ${sectionLabel}.`;
+                    container.appendChild(msg);
+                }
+            } else {
+                if (existingMsg) existingMsg.remove();
+            }
+        };
 
-    // apply filters
-    filterCards(watchCards);
-    filterCards(ratedCards);
+        // apply filters
+        filterCards(watchCards);
+        filterCards(ratedCards);
 
-    // empty messages
-    updateEmptyMessage(watchContainer, watchCards, "Watchlist");
-    updateEmptyMessage(ratedContainer, ratedCards, "Rated Movies");
-  });
+        // empty messages
+        updateEmptyMessage(watchContainer, watchCards, "Watchlist");
+        updateEmptyMessage(ratedContainer, ratedCards, "Rated Movies");
+    });
 }
