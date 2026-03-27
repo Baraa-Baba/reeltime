@@ -4,6 +4,48 @@ let selectedSeats = new Set();
 let SEAT_PRICE = 7;  //7$ l price la el seat
 //movie comments
 window.movieComments = {};
+
+function setAuthTab(tab) {
+    let isLogin = tab !== "signup";
+
+    $('[data-tab]').each(function () {
+        let isActive = $(this).data('tab') === tab;
+        $(this)
+            .toggleClass('is-active', isActive)
+            .attr('aria-selected', isActive ? 'true' : 'false');
+    });
+
+    $('#loginPanel').toggle(isLogin);
+    $('#signupPanel').toggle(!isLogin);
+    $('#loginError, #signupError, #loginSuccess, #signupSuccess').text('');
+}
+
+function openAuthModal(tab = "login") {
+    setAuthTab(tab);
+    $('html, body').addClass('login-open');
+    $('.login')
+        .stop(true, true)
+        .attr('aria-hidden', 'false')
+        .fadeIn(240, function () {
+            let $firstInput = tab === 'signup'
+                ? $('#signupPanel input:visible').first()
+                : $('#loginPanel input:visible').first();
+
+            if ($firstInput.length) {
+                $firstInput.trigger('focus');
+            }
+        });
+}
+
+function closeAuthModal() {
+    $('html, body').removeClass('login-open');
+    $('.login')
+        .stop(true, true)
+        .fadeOut(240, function () {
+            $(this).attr('aria-hidden', 'true');
+        });
+}
+
 $(function () {
     window.movieComments = window.movieComments || {};
     // comments lal movies in bookings
@@ -219,8 +261,6 @@ $(function () {
     });
 
     $(document).ready(function () {
-        $('.login').hide();
-
         // Initialize auth state from server
         if (window.authUser) {
             currentUser = window.authUser.username;
@@ -230,25 +270,15 @@ $(function () {
             sessionStorage.removeItem('loggedInUser');
         }
 
+        if (window.loginModalShouldOpen) {
+            openAuthModal('login');
+            window.loginModalShouldOpen = false;
+        }
+
         // Tab switching
         $(document).on('click', '[data-tab]', function () {
             let tab = $(this).data('tab');
-            $('[data-tab]')
-                .removeClass('btn-warning text-dark active')
-                .addClass('btn-outline-warning');
-            $(this)
-                .removeClass('btn-outline-warning')
-                .addClass('btn-warning text-dark active');
-
-            if (tab === 'login') {
-                $('#loginPanel').show();
-                $('#signupPanel').hide();
-            } else {
-                $('#loginPanel').hide();
-                $('#signupPanel').show();
-            }
-            // Clear errors/success on tab switch
-            $('#loginError, #signupError, #loginSuccess, #signupSuccess').text('');
+            setAuthTab(tab);
         });
 
         // Login toggle button click
@@ -270,7 +300,7 @@ $(function () {
                     window.location.href = '/profile';
                     }
             } else {
-                $('.login').fadeIn(300);
+                openAuthModal('login');
             }
         });
 
@@ -282,10 +312,21 @@ $(function () {
             $('html, body').removeClass('header-drawer-open');
         });
 
+        $(document).on('click', '[data-login-close]', function (e) {
+            e.preventDefault();
+            closeAuthModal();
+        });
+
         // Close modal on background click
         $('.login-background').click(function (e) {
             if (e.target === this) {
-                $('.login').fadeOut(300);
+                closeAuthModal();
+            }
+        });
+
+        $(document).on('keydown', function (e) {
+            if (e.key === 'Escape' && $('.login').is(':visible')) {
+                closeAuthModal();
             }
         });
 
@@ -333,7 +374,7 @@ $(function () {
                         updateLoginStatus();
 
                         setTimeout(function () {
-                            $('.login').fadeOut(300);
+                            closeAuthModal();
                             $('#loginUsername').val('');
                             $('#loginPassword').val('');
                             $('#loginSuccess').text('');
@@ -416,7 +457,7 @@ $(function () {
                         updateLoginStatus();
 
                         setTimeout(function () {
-                            $('.login').fadeOut(300);
+                            closeAuthModal();
                             $('#signupUsername, #signupEmail, #signupPassword, #signupPasswordConfirm').val('');
                             $('#signupSuccess').text('');
                             location.reload();
@@ -463,7 +504,7 @@ $(function () {
         e.preventDefault();
         e.stopPropagation();
 
-        $('.login').fadeIn();
+        openAuthModal('login');
 
         showMessage("Please login to add movies to your watchlist!", 'info');
     });
@@ -586,7 +627,7 @@ $("#confirmbtn").on("click", function () {
 
         setTimeout(() => {
             $("#loginFromBookingBtn").on("click", function () {
-                $('.login').fadeIn();
+                openAuthModal('login');
             });
         }, 100);
 

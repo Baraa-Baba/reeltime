@@ -32,11 +32,7 @@
         'role'=> Auth::user()->role,
     ] : null) }};
 
-    @if(session('login_required'))
-        $(document).ready(function() {
-            $('.login').fadeIn(300);
-        });
-    @endif
+    window.loginModalShouldOpen = {{ session('login_required') ? 'true' : 'false' }};
   </script>
   <script src="{{ asset('js/config.js') }}"></script>
   @stack('head-scripts')
