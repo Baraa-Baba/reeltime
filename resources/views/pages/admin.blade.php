@@ -8,10 +8,10 @@
        <div class="bg-gradient-to-r from-[#1e1e2d] to-[#2a2a3e] rounded-2xl p-6 md:p-8 mb-8 border border-[#8a2be2]/20 shadow-lg">
             <div class="flex flex-col md:flex-row items-center gap-6">
                 <div class="relative">
-                    <img src="https://robohash.org/d" alt="Admin" class="w-20 h-20 md:w-24 md:h-24 rounded-full border-4 border-[#8a2be2] object-cover shadow-xl">
+                    <img src="{{ $user->profile_image}}" alt="Admin" class="w-20 h-20 md:w-24 md:h-24 rounded-full border-4 border-[#8a2be2] object-cover shadow-xl">
                      </div>
                 <div class="flex-1 text-center md:text-left">
-                    <h1 class="text-2xl md:text-3xl font-bold text-white mb-2">Welcome back</h1>
+                    <h1 class="text-2xl md:text-3xl font-bold text-white mb-2">Welcome back, {{$user->username}}</h1>
                     <p class="text-[#8a2be2] font-medium">Administrator</p>
                       </div>
                 <div class="flex gap-3">
@@ -169,13 +169,35 @@
                             <tr><th class="text-left py-4 px-4 text-[#8a2be2] font-semibold">ID</th>
                                 <th class="text-left py-4 px-4 text-[#8a2be2] font-semibold">User</th>
                                 <th class="text-left py-4 px-4 text-[#8a2be2] font-semibold">Movie</th>
+                                <th class="text-left py-4 px-4 text-[#8a2be2] font-semibold">Poster</th>
                                 <th class="text-left py-4 px-4 text-[#8a2be2] font-semibold">Date</th>
                                 <th class="text-left py-4 px-4 text-[#8a2be2] font-semibold">Status</th>
                                 <th class="text-left py-4 px-4 text-[#8a2be2] font-semibold">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                           
+                            @foreach($bookings as $booking)
+                                <tr class="border-b border-white/10 hover:bg-white/5">
+                                    <td class="py-3 px-4">{{ $booking->booking_id }}</td>
+                                    <td class="py-3 px-4">{{ $booking->user->username }}</td>
+                                    <td class="py-3 px-4">{{ $booking->showtime->movie->title }}</td>
+                                    <td class="py-3 px-4"><img src="{{ asset($booking->showtime->movie->poster) }}" class="w-12 h-12 object-cover rounded" alt="poster"></td>
+                                    <td class="py-3 px-4">{{ $booking->booking_date  }}</td>
+                                    <td class="py-3 px-4">
+                                        <span class="px-2 py-1 rounded-full text-xs 
+                                            @if($booking->status == 'confirmed') bg-green-500/20 text-green-400
+                                            @elseif($booking->status == 'cancelled') bg-red-500/20 text-red-400
+                                            @else bg-yellow-500/20 text-yellow-400 @endif">{{ $booking->status  }}</span>
+                                    </td>
+                                    <td class="py-3 px-4">
+                                        <button class="text-blue-400 hover:text-blue-300 mr-2"><i class="fas fa-eye"></i></button>
+                                        <button class="text-red-400 hover:text-red-300"><i class="fas fa-trash"></i></button>
+                                    </td>
+                                </tr>
+    
+                                @endforeach
+
+
                         </tbody>
                     </table>
                 </div>
