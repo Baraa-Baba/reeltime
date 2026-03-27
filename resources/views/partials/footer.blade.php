@@ -23,7 +23,7 @@
         <strong>Movies</strong>
         <a href="{{ route('home') }}">Home</a>
         <a href="{{ route('bookings') }}">Bookings</a>
-        <a href="{{ route('profile') }}">My Profile</a>
+        <a href="{{ Auth::check() && Auth::user()->role === 'admin' ? route('admin') : route('profile') }}">My Profile</a>
         <a href="{{ route('about') }}">About Us</a>
       </div>
       

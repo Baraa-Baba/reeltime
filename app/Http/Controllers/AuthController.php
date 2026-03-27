@@ -43,6 +43,7 @@ class AuthController extends Controller
                 'email' => $user->email,
                 'img' => $user->profile_image ?? 'https://robohash.org/' . urlencode($user->username),
                 'since' => $user->member_since ? $user->member_since->year : $user->created_at->year,
+                'role' => $user->role, 
             ],
         ]);
     }
@@ -94,6 +95,7 @@ class AuthController extends Controller
                 'email' => $user->email,
                 'img' => $user->profile_image,
                 'since' => now()->year,
+                'role' => $user->role,
             ],
         ]);
     }
@@ -133,6 +135,7 @@ class AuthController extends Controller
                     'email' => $user->email,
                     'img' => $user->profile_image ?? 'https://robohash.org/' . urlencode($user->username),
                     'since' => $user->member_since ? $user->member_since->year : $user->created_at->year,
+                    'role' => $user->role,
                 ],
             ]);
         }

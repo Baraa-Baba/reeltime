@@ -251,7 +251,12 @@ $(function () {
         $('#loginToggleBtn').click(function (e) {
             e.preventDefault();
             if (window.authUser) {
-                window.location.href = '/profile';
+                if (window.authUser.role==='admin'){
+                    window.location.href='/admin';
+                }
+                else{
+                    window.location.href = '/profile';
+                    }
             } else {
                 $('.login').fadeIn(300);
             }

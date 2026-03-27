@@ -29,6 +29,7 @@
     'email' => Auth::user()->email,
     'img' => Auth::user()->profile_image ?? 'https://robohash.org/' . urlencode(Auth::user()->username),
     'since' => optional(Auth::user()->member_since)->year ?? Auth::user()->created_at->year,
+    'role'=> Auth::user()->role,
 ] : null) }};
 
     // Auto-open login modal if redirected with login_required flash
