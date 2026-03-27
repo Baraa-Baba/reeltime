@@ -36,7 +36,7 @@ $(document).ready(function () {
                 <div class="empty-icon"><i class="fas fa-film"></i></div>
                 <h3>Please Log In</h3>
                 <p>You need to be logged in to view your profile and ratings.</p>
-                <a href="#" id="profileLoginBtn" style="color: #8a2be2; text-decoration: none; font-weight: bold;">Go to Login <i class="fas fa-arrow-right"></i></a>
+                <a href="#" id="profileLoginBtn" class="accent-link">Go to Login <i class="fas fa-arrow-right"></i></a>
             </div>
         </div>
     `);
@@ -58,8 +58,8 @@ $(document).ready(function () {
                 </div>
                 <div class="profile-info-modern">
                     <h1>${user.username}</h1>
-                    <p style="color: #ccc; margin-bottom: 15px;">${user.email}</p>
-                    <p style="color: #ccc; margin-bottom: 15px;">${user.id}</p>
+                    <p class="profile-meta">${user.email}</p>
+                    <p class="profile-meta">${user.id}</p>
                     <div class="profile-stats">
                         <div class="stat-item">
                             <span class="stat-number" id="watchlist-count">0</span>
@@ -164,7 +164,7 @@ $(document).ready(function () {
                 <div class="empty-watchlist" style="grid-column: 1 / -1;">
                     <h3>Your Watchlist is Empty</h3>
                     <p>Start adding movies to build your personalized collection!</p>
-                    <a href="/search" style="color: #8a2be2; text-decoration: none; font-weight: bold;">Browse Movies <i class="fas fa-arrow-right"></i></a>
+                    <a href="/search" class="accent-link">Browse Movies <i class="fas fa-arrow-right"></i></a>
                 </div>
             `);
             return;
@@ -305,7 +305,7 @@ $(document).ready(function () {
                     <div class="empty-icon"><i class="fas fa-ticket-alt"></i></div>
                     <h3>No Bookings Yet</h3>
                     <p>Book a movie from the bookings page and it will appear here.</p>
-                    <a href="/bookings" style="color: #8a2be2; text-decoration: none; font-weight: bold;">Book a Movie <i class="fas fa-arrow-right"></i></a>
+                    <a href="/bookings" class="accent-link">Book a Movie <i class="fas fa-arrow-right"></i></a>
                 </div>
             `);
             return;
@@ -495,7 +495,7 @@ $(document).ready(function () {
         <div class="booking-modal-overlay" id="cancelBookingModal">
             <div class="booking-modal-large">
                 <div class="booking-modal-header">
-                    <h3 style="color: #8a2be2">Cancel this booking?</h3>
+                    <h3 class="booking-cancel-title">Cancel this booking?</h3>
                     <button class="modal-close-btn" id="closeCancelBookingModal">×</button>
                 </div>
                 <div class="booking-details-content">
@@ -905,7 +905,7 @@ $(document).ready(function () {
                     position: fixed;
                     bottom: 20px;
                     right: 20px;
-                    background: linear-gradient(135deg, rgba(122, 21, 97, 0.678), var(--accent));
+                    background: var(--accent-gradient);
                     color: white;
                     padding: 12px 20px;
                     border-radius: 8px;
@@ -920,10 +920,10 @@ $(document).ready(function () {
                     transform: translateX(0);
                 }
                 .toast-rated {
-                    background: linear-gradient(135deg, rgba(122, 21, 97, 0.678), var(--accent));
+                    background: var(--accent-gradient);
                 }
                 .toast-removed {
-                    background: linear-gradient(135deg, rgba(122, 21, 97, 0.678), var(--accent));
+                    background: var(--accent-gradient);
                 }
                 
                 /* Loading states */
@@ -948,7 +948,7 @@ $(document).ready(function () {
                 }
                 
                 .retry-btn {
-                    background: var(--accent-purple);
+                    background: var(--accent-gradient);
                     color: white;
                     border: none;
                     padding: 10px 20px;

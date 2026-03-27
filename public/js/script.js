@@ -1,22 +1,3 @@
-document.getElementById('hamburger').addEventListener("click", () => {
-document.querySelector("header").classList.toggle("header-nav-open");});
-
-
-// Auto-close burger menu on resize
-function handleResize() {
-    let header = document.querySelector("header");
-    if (window.innerWidth > 978 && header.classList.contains("header-nav-open")) {
-        header.classList.remove("header-nav-open");
-         if (header.classList.contains("header-nav-open") && 
-        e.target.closest('.main-nav a')) {
-        header.classList.remove("header-nav-open");
-    }
-    }
-}
-
-// Add resize event listener
-window.addEventListener('resize', handleResize);
-
 let modal = document.getElementById('card-modal');
 let modalTrailer = document.getElementById('modal-trailer');
 let modalTitle = document.getElementById('modal-title');

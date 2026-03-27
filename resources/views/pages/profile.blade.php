@@ -2,6 +2,10 @@
 
 @section('title', 'Your Profile | ReelTime')
 
+@section('body-class')
+profile-page
+@endsection
+
 @push('styles')
 <link rel="stylesheet" href="{{ asset('css/profile.css') }}">
 @endpush
@@ -12,28 +16,5 @@
 @endpush
 
 @section('content')
-<div class="Profile-container">
-    
-</div>
-
-<main>
-    <div id="watchlist-container" class="gallery"></div>
-    
-    <div class="rated-section">
-        <div class="section-header">
-            <div class="section-title">My Rated Movies</div>
-            <div class="watchlist-count" id="rated-counter">0 movies rated</div>
-        </div>
-        <div class="rated" id="rated"></div>
-    </div>
-    
-    <div class="booked-section">
-      <div class="section-header">
-        <div class="section-title">My Booked Movies</div>
-        <div class="watchlist-count" id="booked-counter">0 bookings</div>
-      </div>
-      <div class="booked-grid-modern" id="booked-grid"></div>
-    </div>
-
-</main>
+<main class="container py-4 py-lg-5 profile-page"></main>
 @endsection

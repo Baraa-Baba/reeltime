@@ -231,10 +231,14 @@ $(function () {
         }
 
         // Tab switching
-        $(document).on('click', '.auth-tab', function () {
+        $(document).on('click', '[data-tab]', function () {
             let tab = $(this).data('tab');
-            $('.auth-tab').removeClass('active');
-            $(this).addClass('active');
+            $('[data-tab]')
+                .removeClass('btn-warning text-dark active')
+                .addClass('btn-outline-warning');
+            $(this)
+                .removeClass('btn-outline-warning')
+                .addClass('btn-warning text-dark active');
 
             if (tab === 'login') {
                 $('#loginPanel').show();
@@ -248,8 +252,16 @@ $(function () {
         });
 
         // Login toggle button click
-        $('#loginToggleBtn').click(function (e) {
+        $(document).on('click', '.login-toggle-btn', function (e) {
             e.preventDefault();
+            let headerDrawer = document.getElementById('headerDrawer');
+            if (headerDrawer && typeof bootstrap !== 'undefined' && bootstrap.Offcanvas) {
+                let drawerInstance = bootstrap.Offcanvas.getInstance(headerDrawer);
+                if (drawerInstance) {
+                    drawerInstance.hide();
+                }
+            }
+
             if (window.authUser) {
                 if (window.authUser.role==='admin'){
                     window.location.href='/admin';
@@ -260,6 +272,14 @@ $(function () {
             } else {
                 $('.login').fadeIn(300);
             }
+        });
+
+        $(document).on('show.bs.offcanvas', '#headerDrawer', function () {
+            $('html, body').addClass('header-drawer-open');
+        });
+
+        $(document).on('hidden.bs.offcanvas', '#headerDrawer', function () {
+            $('html, body').removeClass('header-drawer-open');
         });
 
         // Close modal on background click
@@ -426,14 +446,14 @@ $(function () {
     });
 
     function updateLoginStatus() {
-        let $loginToggleBtn = $('#loginToggleBtn');
+        let $loginToggleBtns = $('.login-toggle-btn');
 
         if (window.authUser) {
-            $loginToggleBtn.html(`<i class="fas fa-user"></i> ${window.authUser.username}`);
-            $loginToggleBtn.addClass('logged-in');
+            $loginToggleBtns.html(`<i class="fas fa-user me-1"></i><span>${window.authUser.username}</span>`);
+            $loginToggleBtns.addClass('logged-in');
         } else {
-            $loginToggleBtn.html('<i class="fas fa-user"></i> Login');
-            $loginToggleBtn.removeClass('logged-in');
+            $loginToggleBtns.html('<i class="fas fa-user me-1"></i><span>Login</span>');
+            $loginToggleBtns.removeClass('logged-in');
         }
     }
 
@@ -550,7 +570,7 @@ $("#confirmbtn").on("click", function () {
                     You need to log in to confirm your booking.
                 </p>
                 <button id="loginFromBookingBtn" style="
-                    background: linear-gradient(135deg, rgba(122, 21, 97, 0.678), var(--accent));
+                    background: linear-gradient(135deg, var(--accent), var(--accent-2));
                     color: white;
                     border: none;
                     padding: 10px 20px;
@@ -717,4 +737,3 @@ $(".showShowTimes-btn").on("click", function () {
     openMovieModal(card);
 }
 )
-
