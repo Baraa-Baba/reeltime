@@ -6,12 +6,29 @@
 bookings-page
 @endsection
 
-@push('styles')
-<link rel="stylesheet" href="{{ asset('css/bookings.css') }}">
-@endpush
-
 @push('scripts')
 <script src="{{ asset('js/watchlist.js') }}" defer></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.gallery2 .movie-card').forEach(card => {
+      const title = card.dataset.title || '';
+      const desc = card.dataset.description || '';
+      const rating = card.dataset.rating || 'N/A';
+      const time = card.dataset.time || 'N/A';
+      const overlay = document.createElement('div');
+      overlay.className = 'movie-overlay';
+      overlay.innerHTML = `
+        <p class="movie-overlay-title">${title}</p>
+        <p class="movie-overlay-desc">${desc}</p>
+        <div class="movie-overlay-bottom">
+          <span class="film-overlay">${time}</span>
+          <span class="movie-overlay-rating">${rating} / 5 stars</span>
+        </div>
+      `;
+      card.appendChild(overlay);
+    });
+  });
+</script>
 @endpush
 
 @section('content')
@@ -19,53 +36,57 @@ bookings-page
   <div class="search-results"></div>
 </div>
 
-<main class="container py-4 py-lg-5 booking-shell">
-  <section class="card border-secondary-subtle shadow-sm bg-dark mb-4">
-    <div class="card-body p-4 p-lg-5">
-      <div class="row g-4 align-items-center">
-        <div class="col-lg-7">
-          <span class="badge text-bg-warning text-dark rounded-pill mb-3">Book in minutes</span>
-          <h1 class="display-6 fw-bold mb-3">Pick a cinema, choose a seat, and check out without losing context.</h1>
-          <p class="text-secondary mb-0">
-            ReelTime keeps the booking flow simple: choose your movie, set the time, reserve seats,
-            and confirm in one continuous path.
-          </p>
-        </div>
-
-        <div class="col-lg-5">
-          <div class="row row-cols-2 row-cols-md-5 g-2">
-            <div class="col"><div class="card h-100 text-center border-secondary-subtle bg-body-tertiary"><div class="card-body py-3 fw-semibold">Cinema</div></div></div>
-            <div class="col"><div class="card h-100 text-center border-secondary-subtle bg-body-tertiary"><div class="card-body py-3 fw-semibold">Movie</div></div></div>
-            <div class="col"><div class="card h-100 text-center border-secondary-subtle bg-body-tertiary"><div class="card-body py-3 fw-semibold">Date</div></div></div>
-            <div class="col"><div class="card h-100 text-center border-secondary-subtle bg-body-tertiary"><div class="card-body py-3 fw-semibold">Seats</div></div></div>
-            <div class="col"><div class="card h-100 text-center border-secondary-subtle bg-body-tertiary"><div class="card-body py-3 fw-semibold">Checkout</div></div></div>
-          </div>
-        </div>
+<main class="page-shell booking-shell">
+  <section class="booking-hero">
+    <div class="hero-copy">
+      <span class="eyebrow">Book In Minutes</span>
+      <h1>Pick a cinema, choose seats, and check out without losing context.</h1>
+      <p>
+        ReelTime keeps the booking flow simple: choose the movie, set the date and time, reserve seats,
+        then finish payment in one continuous path.
+      </p>
+      <div class="hero-actions">
+        <a href="#step1" class="button button-primary">Start booking</a>
+        <a href="#gallery2" class="button button-secondary">View showtimes</a>
       </div>
     </div>
   </section>
 
   <section class="booking-layout">
-    <article class="booking-panel booking-flow surface-card">
+    <article class="booking-panel booking-flow">
+      <div class="section-header">
+        <span class="eyebrow">Booking Flow</span>
+        <h2>Move through the steps in order.</h2>
+        <p>Each step unlocks the next one so the booking stays readable from start to finish.</p>
+      </div>
+
+      <div class="booking-pills">
+        <span>Cinema</span>
+        <span>Movie</span>
+        <span>Date</span>
+        <span>Seats</span>
+        <span>Checkout</span>
+      </div>
+
       <div class="booking-steps">
-        <button class="stepsbtn default enabled" id="btn1" onclick="showStep(1)">1</button>
-        <button class="stepsbtn" id="btn2" onclick="showStep(2)">2</button>
-        <button class="stepsbtn" id="btn3" onclick="showStep(3)">3</button>
-        <button class="stepsbtn" id="btn4" onclick="showStep(4)">4</button>
-        <button class="stepsbtn" id="btn5" onclick="showStep(5)">5</button>
+        <button class="stepsbtn default enabled" id="btn1" type="button" onclick="showStep(1)">1</button>
+        <button class="stepsbtn" id="btn2" type="button" onclick="showStep(2)">2</button>
+        <button class="stepsbtn" id="btn3" type="button" onclick="showStep(3)">3</button>
+        <button class="stepsbtn" id="btn4" type="button" onclick="showStep(4)">4</button>
+        <button class="stepsbtn" id="btn5" type="button" onclick="showStep(5)">5</button>
       </div>
 
       <div class="booking-stage">
         <div class="step-content default" id="step1">
-          <select id="cinemasSelect" class="form-select form-select-lg bg-body-tertiary border-secondary-subtle text-light">
+          <select id="cinemasSelect">
             <option value="SpotChoueifat">The Spot Choueifat</option>
             <option value="SpotSaida">The Spot Saida</option>
           </select>
-          <button class="btn btn-warning fw-semibold" onclick="completeStep()">Submit</button>
+          <button class="button button-primary" type="button" onclick="completeStep()">Submit</button>
         </div>
 
         <div class="step-content" id="step2">
-          <select id="movieselect" class="form-select form-select-lg bg-body-tertiary border-secondary-subtle text-light">
+          <select id="movieselect">
             <option value="TheRunningMan">The Running Man</option>
             <option value="Predator:Badlands">Predator: Badlands</option>
             <option value="HardaBasht">HardaBasht</option>
@@ -73,18 +94,18 @@ bookings-page
             <option value="Playdate">Playdate</option>
             <option value="ElSelemWElThoban">El Selem W El Thoban</option>
           </select>
-          <button class="btn btn-warning fw-semibold" onclick="completeStep()">Submit</button>
+          <button class="button button-primary" type="button" onclick="completeStep()">Submit</button>
         </div>
 
         <div class="step-content" id="step3">
-          <input type="date" id="dateselect" class="form-control form-control-lg bg-body-tertiary border-secondary-subtle text-light">
-          <select id="timeselect" class="form-select form-select-lg bg-body-tertiary border-secondary-subtle text-light">
+          <input type="date" id="dateselect">
+          <select id="timeselect">
             <option value="1:00">1:00 pm</option>
             <option value="3:00">3:00 pm</option>
             <option value="6:00">6:00 pm</option>
             <option value="9:00">9:00 pm</option>
           </select>
-          <button class="btn btn-warning fw-semibold" id="Datebtn" disabled>Submit</button>
+          <button class="button button-primary" type="button" id="Datebtn" disabled>Submit</button>
           <div id="datecompletestep"></div>
         </div>
 
@@ -116,32 +137,33 @@ bookings-page
               </div>
             </div>
           </div>
-          <button class="btn btn-warning fw-semibold" id="reserveBtn" disabled onclick="completeStep()">Reserve</button>
+          <button class="button button-primary" type="button" id="reserveBtn" disabled onclick="completeStep()">Reserve</button>
         </div>
 
         <div class="step-content" id="step5">
-          <input type="text" id="Name" class="form-control form-control-lg bg-body-tertiary border-secondary-subtle text-light" placeholder="Enter your full name">
-          <input type="text" id="Email" class="form-control form-control-lg bg-body-tertiary border-secondary-subtle text-light" placeholder="Enter your email">
-          <input type="text" id="PhoneNumber" class="form-control form-control-lg bg-body-tertiary border-secondary-subtle text-light" placeholder="Enter your phone number">
-          <input type="text" id="CardNumber" class="form-control form-control-lg bg-body-tertiary border-secondary-subtle text-light" placeholder="Enter your card number">
-          <input type="text" id="CVV" class="form-control form-control-lg bg-body-tertiary border-secondary-subtle text-light" placeholder="Enter your CVV">
-          <button class="btn btn-warning fw-semibold" id="confirmbtn">Confirm</button>
+          <input type="text" id="Name" placeholder="Enter your full name">
+          <input type="text" id="Email" placeholder="Enter your email">
+          <input type="text" id="PhoneNumber" placeholder="Enter your phone number">
+          <input type="text" id="CardNumber" placeholder="Enter your card number">
+          <input type="text" id="CVV" placeholder="Enter your CVV">
+          <button class="button button-primary" type="button" id="confirmbtn">Confirm</button>
           <div id="TotalPrice"></div>
           <div id="confirmation"></div>
         </div>
       </div>
     </article>
 
-    <aside class="booking-panel booking-gallery surface-card">
-      <div class="panel-header">
-        <span class="eyebrow">Now showing</span>
-        <p>Tap a poster for showtimes, trailer context, and quick actions.</p>
+    <aside class="booking-panel booking-gallery">
+      <div class="section-header">
+        <span class="eyebrow">Now Showing</span>
+        <h2>Tap a poster for showtimes and quick context.</h2>
+        <p>Each card opens the shared detail modal with the trailer, cast, genres, and reviews.</p>
       </div>
 
       <section class="gallery2" id="gallery2">
         <div class="movie" id="movie">
           <figure class="movie-card" data-title="The Running Man"
-            data-description="In a near-future society, The Running Man is the top-rated show on televisionâ€”a deadly competition where contestants, known as Runners, must survive 30 days while being hunted by professional assassins, with every move broadcast to a bloodthirsty public and each day bringing a greater cash reward."
+            data-description="In a near-future society, The Running Man is the top-rated show on television, a deadly competition where contestants must survive 30 days while being hunted by professional assassins."
             data-trailer-id="YOUR_TRAILER_ID_4"
             data-cast="Arnold Schwarzenegger, Maria Conchita Alonso, Richard Dawson"
             data-genres="Action, Sci-Fi, Thriller"
@@ -149,23 +171,23 @@ bookings-page
             data-rating="4.3"
             data-time="115 min">
             <img src="{{ asset('imgs/therunningman-min.png') }}" alt="The Running Man">
-            <button class="showShowTimes-btn" type="button">Show showtimes</button>
+            <button class="showShowTimes-btn" type="button">View showtimes</button>
           </figure>
 
           <figure class="movie-card" data-title="Predator:Badlands"
             data-description="A young Predator outcast from his clan finds an unlikely ally on his journey in search of the ultimate adversary."
             data-trailer-id="YOUR_TRAILER_ID_4"
-            data-cast="Elle Fanning, ravi Narayan, Micheal Homik"
+            data-cast="Elle Fanning, Ravi Narayan, Micheal Homik"
             data-genres="Action, Sci-Fi, Horror"
             data-this-movie-is="Gory, Suspenseful, Alien Hunt"
             data-rating="3.3"
             data-time="125 min">
             <img src="{{ asset('imgs/predator badlands-min.png') }}" alt="Predator: Badlands">
-            <button class="showShowTimes-btn" type="button">Show showtimes</button>
+            <button class="showShowTimes-btn" type="button">View showtimes</button>
           </figure>
 
           <figure class="movie-card" data-title="HardaBasht"
-            data-description="A mother and her 3 boys live in the poor suburbs of Beirut. The youngest boy is religiously committed unlike his two older brothers who are drug dealers. They force their younger brother to work for them because of his clean reputation. A series of events bring chaos to the family and the whole neighborhood."
+            data-description="A mother and her three boys live in the poor suburbs of Beirut, and a string of choices pulls the whole neighborhood into chaos."
             data-trailer-id="YOUR_TRAILER_ID_4"
             data-cast="Randa Kaady, Alexandra Kahwagi, Hussein Kaouk"
             data-genres="Drama, Family, Crime"
@@ -173,11 +195,11 @@ bookings-page
             data-rating="4.1"
             data-time="155 min">
             <img src="{{ asset('imgs/hardabsht-min.png') }}" alt="HardaBasht poster">
-            <button class="showShowTimes-btn" type="button">Show showtimes</button>
+            <button class="showShowTimes-btn" type="button">View showtimes</button>
           </figure>
 
           <figure class="movie-card" data-title="Jujutsu Kaisen:Execution"
-            data-description="A veil abruptly descends over the busy Shibuya area amid the bustling Halloween crowds, trapping countless civilians inside. Satoru Gojo, steps into the chaos. But in wait curse users scheming to seal him away. Yuji Itadori and jujutsu sorcerers, enters the Shibuya Incident. Be the first to experience Yuji and Yutaâ€™s fateful battle with the hotly anticipated kickoff to Season 3 in theatres nationwide."
+            data-description="A veil drops over Shibuya on Halloween, trapping civilians while sorcerers and curse users collide in one of the series' biggest conflicts."
             data-trailer-id="YOUR_TRAILER_ID_5"
             data-cast="Adam McArthur, Jun'ya Enoki, Yuchi Nakamura"
             data-genres="Action, Fantasy, Anime"
@@ -185,11 +207,11 @@ bookings-page
             data-rating="4.7"
             data-time="175 min">
             <img src="{{ asset('imgs/jujutsu kaisen-min.png') }}" alt="Jujutsu Kaisen:Execution poster">
-            <button class="showShowTimes-btn" type="button">Show showtimes</button>
+            <button class="showShowTimes-btn" type="button">View showtimes</button>
           </figure>
 
           <figure class="movie-card" data-title="Playdate"
-            data-description="After being fired from his job, BRIAN, instantly becomes a reluctant stay-at-home dad to his step son. On his very first day, Brian accepts a random invitation for a playdate from another stay-at-home dad, JEFF. Jeff definitely seems a little bitâ€¦off. And as the playdate begins, Jeff turns out to be someone Brian never expected and they immediately have to go on the run from a very dangerous situation. Itâ€™s a playdate from hell as the two fathers and their sons spend the day trying not to get killed and solve a conspiracy."
+            data-description="A reluctant stay-at-home dad accepts an invitation that turns into a chaotic run for survival with another father and their kids."
             data-trailer-id="YOUR_TRAILER_ID_6"
             data-cast="Alan Ritchson, Kevin James, Banks Peirce"
             data-genres="Comedy, Action, Thriller"
@@ -197,11 +219,11 @@ bookings-page
             data-rating="4.2"
             data-time="185 min">
             <img src="{{ asset('imgs/playdate-min.png') }}" alt="Playdate poster">
-            <button class="showShowTimes-btn" type="button">Show showtimes</button>
+            <button class="showShowTimes-btn" type="button">View showtimes</button>
           </figure>
 
           <figure class="movie-card" data-title="El Selem W El Thoban"
-            data-description="In Snake and Ladder, love and ambition intertwine as Ahmed (Amr Youssef), a creative architect, and Malak (Asmaa Galal), a driven entrepreneur, struggle to reconcile who theyâ€™ve become with who they were together. When distance and new relationshipsâ€”like Malakâ€™s rekindled connection with Amir (Dhafer Lâ€™Abidine)â€”test their bond, both are forced to confront lost versions of themselves and the choices that shaped their paths."
+            data-description="In Snake and Ladder, love and ambition collide as two former partners struggle with who they became after distance and new relationships changed everything."
             data-trailer-id="GRm2_FzP1m0"
             data-cast="Amr Youssef, Asmaa Galal, Dhafer L'Abidine"
             data-genres="Romance, Drama"
@@ -209,7 +231,7 @@ bookings-page
             data-rating="2.3"
             data-time="168 min">
             <img src="{{ asset('imgs/El Selem W El Thoban-min.png') }}" alt="El Selem W El Thoban">
-            <button class="showShowTimes-btn" type="button">Show showtimes</button>
+            <button class="showShowTimes-btn" type="button">View showtimes</button>
           </figure>
         </div>
       </section>
@@ -219,7 +241,7 @@ bookings-page
 
 <div class="modal" id="card-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modal-title">
   <div class="modal__backdrop" data-close-modal></div>
-  <div class="modal__dialog" role="document">
+  <div class="modal__dialog surface-card" role="document">
     <button class="modal__close" id="modal-close" aria-label="Close dialog" data-close-modal>&times;</button>
 
     <div class="modal__media">
@@ -256,29 +278,4 @@ bookings-page
   </div>
 </div>
 
-@push('scripts')
-<script>
- document.querySelectorAll(".gallery2 .movie-card").forEach(card => {
-    let title = card.dataset.title
-      || card.querySelector("figcaption")?.textContent.trim()
-      || "";
-    let desc   = card.dataset.description || "";
-    let rating = card.dataset.rating || "N/A";
-    let time = card.dataset.time || "N/A";
-    let overlay = document.createElement("div");
-    overlay.className = "movie-overlay";
-
-    overlay.innerHTML = `
-      <p class="movie-overlay-title">${title}</p>
-      <p class="movie-overlay-desc">${desc}</p>
-      <div class="movie-overlay-bottom">
-        <span class="film-overlay">${time}</span>
-        <span class="movie-overlay-rating">${rating} / 5 ★</span>
-      </div>
-    `;
-
-    card.appendChild(overlay);
-  });
-</script>
-@endpush
 @endsection

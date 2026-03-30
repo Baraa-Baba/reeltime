@@ -218,13 +218,14 @@ allComments.reverse().forEach(c => {
 
 // MAIN FUNCTION TO OPEN MODAL
 function openMovieModal(cardElement) {
-  let card = cardElement.closest('figure');
+  let card = cardElement?.closest?.('figure.movie-card, .movie-card') || cardElement;
+  if (!card) return;
 
-  let h3 =cardElement.querySelector('h3')
-  let title =(h3 && h3.textContent.trim()) || card.dataset.title || card.getAttribute('data-title') || '';
+  let h3 = card.querySelector('h3');
+  let title = (h3 && h3.textContent.trim()) || card.dataset.title || card.getAttribute('data-title') || '';
   let text = card.dataset.description || card.getAttribute('data-description') || 'No movie description available yet.';
 
-  let rating = card.dataset.rating || card.getAttribute('data-rating') ||'N/A';
+  let rating = card.dataset.rating || card.getAttribute('data-rating') || 'N/A';
 
   let cast = card.dataset.cast || card.getAttribute('data-cast') || 'N/A';
 
@@ -233,8 +234,6 @@ function openMovieModal(cardElement) {
   let thisMovieIs = card.dataset.thisMovieIs || card.getAttribute('data-this-movie-is') || 'N/A';
 
   let youtubeEmbedUrl = TRAILER_URLS[title] || '';
-  let titleEl = card.querySelector('figcaption');
-
   if (modalTitle) modalTitle.textContent = title;
   if (modalText) modalText.textContent = text;
   if (modalCast) modalCast.textContent = cast;

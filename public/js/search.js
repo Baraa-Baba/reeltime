@@ -9,9 +9,31 @@ $(function () {
     let allMovies = [];
     let watchlistTitles = new Set();
 
+    function getCurrentUser() {
+        if (window.authUser) {
+            return window.authUser;
+        }
+
+        try {
+            return JSON.parse(sessionStorage.getItem("loggedInUser"));
+        } catch (err) {
+            console.error("Error parsing loggedInUser:", err);
+            return null;
+        }
+    }
+
+    function escapeHtml(value) {
+        return String(value ?? "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;");
+    }
+
     function refreshWatchlistTitles() {
         try {
-            const userData = JSON.parse(sessionStorage.getItem("loggedInUser"));
+            const userData = getCurrentUser();
             if (!userData) {
                 watchlistTitles = new Set();
                 return;
@@ -19,7 +41,9 @@ $(function () {
 
             const saved = JSON.parse(localStorage.getItem("watchlist")) || [];
             watchlistTitles = new Set(
-                saved.filter(item => item.username === userData.username).map(item => item.title)
+                saved
+                    .filter((item) => item.username === userData.username)
+                    .map((item) => item.title)
             );
         } catch (err) {
             console.error("Error building watchlist titles:", err);
@@ -89,41 +113,41 @@ $(function () {
         $count.text(`${list.length} result${list.length !== 1 ? "s" : ""} found`);
 
         list.forEach((movie) => {
-            const imgSrc = resolveImagePath(movie.image);
-            const rating = movie.rating ?? "N/A";
-            const inWatchlist = watchlistTitles.has(movie.title);
+            const title = movie.title || "";
             const description = movie.description || movie.overview || "";
+            const rating = movie.rating ?? "N/A";
+            const runtime = movie.time || movie.duration || "";
             const cast = Array.isArray(movie.cast) ? movie.cast.join(", ") : (movie.cast || "");
             const genres = Array.isArray(movie.genres) ? movie.genres.join(", ") : (movie.genre || movie.genres || "");
             const mood = Array.isArray(movie.tags) ? movie.tags.join(", ") : (movie.thisMovieIs || movie.tags || "");
+            const imgSrc = resolveImagePath(movie.image);
+            const inWatchlist = watchlistTitles.has(title);
 
             const $card = $(`
-              <div class="col">
-                <div class="card h-100 bg-dark border-secondary-subtle shadow-sm movie-card position-relative"
-                     data-title="${movie.title}"
-                     data-description="${movie.description || ''}"
-                     data-rating="${rating}"
-                     data-cast="${cast}"
-                     data-genres="${genres}"
-                     data-this-movie-is="${mood}">
-                  <div class="position-relative">
-                    <img src="${imgSrc}" class="card-img-top" alt="${movie.title}" onerror="this.src='../imgs/default-movie.jpg'">
-                    <span class="watch-flag badge rounded-pill text-bg-warning position-absolute top-0 end-0 m-2 ${inWatchlist ? 'in-watchlist' : ''}"
-                          data-title="${movie.title}"
-                          title="${inWatchlist ? 'In your watchlist' : 'Not in watchlist'}">
-                      <i class="${inWatchlist ? 'fa-solid' : 'fa-regular'} fa-heart"></i>
-                    </span>
-                  </div>
-                  <div class="card-body d-flex flex-column">
-                    <h3 class="h5 fw-bold mb-2">${movie.title || ""}</h3>
-                    <p class="text-secondary small mb-3 flex-grow-1">${description}</p>
-                    <div class="d-flex justify-content-between gap-3 small">
-                      <span class="text-secondary"><i class="far fa-clock me-1"></i>${movie.time || ""}</span>
-                      <span class="text-warning fw-semibold">${rating} / 5 ★</span>
+                <figure class="movie-card search-result-card"
+                    data-title="${escapeHtml(title)}"
+                    data-description="${escapeHtml(description)}"
+                    data-rating="${escapeHtml(rating)}"
+                    data-cast="${escapeHtml(cast)}"
+                    data-genres="${escapeHtml(genres)}"
+                    data-this-movie-is="${escapeHtml(mood)}"
+                    data-time="${escapeHtml(runtime)}">
+                    <span class="rating-overlay">${escapeHtml(rating)} / 5</span>
+                    <button class="watch-flag ${inWatchlist ? "in-watchlist" : ""}" type="button"
+                        data-title="${escapeHtml(title)}"
+                        aria-label="Toggle ${escapeHtml(title)} watchlist status">
+                        <i class="${inWatchlist ? "fa-solid" : "fa-regular"} fa-heart" aria-hidden="true"></i>
+                    </button>
+                    <img src="${imgSrc}" alt="${escapeHtml(title)} poster" onerror="this.src='../imgs/default-movie.jpg'">
+                    <div class="movie-overlay">
+                        <p class="movie-overlay-title">${escapeHtml(title)}</p>
+                        <p class="movie-overlay-desc">${escapeHtml(description)}</p>
+                        <div class="movie-overlay-bottom">
+                            <span class="film-overlay">${escapeHtml(runtime)}</span>
+                            <span class="movie-overlay-rating">${escapeHtml(rating)} / 5 stars</span>
+                        </div>
                     </div>
-                  </div>
-                </div>
-              </div>
+                </figure>
             `);
 
             $grid.append($card);
@@ -136,10 +160,14 @@ $(function () {
 
         let filtered = allMovies.filter((movie) => {
             if (!q) return true;
+            const genresText = Array.isArray(movie.genres) ? movie.genres.join(" ") : (movie.genres || "");
+            const tagsText = Array.isArray(movie.tags) ? movie.tags.join(" ") : (movie.tags || "");
             const haystack = [
                 movie.title,
                 movie.genre,
                 movie.description,
+                genresText,
+                tagsText,
                 (movie.year || "").toString()
             ].join(" ").toLowerCase();
 

@@ -773,8 +773,3 @@ $("#confirmbtn").on("click", function () {
         }, 10000);
     }, 3000); // Simulate processing delay
 });
-$(".showShowTimes-btn").on("click", function () {
-    let card = e.target.closest(".movie-card");
-    openMovieModal(card);
-}
-)

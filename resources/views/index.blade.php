@@ -66,7 +66,7 @@ home-page
 
 <div class="modal" id="card-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modal-title">
   <div class="modal__backdrop" data-close-modal></div>
-  <div class="modal__dialog" role="document">
+  <div class="modal__dialog surface-card" role="document">
     <button class="modal__close" id="modal-close" aria-label="Close dialog" data-close-modal>&times;</button>
 
     <div class="modal__media">

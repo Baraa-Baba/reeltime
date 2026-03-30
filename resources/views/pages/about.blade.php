@@ -7,182 +7,149 @@ about-page
 @endsection
 
 @section('content')
-<main class="container py-4 py-lg-5">
-  <section class="card border-secondary-subtle shadow-sm bg-dark mb-4">
-    <div class="card-body p-4 p-lg-5">
-      <div class="row g-4 align-items-center">
-        <div class="col-lg-7">
-          <span class="badge text-bg-warning text-dark rounded-pill mb-3">About ReelTime</span>
-          <h1 class="display-6 fw-bold mb-3">Built for people who want movie night handled in one place.</h1>
-          <p class="text-secondary mb-4">
-            ReelTime combines trailers, seat booking, watchlists, ratings, and trivia into a cleaner,
-            faster flow for people who care more about the film than the clutter around it.
-          </p>
-          <div class="d-flex flex-wrap gap-2">
-            <a href="{{ route('search') }}" class="btn btn-warning fw-semibold">Explore movies</a>
-            <a href="{{ route('bookings') }}" class="btn btn-outline-warning fw-semibold">Plan a booking</a>
-          </div>
-        </div>
-        <div class="col-lg-5">
-          <div class="row g-3">
-            <div class="col-4">
-              <div class="card border-secondary-subtle bg-body-tertiary h-100 text-center">
-                <div class="card-body">
-                  <div class="fs-3 fw-bold text-warning">500+</div>
-                  <div class="text-secondary small">Movies to rate</div>
-                </div>
-              </div>
-            </div>
-            <div class="col-4">
-              <div class="card border-secondary-subtle bg-body-tertiary h-100 text-center">
-                <div class="card-body">
-                  <div class="fs-3 fw-bold text-warning">24/7</div>
-                  <div class="text-secondary small">Booking access</div>
-                </div>
-              </div>
-            </div>
-            <div class="col-4">
-              <div class="card border-secondary-subtle bg-body-tertiary h-100 text-center">
-                <div class="card-body">
-                  <div class="fs-3 fw-bold text-warning">Fast</div>
-                  <div class="text-secondary small">Trailer first</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+<main class="page-shell about-shell">
+  <section class="surface-card about-hero">
+    <div class="hero-copy">
+      <span class="eyebrow">About ReelTime</span>
+      <h1>Built for movie nights that stay focused on the film.</h1>
+      <p>
+        ReelTime brings trailers, watchlists, seat booking, ratings, and games into one flow so users can move
+        from curiosity to checkout without bouncing between disconnected pages.
+      </p>
+      <div class="hero-actions">
+        <a href="{{ route('search') }}" class="button button-primary">Explore movies</a>
+        <a href="{{ route('bookings') }}" class="button button-secondary">Plan a booking</a>
       </div>
+    </div>
+
+    <div class="hero-metrics">
+      <article class="metric-card">
+        <strong>500+</strong>
+        <span>Movies to rate</span>
+      </article>
+      <article class="metric-card">
+        <strong>24/7</strong>
+        <span>Booking access</span>
+      </article>
+      <article class="metric-card">
+        <strong>Fast</strong>
+        <span>Trailer-first browsing</span>
+      </article>
     </div>
   </section>
 
-  <section class="row g-4 mb-4">
-    <div class="col-lg-7">
-      <div class="card border-secondary-subtle shadow-sm bg-dark h-100">
-        <div class="card-body p-4">
-          <span class="badge text-bg-warning text-dark rounded-pill mb-3">The story</span>
-          <h2 class="h3 fw-bold mb-3">Why ReelTime exists</h2>
-          <p class="text-secondary">
-            We wanted a movie experience that feels direct. Open a trailer, check the vibe, add it to
-            your watchlist, and move toward a booking without bouncing between unrelated pages.
-          </p>
-          <p class="text-secondary mb-4">
-            ReelTime is designed for viewers who like discovery to feel curated and booking to feel obvious.
-            It is simple on purpose.
-          </p>
+  <section class="about-story">
+    <article class="surface-card story-copy">
+      <div class="section-header">
+        <span class="eyebrow">The Story</span>
+        <h2>Why ReelTime exists</h2>
+        <p>
+          We wanted discovery and booking to feel curated, direct, and useful. Open a trailer, check the mood,
+          save it for later, then move into seats and showtimes without losing context.
+        </p>
+      </div>
 
-          <div class="row g-3">
-            <div class="col-md-4">
-              <div class="card border-secondary-subtle bg-body-tertiary text-center h-100">
-                <div class="card-body">
-                  <div class="fs-3 fw-bold text-warning">100+</div>
-                  <div class="text-secondary small">Trailers uploaded</div>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-4">
-              <div class="card border-secondary-subtle bg-body-tertiary text-center h-100">
-                <div class="card-body">
-                  <div class="fs-3 fw-bold text-warning">Global</div>
-                  <div class="text-secondary small">Booking coverage</div>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-4">
-              <div class="card border-secondary-subtle bg-body-tertiary text-center h-100">
-                <div class="card-body">
-                  <div class="fs-3 fw-bold text-warning">95%</div>
-                  <div class="text-secondary small">User satisfaction</div>
-                </div>
-              </div>
-            </div>
-          </div>
+      <p>
+        The product is intentionally simple: fewer distractions, clearer decisions, and a better path from browsing
+        to actually watching the movie.
+      </p>
+
+      <div class="story-stats">
+        <div class="story-stat">
+          <span class="stat-number">100+</span>
+          <span class="stat-label">Trailers queued</span>
+        </div>
+        <div class="story-stat">
+          <span class="stat-number">Global</span>
+          <span class="stat-label">Booking-ready flow</span>
+        </div>
+        <div class="story-stat">
+          <span class="stat-number">95%</span>
+          <span class="stat-label">Users stay in flow</span>
         </div>
       </div>
+    </article>
+
+    <article class="surface-card story-visual">
+      <div class="image-container">
+        <img src="{{ asset('imgs/for welcome page.png') }}" alt="ReelTime cinema experience">
+        <div class="image-overlay"></div>
+      </div>
+    </article>
+  </section>
+
+  <section>
+    <div class="section-header">
+      <span class="eyebrow">Why Choose ReelTime</span>
+      <h2>Everything stays centered on the movie.</h2>
+      <p>
+        Discovery, booking, watchlists, and ratings all follow the same visual system and the same low-friction flow.
+      </p>
     </div>
 
-    <div class="col-lg-5">
-      <div class="card border-secondary-subtle shadow-sm bg-dark h-100 overflow-hidden">
-        <img src="{{ asset('imgs/for welcome page.png') }}" alt="ReelTime cinema experience" class="img-fluid h-100 object-fit-cover">
-      </div>
+    <div class="values-grid">
+      <article class="value-card">
+        <div class="value-icon">
+          <i class="fas fa-ticket-alt" aria-hidden="true"></i>
+        </div>
+        <h3>Smart booking</h3>
+        <p>Reserve seats with a clean, readable flow that keeps timing, selections, and checkout obvious.</p>
+      </article>
+
+      <article class="value-card">
+        <div class="value-icon">
+          <i class="fas fa-play-circle" aria-hidden="true"></i>
+        </div>
+        <h3>Trailer first</h3>
+        <p>Watch the trailer before committing, then decide whether to save, rate, or book.</p>
+      </article>
+
+      <article class="value-card">
+        <div class="value-icon">
+          <i class="fas fa-heart" aria-hidden="true"></i>
+        </div>
+        <h3>Rate and remember</h3>
+        <p>Keep a personal history of what you saved, watched, booked, and reviewed.</p>
+      </article>
     </div>
   </section>
 
-  <section class="mb-4">
-    <div class="mb-3">
-      <span class="badge text-bg-warning text-dark rounded-pill mb-2">Why choose ReelTime</span>
-      <h2 class="h3 fw-bold mb-1">Everything stays focused on the movie.</h2>
-      <p class="text-secondary mb-0">We keep the experience tight so users can move from discovery to booking without friction.</p>
+  <section>
+    <div class="section-header">
+      <span class="eyebrow">Mission</span>
+      <h2>The product principles behind the experience.</h2>
+      <p>Clear decisions, stronger taste signals, and less clutter around movie night.</p>
     </div>
 
-    <div class="row g-3">
-      <div class="col-md-4">
-        <div class="card border-secondary-subtle shadow-sm bg-dark h-100">
-          <div class="card-body p-4">
-            <div class="mb-3 text-warning fs-2"><i class="fas fa-ticket-alt"></i></div>
-            <h3 class="h5 fw-bold">Smart booking</h3>
-            <p class="text-secondary mb-0">Reserve seats with clear timing, clean steps, and enough context to stay confident.</p>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="card border-secondary-subtle shadow-sm bg-dark h-100">
-          <div class="card-body p-4">
-            <div class="mb-3 text-warning fs-2"><i class="fas fa-play-circle"></i></div>
-            <h3 class="h5 fw-bold">Trailer first</h3>
-            <p class="text-secondary mb-0">See the trailer before you commit, then decide whether to watch, rate, or save it.</p>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="card border-secondary-subtle shadow-sm bg-dark h-100">
-          <div class="card-body p-4">
-            <div class="mb-3 text-warning fs-2"><i class="fas fa-heart"></i></div>
-            <h3 class="h5 fw-bold">Rate & remember</h3>
-            <p class="text-secondary mb-0">Leave ratings and comments that shape your own watchlist and movie history.</p>
-          </div>
-        </div>
-      </div>
+    <div class="about-pillars">
+      <article class="pillar-card">
+        <img src="{{ asset('imgs/badge.png') }}" alt="Achievements" class="about-icon">
+        <h3>Achievements</h3>
+        <p>Thousands of bookings, trailer views, and saved titles moving through one cleaner flow.</p>
+      </article>
+
+      <article class="pillar-card">
+        <img src="{{ asset('imgs/shared-vision.png') }}" alt="Vision" class="about-icon">
+        <h3>Vision</h3>
+        <p>Be the most direct way to discover, save, and book movies from a single place.</p>
+      </article>
+
+      <article class="pillar-card">
+        <img src="{{ asset('imgs/mission.png') }}" alt="Mission" class="about-icon">
+        <h3>Mission</h3>
+        <p>Give movie lovers a fast path from curiosity to the big screen with less friction everywhere.</p>
+      </article>
     </div>
   </section>
 
-  <section class="row g-3 mb-4">
-    <div class="col-md-4">
-      <div class="card border-secondary-subtle shadow-sm bg-dark h-100">
-        <div class="card-body p-4">
-          <img src="{{ asset('imgs/badge.png') }}" alt="Achievements" class="img-fluid mb-3" style="max-height:72px;width:auto;">
-          <h3 class="h5 fw-bold">Achievements</h3>
-          <p class="text-secondary mb-0">We’ve enabled thousands of bookings, trailer views, and ratings across the catalog.</p>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-4">
-      <div class="card border-secondary-subtle shadow-sm bg-dark h-100">
-        <div class="card-body p-4">
-          <img src="{{ asset('imgs/shared-vision.png') }}" alt="Vision" class="img-fluid mb-3" style="max-height:72px;width:auto;">
-          <h3 class="h5 fw-bold">Vision</h3>
-          <p class="text-secondary mb-0">To be the most direct way to discover, save, and book movies from one place.</p>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-4">
-      <div class="card border-secondary-subtle shadow-sm bg-dark h-100">
-        <div class="card-body p-4">
-          <img src="{{ asset('imgs/mission.png') }}" alt="Mission" class="img-fluid mb-3" style="max-height:72px;width:auto;">
-          <h3 class="h5 fw-bold">Mission</h3>
-          <p class="text-secondary mb-0">Give movie lovers a fast path from curiosity to the big screen with no clutter.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="card border-secondary-subtle shadow-sm bg-dark">
-    <div class="card-body p-4 p-lg-5 text-center">
-      <span class="badge text-bg-warning text-dark rounded-pill mb-3">Ready to move?</span>
-      <h2 class="h3 fw-bold mb-3">Browse the catalog or lock in seats now.</h2>
-      <p class="text-secondary mb-4">Watch trailers, rate movies, and build a watchlist that actually feels useful.</p>
-      <div class="d-flex flex-wrap justify-content-center gap-2">
-        <a href="{{ route('home') }}" class="btn btn-warning fw-semibold">Start watching</a>
-        <a href="{{ route('bookings') }}" class="btn btn-outline-warning fw-semibold">Book tickets</a>
+  <section class="surface-card cta-section">
+    <div class="cta-content">
+      <span class="eyebrow">Ready To Move?</span>
+      <h2>Browse the catalog or lock in seats now.</h2>
+      <p>Watch trailers, build a sharper watchlist, and make bookings without leaving the flow.</p>
+      <div class="cta-buttons">
+        <a href="{{ route('home') }}" class="button button-primary">Start watching</a>
+        <a href="{{ route('bookings') }}" class="button button-secondary">Book tickets</a>
       </div>
     </div>
   </section>

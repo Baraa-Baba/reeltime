@@ -6,10 +6,6 @@
 profile-page
 @endsection
 
-@push('styles')
-<link rel="stylesheet" href="{{ asset('css/profile.css') }}">
-@endpush
-
 @push('scripts')
 <script>
     window.authUser = @json([
