@@ -207,6 +207,7 @@ $(document).ready(function () {
             removeFromWatchlist(title);
         });
     }
+    
 
 
     //this function load the movies that is rated and we can edit the rate or remove
