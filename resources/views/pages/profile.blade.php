@@ -7,6 +7,11 @@
 @endpush
 
 @push('scripts')
+<script>
+    window.watchlistCount = {{ $watchlist->count() }};
+    
+   
+</script>
 <script src="{{ asset('js/profile.js') }}" defer></script>
 <script src="{{ asset('js/watchlist.js') }}" defer></script>
 @endpush

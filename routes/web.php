@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
-
+use App\Http\Controllers\ProfileController;
 use App\Models\HeroBanner;
 
 Route::get('/', function () {
@@ -34,9 +34,8 @@ Route::middleware(['check.admin'])->group(function () {
 
 // Protected routes
 Route::middleware(['check.auth'])->group(function () {
-    Route::get('/profile', function () {
-        return view('pages.profile');
-    })->name('profile');
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
+    
 
     Route::post('/auth/logout', [AuthController::class, 'logout'])->name('auth.logout');
 });
@@ -48,3 +47,4 @@ Route::middleware(['guest'])->group(function () {
 });
 
 Route::get('/auth/user', [AuthController::class, 'currentUser'])->name('auth.user');
+
