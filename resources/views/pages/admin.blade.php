@@ -98,6 +98,10 @@ admin-page
         <i class="fas fa-users" aria-hidden="true"></i>
         <span>Users</span>
       </button>
+      <button class="button button-secondary admin-tab-btn" id="heroBannersTabBtn" type="button" onclick="switchTab('heroBanners')">
+        <i class="fas fa-image" aria-hidden="true"></i>
+        <span>Hero Banners</span>
+      </button>
     </div>
 
      <section id="moviesTab" class="admin-tab-pane">
@@ -335,9 +339,93 @@ admin-page
           </table>
         </div>
       </div>
-    </section>
   </section>
+ <!-- Hero Banners Tab -->
+<section id="heroBannersTab" class="admin-tab-pane d-none">
+    <div class="section-header">
+        <div class="d-flex justify-content-end align-items-center w-100">
+            <button type="button" class="button button-primary" onclick="openHeroBannerModal()">
+                <i class="fas fa-plus"></i> Add Banner
+            </button>
+        </div>
+    </div>
+
+    <div class="admin-data-card">
+        <div class="admin-table-wrap">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Image</th>
+                        <th>Title</th>
+                        <th>Subtitle</th>
+                        <th>CTA Label</th>
+                        <th>CTA Route</th>
+                        <th>Position</th>
+                        <th>Active</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="heroBannersList">
+                    <tr><td colspan="9" class="admin-empty">Loading banners...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+  </section>
+  
 </main>
+
+
+<!-- Add/Edit Banner Modal -->
+<div id="heroBannerModal" class="admin-modal" onclick="closeModal('heroBannerModal')">
+    <div class="surface-card admin-modal-shell" onclick="event.stopPropagation()" style="max-width: 600px;">
+        <button type="button" class="modal-close-btn" onclick="closeModal('heroBannerModal')">
+            <i class="fas fa-times"></i>
+        </button>
+        <div class="section-header">
+            <span class="eyebrow">Hero Banner</span>
+            <h2 id="heroBannerModalTitle">Add Banner</h2>
+        </div>
+        <form id="heroBannerForm" enctype="multipart/form-data">
+            <input type="hidden" name="banner_id" id="banner_id">
+            <div style="display: grid; gap: 1rem;">
+                <div>
+                    <label>Title <span class="text-danger">*</span></label>
+                    <input type="text" name="title" id="banner_title" required class="form-control" style="width:100%; padding: 0.75rem 1rem; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white;">
+                </div>
+                <div>
+                    <label>Subtitle</label>
+                    <input type="text" name="subtitle" id="banner_subtitle" class="form-control" style="width:100%; padding: 0.75rem 1rem; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white;">
+                </div>
+                <div>
+                    <label>CTA Label </label>
+                    <input type="text" name="cta_label" id="banner_cta_label" class="form-control" style="width:100%; padding: 0.75rem 1rem; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white;">
+                </div>
+                <div>
+                    <label>CTA Route Name</label>
+                    <input type="text" name="cta_route_name" id="banner_cta_route_name" class="form-control" style="width:100%; padding: 0.75rem 1rem; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white;">
+                </div>
+                <div>
+                    <label>Position (order)</label>
+                    <input type="number" name="position" id="banner_position" class="form-control" min="0" style="width:100%; padding: 0.75rem 1rem; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white;">
+                </div>
+                <div>
+                    <label>Background Image <span class="text-danger">*</span></label>
+                    <input type="file" name="background_image" id="banner_image" accept="image/*" class="form-control" style="padding: 0.75rem 1rem;">
+                    <div id="currentImagePreview" style="margin-top: 0.5rem; display: none;">
+                        <img id="currentImageImg" style="max-width: 100px; border-radius: 8px;">
+                    </div>
+                </div>
+                <div id="heroBannerFormMessage" style="display: none;" class="alert"></div>
+            </div>
+        </form>
+        <div class="admin-actions" style="justify-content: flex-end; margin-top: 1rem;">
+            <button class="button button-secondary" onclick="closeModal('heroBannerModal')">Cancel</button>
+            <button class="button button-primary" id="submitHeroBannerBtn">Save Banner</button>
+        </div>
+    </div>
+</div>
 
 <div id="addMovieModal" class="admin-modal" onclick="closeModal('addMovieModal')">
     <div class="surface-card admin-modal-shell" onclick="event.stopPropagation()" style="max-width: 700px; max-height: 90vh; display: flex; flex-direction: column;">    
@@ -595,18 +683,24 @@ admin-page
 </div>
 <!-- Delete Confirmation Modal -->
 <div id="deleteConfirmModal" class="admin-modal">
-    <div class="surface-card admin-modal-shell" style="max-width: 400px;">
+    <div class="surface-card admin-modal-shell" style="max-width: 450px;">
         <button type="button" class="modal-close-btn" id="closeDeleteModal" aria-label="Close">
             <i class="fas fa-times" aria-hidden="true"></i>
         </button>
-        <div class="section-header">
-            <span class="eyebrow">Confirm Delete</span>
-            <h2>Are you sure?</h2>
-            <p>This action cannot be undone.</p>
+        <div class="section-header" style="text-align: center;">
+            <span class="eyebrow" style="background: rgba(251, 113, 133, 0.2); color: var(--danger);">
+                <i class="fas fa-exclamation-triangle"></i> Warning
+            </span>
+            <h2 style="color: var(--danger);">Delete Item?</h2>
+            <p>This action cannot be undone. Are you sure you want to permanently delete this item?</p>
         </div>
-        <div class="admin-actions" style="justify-content: flex-end; margin-top: 1rem;">
-            <button class="button button-secondary cancel-delete-btn" id="cancelDeleteBtn">Cancel</button>
-            <button class="button button-primary confirm-delete-btn" id="confirmDeleteBtn">Delete</button>
+        <div class="admin-actions" style="justify-content: center; gap: 1rem; margin-top: 1rem;">
+            <button class="button button-secondary cancel-delete-btn" id="cancelDeleteBtn">
+                <i class="fas fa-times"></i> Cancel
+            </button>
+            <button class="button button-primary confirm-delete-btn" id="confirmDeleteBtn">
+                <i class="fas fa-trash"></i> Delete
+            </button>
         </div>
     </div>
 </div>
@@ -646,5 +740,178 @@ admin-page
     .admin-table tbody tr.movie-row:hover {
         background: rgba(255, 255, 255, 0.05);
     }
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 24px;
+    }
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .3s;
+        border-radius: 34px;
+    }
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: .3s;
+        border-radius: 50%;
+    }
+    input:checked + .slider {
+        background-color: var(--accent);
+    }
+    input:checked + .slider:before {
+        transform: translateX(26px);
+    }
+    
+    /* Reduce gap between tabs and table */
+    .admin-tab-pane {
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+    }
+    
+    .admin-tab-pane .admin-data-card {
+        margin-top: 0 !important;
+    }
+    
+    .admin-tab-pane .d-flex.justify-content-end {
+        margin-bottom: 0.75rem !important;
+    }
+    
+    /* Fix modal z-index to appear above header */
+    .admin-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 9999 !important;
+        background: rgba(4, 6, 10, 0.85);
+        backdrop-filter: blur(18px);
+        display: none;
+        place-items: center;
+        padding: 1rem;
+    }
+    
+    .admin-modal.is-open {
+        display: grid;
+    }
+    
+    .admin-modal-shell {
+        position: relative;
+        max-width: 700px;
+        width: 100%;
+        max-height: 85vh;
+        overflow-y: auto;
+        margin: auto;
+        z-index: 10000 !important;
+    }
+    
+    .modal-close-btn {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10002;
+    }
+    
+    .modal-close-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+    
+    header.site-header {
+        z-index: 1000 !important;
+    }
+    
+    body.modal-open {
+        overflow: hidden !important;
+    }
+    /* Delete Confirmation Modal Styles */
+#deleteConfirmModal .admin-modal-shell {
+    max-width: 450px;
+    text-align: center;
+}
+
+#deleteConfirmModal .section-header {
+    margin-bottom: 0.5rem;
+}
+
+#deleteConfirmModal .section-header h2 {
+    color: var(--danger);
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+#deleteConfirmModal .section-header p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+#deleteConfirmModal .admin-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+#deleteConfirmModal .cancel-delete-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: var(--text-color);
+    padding: 0.6rem 1.5rem;
+}
+
+#deleteConfirmModal .cancel-delete-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+#deleteConfirmModal .confirm-delete-btn {
+    background: linear-gradient(135deg, var(--danger), #dc2626);
+    border: none;
+    color: white;
+    padding: 0.6rem 1.5rem;
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+}
+
+#deleteConfirmModal .confirm-delete-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(220, 38, 38, 0.4);
+}
+
+/* Warning icon */
+#deleteConfirmModal .modal-close-btn {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Add a warning icon before the title - optional */
+#deleteConfirmModal .section-header h2::before {
+    content: "⚠️ ";
+    font-size: 1.3rem;
+  }
 </style>
 @endsection

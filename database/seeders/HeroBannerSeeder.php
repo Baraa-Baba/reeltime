@@ -27,7 +27,7 @@ class HeroBannerSeeder extends Seeder
             'subtitle'         => 'Search by title, genre, or mood and build your watchlist',
             'cta_label'        => 'Search Movies',
             'cta_route_name'   => 'search',
-            'background_image' => 'imgs/discover-movies.png', // use an existing image or add one
+            'background_image' => 'imgs/premiere.png', // use an existing image or add one
             'position'         => 2,
         ]);
 
@@ -37,7 +37,7 @@ class HeroBannerSeeder extends Seeder
             'subtitle'         => 'Reserve seats, track bookings, and challenge your friends',
             'cta_label'        => 'Book Now',
             'cta_route_name'   => 'bookings',
-            'background_image' => 'imgs/book-and-play.png', // use an existing image or add one
+            'background_image' => 'imgs/RT.png', // use an existing image or add one
             'position'         => 3,
         ]);
     }

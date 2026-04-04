@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     window.switchTab = function(tab) {
-        const tabs = ['movies', 'games', 'bookings', 'users'];
+        const tabs = ['movies', 'games', 'bookings', 'users','heroBanners'];
         tabs.forEach((name) => {
             const content = document.getElementById(`${name}Tab`);
             const btn = document.getElementById(`${name}TabBtn`);
@@ -364,4 +364,266 @@ document.addEventListener('DOMContentLoaded', function() {
 
     
     switchTab('movies');
+  
+// Load hero banners into table
+function loadHeroBanners() {
+    const tbody = document.getElementById('heroBannersList');
+    if (!tbody) {
+        return;
+    }
+    
+    
+    tbody.innerHTML = '<tr><td colspan="7" class="admin-empty">Loading banners...</td></tr>';
+    
+    fetch('/api/admin-api/hero-banners', {
+        headers: {
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        },
+        credentials: 'include'
+    })
+    .then(res => {
+        return res.json();
+    })
+    .then(result => {
+        if (result.success && result.data) {
+            renderHeroBannersTable(result.data);
+        } else {
+            tbody.innerHTML = '<tr><td colspan="7" class="admin-empty">Failed to load banners: ' + (result.message || 'Unknown error') + '</td></tr>';
+        }
+    })
+    .catch(err => {
+        tbody.innerHTML = '<tr><td colspan="7" class="admin-empty">Error loading banners: ' + err.message + '</td></tr>';
+    });
+}
+// Helper: escape HTML to prevent XSS
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+    });
+}
+// Render table rows
+function renderHeroBannersTable(banners) {
+    const tbody = document.getElementById('heroBannersList');
+    if (!tbody) return;
+    
+    if (!banners.length) {
+        tbody.innerHTML = '<tr><td colspan="9" class="admin-empty">No banners yet. Click "Add Banner" to create one.</td></tr>';
+        return;
+    }
+    
+    let html = '';
+    banners.forEach(banner => {
+        html += `
+            <tr data-id="${banner.hero_banner_id}">
+                <td>${banner.hero_banner_id}</td>
+                <td><img src="${banner.background_image}" class="admin-thumb" style="width: 52px; height: 52px; object-fit: cover; border-radius: 8px;"></td>
+                <td><strong>${escapeHtml(banner.title)}</strong></td>
+                <td>${escapeHtml(banner.subtitle || '—')}</td>
+                <td>${escapeHtml(banner.cta_label || '—')}</td>
+                <td>${escapeHtml(banner.cta_route_name || '—')}</td>
+                <td>${banner.position}</td>
+                <td>
+                    <label class="switch">
+                        <input type="checkbox" class="toggle-active" data-id="${banner.hero_banner_id}" ${banner.is_active ? 'checked' : ''}>
+                        <span class="slider round"></span>
+                    </label>
+                </td>
+                <td>
+                    <div class="admin-actions">
+                        <button type="button" class="button button-secondary admin-icon-btn edit-banner" 
+                            data-id="${banner.hero_banner_id}"
+                            data-title="${escapeHtml(banner.title)}"
+                            data-subtitle="${escapeHtml(banner.subtitle || '')}"
+                            data-cta_label="${escapeHtml(banner.cta_label || '')}"
+                            data-cta_route_name="${escapeHtml(banner.cta_route_name || '')}"
+                            data-position="${banner.position}"
+                            data-image="${banner.background_image}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button type="button" class="button button-secondary admin-icon-btn admin-icon-btn-danger delete-banner" data-id="${banner.hero_banner_id}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    });
+    tbody.innerHTML = html;
+    
+    
+    document.querySelectorAll('.toggle-active').forEach(btn => {
+        btn.removeEventListener('change', handleToggleActive);
+        btn.addEventListener('change', handleToggleActive);
+    });
+    document.querySelectorAll('.edit-banner').forEach(btn => {
+        btn.removeEventListener('click', handleEditBanner);
+        btn.addEventListener('click', handleEditBanner);
+    });
+    document.querySelectorAll('.delete-banner').forEach(btn => {
+        btn.removeEventListener('click', handleDeleteBanner);
+        btn.addEventListener('click', handleDeleteBanner);
+    });
+}
+
+// Toggle active status
+async function handleToggleActive(e) {
+    const cb = e.target;
+    const id = cb.dataset.id;
+    const originalChecked = cb.checked;
+    
+    try {
+        const response = await fetch(`/api/admin-api/hero-banners/${id}/toggle-active`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            credentials: 'include'
+        });
+        const result = await response.json();
+        if (result.success) {
+            showToast(result.message, 'success');
+            loadHeroBanners(); // refresh to update active count and order
+        } else {
+            cb.checked = !originalChecked;
+            showToast(result.message || 'Failed to toggle status', 'error');
+        }
+    } catch (error) {
+        cb.checked = !originalChecked;
+        showToast('Network error', 'error');
+    }
+}
+
+// Edit banner 
+function handleEditBanner(e) {
+    const btn = e.currentTarget;
+    document.getElementById('banner_id').value = btn.dataset.id;
+    document.getElementById('banner_title').value = btn.dataset.title;
+    document.getElementById('banner_subtitle').value = btn.dataset.subtitle;
+    document.getElementById('banner_cta_label').value = btn.dataset.cta_label;
+    document.getElementById('banner_cta_route_name').value = btn.dataset.cta_route_name;
+    document.getElementById('banner_position').value = btn.dataset.position;
+    
+    const previewDiv = document.getElementById('currentImagePreview');
+    const previewImg = document.getElementById('currentImageImg');
+    if (btn.dataset.image && btn.dataset.image !== 'undefined') {
+        previewImg.src = btn.dataset.image;
+        previewDiv.style.display = 'block';
+    } else {
+        previewDiv.style.display = 'none';
+    }
+    
+    document.getElementById('heroBannerModalTitle').innerText = 'Edit Banner';
+    document.getElementById('banner_image').required = false;
+    openModal('heroBannerModal');
+}
+
+// Delete banner
+function handleDeleteBanner(e) {
+    const id = e.currentTarget.dataset.id;
+    const url = `/api/admin-api/hero-banners/${id}`;
+    const button = e.currentTarget;
+    openDeleteModal(url, button);
+}
+
+window.openHeroBannerModal = function() {
+    document.getElementById('heroBannerForm').reset();
+    document.getElementById('banner_id').value = '';
+    document.getElementById('currentImagePreview').style.display = 'none';
+    document.getElementById('heroBannerModalTitle').innerText = 'Add Banner';
+    document.getElementById('banner_image').required = true;
+    openModal('heroBannerModal');
+};
+
+// Submit form (add or edit)
+document.getElementById('submitHeroBannerBtn')?.addEventListener('click', async function() {
+    const form = document.getElementById('heroBannerForm');
+    const formData = new FormData(form);
+    const bannerId = document.getElementById('banner_id').value;
+    const isEdit = bannerId !== '';
+    const url = isEdit ? `/api/admin-api/hero-banners/${bannerId}` : '/api/admin-api/hero-banners';
+    
+    if (!isEdit && !formData.get('background_image')) {
+        showToast('Please select an image', 'error');
+        return;
+    }
+    
+    if (isEdit) {
+        formData.append('_method', 'PUT');
+    }
+    
+    const submitBtn = this;
+    const originalText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+    
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json'
+            },
+            credentials: 'include',
+            body: formData
+        });
+        const data = await response.json();
+        if (data.success) {
+            showToast(data.message, 'success');
+            closeModal('heroBannerModal');
+            loadHeroBanners();
+        } else {
+            showToast(data.message || 'Failed to save banner', 'error');
+        }
+    } catch (error) {
+        showToast('Network error', 'error');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+    }
+});
+
+// Load banners when switching to the Hero Banners tab
+const originalSwitchTab = window.switchTab;
+window.switchTab = function(tab) {
+    originalSwitchTab(tab);
+    if (tab === 'heroBanners') {
+        loadHeroBanners();
+    }
+};
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    if (document.getElementById('heroBannersTab') && !document.getElementById('heroBannersTab').classList.contains('d-none')) {
+        loadHeroBanners();
+    }
+});
+
+    // Fix modal open/close to add body class
+    const originalOpenModal = window.openModal;
+    window.openModal = function(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.add('is-open');
+            document.body.classList.add('modal-open');
+        }
+        if (originalOpenModal) originalOpenModal(modalId);
+    };
+    
+    const originalCloseModal = window.closeModal;
+    window.closeModal = function(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.remove('is-open');
+            document.body.classList.remove('modal-open');
+        }
+        if (originalCloseModal) originalCloseModal(modalId);
+    };
+
 });

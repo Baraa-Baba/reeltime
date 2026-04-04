@@ -63,7 +63,15 @@ Route::middleware('web')->group(function () {
     Route::post('/game-rounds/{game_round_id}/answer', [GameRoundController::class, 'submitAnswer']);
 }); 
 Route::middleware(['web', 'auth', 'admin'])->prefix('admin-api')->group(function () {
+    // Movies
     Route::post('/movies', [App\Http\Controllers\Api\AdminController_Api::class, 'store']);
     Route::put('/movies/{movie_id}', [App\Http\Controllers\Api\AdminController_Api::class, 'update']);
     Route::get('/movies/{movie_id}', [App\Http\Controllers\Api\AdminController_Api::class, 'show']);
+     // Hero Banners
+    Route::get('/hero-banners', [App\Http\Controllers\Api\HeroBannerController::class, 'index']);
+    Route::post('/hero-banners', [App\Http\Controllers\Api\HeroBannerController::class, 'store']);
+    Route::put('/hero-banners/{id}', [App\Http\Controllers\Api\HeroBannerController::class, 'update']);
+    Route::patch('/hero-banners/{id}/toggle-active', [App\Http\Controllers\Api\HeroBannerController::class, 'toggleActive']);
+    Route::delete('/hero-banners/{id}', [App\Http\Controllers\Api\HeroBannerController::class, 'destroy']);
+    Route::post('/hero-banners/reorder', [App\Http\Controllers\Api\HeroBannerController::class, 'reorder']);
 });
