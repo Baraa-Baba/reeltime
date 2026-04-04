@@ -33,7 +33,6 @@ class AdminController_Api extends Controller
             'this_movie_is' => 'nullable|string',
             'cast' => 'required|string',
             'duration' => 'required|integer|min:1',
-            'rating' => 'nullable|numeric|min:0|max:10',
             'poster' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
         
@@ -53,7 +52,7 @@ class AdminController_Api extends Controller
                 'genres' => $validated['genres'],  
                 'cast' => $validated['cast'],
                 'duration' => $validated['duration'],
-                'rating' => $validated['rating'] ?? 0,
+                'rating' => null,
                 'poster' => $posterPath ? 'storage/' . $posterPath : null,
                 'this_movie_is' => $validated['this_movie_is'] ?? null,
             ]);
@@ -101,7 +100,6 @@ class AdminController_Api extends Controller
         'this_movie_is' => 'nullable|string',
         'cast' => 'required|string',
         'duration' => 'required|integer|min:1',
-        'rating' => 'nullable|numeric|min:0|max:10',
         'poster' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
     ]);
 

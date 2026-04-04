@@ -205,7 +205,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     
-    window.openEditMovieModal = function(movieId, title, description, genres, this_movie_is, cast, duration, trailerLink, rating, posterUrl) {
+    window.openEditMovieModal = function(movieId, title, description, genres, this_movie_is, cast, duration, trailerLink, posterUrl) {
         document.getElementById('edit_movie_id').value = movieId;
         document.getElementById('edit_title').value = title;
         document.getElementById('edit_description').value = description;
@@ -214,21 +214,12 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('edit_cast').value = cast;
         document.getElementById('edit_duration').value = duration;
         document.getElementById('edit_trailer_link').value = trailerLink || '';
-        document.getElementById('edit_rating_slider').value = rating;
-        document.getElementById('edit_rating_number').value = rating;
         const previewDiv = document.getElementById('edit_poster_preview');
         if (previewDiv) previewDiv.style.display = 'none';
         const input = document.getElementById('edit_poster_input');
         if (input) input.value = '';
         openModal('editMovieModal');
     };
-
-    const ratingSlider = document.getElementById('edit_rating_slider');
-    const ratingNumber = document.getElementById('edit_rating_number');
-    if (ratingSlider && ratingNumber) {
-        ratingSlider.addEventListener('input', function() { ratingNumber.value = this.value; });
-        ratingNumber.addEventListener('input', function() { ratingSlider.value = this.value; });
-    }
 
     const editMovieForm = document.getElementById('editMovieForm');
     if (editMovieForm) {

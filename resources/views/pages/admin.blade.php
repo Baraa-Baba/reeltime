@@ -139,7 +139,7 @@ admin-page
                     @endif
                   </td>
                   <td>{{ $movie->title }}</td>
-                  <td>{{ $movie->rating }}</td>
+                  <td>{{ $movie->rating ? number_format($movie->rating, 1) : '-' }}</td>
                   <td>{{ $movie->duration }} min</td>
                   <td>
                     <div class="admin-actions">
@@ -153,7 +153,6 @@ admin-page
                               '{{ addslashes($movie->cast) }}',
                               '{{ $movie->duration }}',
                               '{{ $movie->trailer_link }}',
-                              '{{ $movie->rating }}',
                               '{{ asset($movie->poster) }}'
                           )" aria-label="Edit movie">
                           <i class="fas fa-edit" aria-hidden="true"></i>
@@ -549,15 +548,7 @@ admin-page
                         </label>
                         <input type="url" id="edit_trailer_link" name="trailer_link" style="width: 100%; padding: 0.75rem 1rem; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white;">
                     </div>
-                    <div>
-                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">
-                            <i class="fas fa-star"></i> Rating (0-10)
-                        </label>
-                        <div style="display: flex; align-items: center; gap: 1rem;">
-                            <input type="range" id="edit_rating_slider" name="rating" step="0.1" min="0" max="10" value="0" style="flex: 1;">
-                            <input type="number" id="edit_rating_number" step="0.1" min="0" max="10" value="0" style="width: 70px; padding: 0.5rem; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; text-align: center;">
-                        </div>
-                    </div>
+                    
                     <div>
                         <label for="edit_poster" style="display: block; margin-bottom: 0.5rem; font-weight: 600;">
                             <i class="fas fa-image"></i> Poster Image (leave empty to keep current)
