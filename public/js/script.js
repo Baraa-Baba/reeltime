@@ -57,6 +57,106 @@ let TRAILER_URLS = {
   "The Running Man": "https://www.youtube.com/embed/KD18ddeFuyM",
 };
 
+function normalizeMovieKey(value) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "");
+}
+
+function findTrailerUrlByTitle(title) {
+  let normalizedTitle = normalizeMovieKey(title);
+
+  if (!normalizedTitle) {
+    return "";
+  }
+
+  let entry = Object.entries(TRAILER_URLS).find(([key]) => normalizeMovieKey(key) === normalizedTitle);
+  return entry ? normalizeTrailerUrl(entry[1]) : "";
+}
+
+function normalizeTrailerUrl(rawValue) {
+  if (!rawValue) return "";
+  let value = String(rawValue).trim();
+
+  if (!value || /^YOUR_TRAILER_ID_/i.test(value)) {
+    return "";
+  }
+
+  if (value.includes("youtube.com/embed/")) return value;
+
+  if (/^https?:\/\//i.test(value)) {
+    let match = value.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/);
+    if (match) {
+      return `https://www.youtube.com/embed/${match[1]}`;
+    }
+
+    return value;
+  }
+
+  let match = value.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/);
+  if (match) {
+    return `https://www.youtube.com/embed/${match[1]}`;
+  }
+
+  if (/^[\w-]{11}$/.test(value)) {
+    return `https://www.youtube.com/embed/${value}`;
+  }
+
+  return "";
+}
+
+function parseStoredJson(key, fallbackValue) {
+  try {
+    let rawValue = localStorage.getItem(key);
+    return rawValue ? JSON.parse(rawValue) : fallbackValue;
+  } catch (error) {
+    console.warn(`Failed to parse ${key} from localStorage.`, error);
+    return fallbackValue;
+  }
+}
+
+function parseSessionJson(key, fallbackValue) {
+  try {
+    let rawValue = sessionStorage.getItem(key);
+    return rawValue ? JSON.parse(rawValue) : fallbackValue;
+  } catch (error) {
+    console.warn(`Failed to parse ${key} from sessionStorage.`, error);
+    return fallbackValue;
+  }
+}
+
+function renderModalShowtimes(card) {
+  let showtimesContainer = document.getElementById("modal-showtimes");
+  if (!showtimesContainer) return;
+
+  let showtimesLabel = document.querySelector(".movieshowtime");
+  let rawShowtimes = card.dataset.showtimes || card.getAttribute("data-showtimes") || "[]";
+  let parsedShowtimes = [];
+
+  try {
+    parsedShowtimes = JSON.parse(rawShowtimes);
+  } catch (error) {
+    parsedShowtimes = [];
+  }
+
+  showtimesContainer.innerHTML = "";
+
+  if (!Array.isArray(parsedShowtimes) || !parsedShowtimes.length) {
+    if (showtimesLabel) showtimesLabel.style.display = "none";
+    showtimesContainer.style.display = "none";
+    return;
+  }
+
+  if (showtimesLabel) showtimesLabel.style.display = "";
+  showtimesContainer.style.display = "";
+
+  parsedShowtimes.forEach((showtime) => {
+    let pill = document.createElement("span");
+    pill.className = "showtime-pill";
+    pill.textContent = showtime;
+    showtimesContainer.appendChild(pill);
+  });
+}
 
 
 
@@ -166,30 +266,30 @@ function startAutoAdvance() {
 
 //render comments
 function renderCommentsForMovie(title) {
-    let commentsContainer = document.getElementById("comments-list");
+  let commentsContainer = document.getElementById("comments-list");
   if (!commentsContainer) return;
 
   commentsContainer.innerHTML = "";
 
-  //comments from movies.json
-  let baseComments =
-    (window.movieComments && window.movieComments[title]) || [];
+  let baseComments = Array.isArray(window.movieComments?.[title])
+    ? window.movieComments[title]
+    : [];
 
-  // Extra comments users added (localStorage)
-let extraStore = JSON.parse(localStorage.getItem("movieCommentsExtra")) || {};
-  let extraForMovie = extraStore[title] || [];
+  let extraStore = parseStoredJson("movieCommentsExtra", {});
+  let extraForMovie = Array.isArray(extraStore?.[title]) ? extraStore[title] : [];
 
-  // jam3 el comments mn movies.json w el extra
-let allComments = [...baseComments, ...extraForMovie];
+  let allComments = [...baseComments, ...extraForMovie].filter(comment => comment && typeof comment === "object");
 
-let uniqueComments = [];
-let userMap = new Map();
-allComments.reverse().forEach(c => {
-    if (!userMap.has(c.user)) {
-        userMap.set(c.user, c);
-        uniqueComments.unshift(c); // Add to beginning to maintain order
+  let uniqueComments = [];
+  let userMap = new Map();
+  allComments.reverse().forEach((comment) => {
+    let userKey = comment.user || "ReelTime user";
+
+    if (!userMap.has(userKey)) {
+        userMap.set(userKey, comment);
+        uniqueComments.unshift(comment);
     }
-});
+  });
 
   if (!uniqueComments.length) {
     commentsContainer.innerHTML =
@@ -197,20 +297,21 @@ allComments.reverse().forEach(c => {
     return;
   }
 
-  uniqueComments.forEach(c => {
-  let div = document.createElement("div");
+  uniqueComments.forEach((comment) => {
+    let div = document.createElement("div");
     div.className = "comment";
 
-  let rating = c.rating || 0;
-  let stars =
+    let rating = Number.parseInt(comment.rating, 10) || 0;
+    rating = Math.max(0, Math.min(5, rating));
+    let stars =
       "★".repeat(rating) + "☆".repeat(5 - rating);
 
     div.innerHTML = `
       <div class="comment-header">
-        <span class="comment-user">${c.user}</span>
+        <span class="comment-user">${comment.user || "ReelTime user"}</span>
         <span class="comment-rating">${stars}</span>
       </div>
-      <p class="comment-text">${c.text}</p>
+      <p class="comment-text">${comment.text || ""}</p>
     `;
     commentsContainer.appendChild(div);
   });
@@ -233,25 +334,45 @@ function openMovieModal(cardElement) {
 
   let thisMovieIs = card.dataset.thisMovieIs || card.getAttribute('data-this-movie-is') || 'N/A';
 
-  let youtubeEmbedUrl = TRAILER_URLS[title] || '';
+  let trailerFromCard = card.dataset.trailerUrl || card.getAttribute('data-trailer-url') || '';
+  let youtubeEmbedUrl = findTrailerUrlByTitle(title) || normalizeTrailerUrl(trailerFromCard);
   if (modalTitle) modalTitle.textContent = title;
   if (modalText) modalText.textContent = text;
   if (modalCast) modalCast.textContent = cast;
   if (modalGenres) modalGenres.textContent = genres;
   if (modalThisMovieIs) modalThisMovieIs.textContent = thisMovieIs;
-  
-  if (youtubeEmbedUrl && modalTrailer) {
-    let params = "?autoplay=1&mute=1&rel=0&playsinline=1&modestbranding=1";
-    modalTrailer.src = youtubeEmbedUrl + params;
-    modalTrailer.style.display = 'block';
-  } 
-  
-  renderCommentsForMovie(title);
-  updateWatchlistButton(title);
 
   if (modal) {
     modal.classList.add('open');
     document.body.style.overflow = 'hidden';
+  }
+
+  renderModalShowtimes(card);
+
+  if (youtubeEmbedUrl && modalTrailer) {
+    let params = "?autoplay=1&mute=1&rel=0&playsinline=1&modestbranding=1";
+    modalTrailer.src = youtubeEmbedUrl + params;
+    modalTrailer.style.display = 'block';
+  } else if (modalTrailer) {
+    modalTrailer.src = '';
+    modalTrailer.style.display = 'none';
+  }
+
+  try {
+    renderCommentsForMovie(title);
+  } catch (error) {
+    console.error("Failed to render movie comments.", error);
+
+    let commentsContainer = document.getElementById("comments-list");
+    if (commentsContainer) {
+      commentsContainer.innerHTML = `<p class="no-comments">Comments are unavailable right now.</p>`;
+    }
+  }
+
+  try {
+    updateWatchlistButton(title);
+  } catch (error) {
+    console.error("Failed to update watchlist button.", error);
   }
 }
 
@@ -262,10 +383,7 @@ function updateWatchlistButton(movieTitle) {
     let newWatchlistBtn = watchlistBtn.cloneNode(true);
     watchlistBtn.parentNode.replaceChild(newWatchlistBtn, watchlistBtn);
 
-    let userData;
-    
-        userData = JSON.parse(sessionStorage.getItem('loggedInUser'));
-   
+    let userData = parseSessionJson('loggedInUser', null);
 
     let saved = [];
     if (!userData) {
@@ -278,7 +396,7 @@ function updateWatchlistButton(movieTitle) {
         newWatchlistBtn.style.cursor = "pointer";
         return;
     }
-        saved = JSON.parse(localStorage.getItem('watchlist')) || [];
+        saved = parseStoredJson('watchlist', []);
     
 
     let inList = saved.some(m => m.title === movieTitle && m.username === userData.username);
@@ -299,14 +417,14 @@ function updateWatchlistButton(movieTitle) {
 document.addEventListener("click", (e) => {
   let card = e.target.closest(".movie-card");
   if (!card) return;
-  if ($(e.target).closest('.watch-flag').length) {
-        return;
-    }
+
+  // Don't open modal if clicking on watchlist button
+  if (e.target.closest('.watch-flag')) {
+    return;
+  }
+
   openMovieModal(card);
 });
-
-
-  
 
 //for modal to be responsive
 function repositionModalTitle() {
