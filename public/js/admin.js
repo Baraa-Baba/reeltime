@@ -385,7 +385,7 @@ document.addEventListener('keydown', function(e) {
                     tempCard.setAttribute('data-genres', movie.genres);
                     tempCard.setAttribute('data-this-movie-is', movie.this_movie_is || 'N/A');
                     tempCard.setAttribute('data-rating', movie.rating);
-                    tempCard.setAttribute('data-trailer-id', movie.trailer_link || '');
+                    tempCard.setAttribute('data-trailer-url', movie.trailer_link || '');
                     const h3 = document.createElement('h3');
                     h3.textContent = movie.title;
                     tempCard.appendChild(h3);

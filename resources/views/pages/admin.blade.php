@@ -741,7 +741,6 @@ admin-page
     <div class="modal__body">
       <h3 id="modal-title">movie</h3>
       <p id="modal-text"></p>
-      <button class="button button-primary add-watchlist-btn">+ Add to Watchlist</button>
       <div class="comments-section">
         <h4>Reviews</h4>
         <div id="comments-list"></div>
