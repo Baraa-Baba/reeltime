@@ -373,7 +373,24 @@ admin-page
         </div>
     </div>
   </section>
-  
+  <!-- Image Preview Modal for Hero Banners -->
+<div id="imagePreviewModal" class="admin-modal">
+    <div class="surface-card admin-modal-shell" style="max-width: 800px; max-height: 90vh; overflow: auto;">
+        <button type="button" class="modal-close-btn" onclick="closeImagePreviewModal()" aria-label="Close">
+            <i class="fas fa-times" aria-hidden="true"></i>
+        </button>
+        <div class="section-header" style="text-align: center;">
+            <span class="eyebrow">Banner Preview</span>
+            <h2 id="previewModalTitle">Hero Banner</h2>
+        </div>
+        <div style="text-align: center; padding: 1rem;">
+            <img id="previewImage" src="" alt="Banner preview" style="max-width: 100%; max-height: 60vh; border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.3);">
+        </div>
+        <div style="text-align: center; margin-top: 1rem;">
+            <p id="previewImageTitle" style="color: var(--text-muted);"></p>
+        </div>
+    </div>
+</div>
 </main>
 
 
@@ -908,10 +925,41 @@ admin-page
     background: rgba(255, 255, 255, 0.1);
 }
 
-/* Add a warning icon before the title - optional */
-#deleteConfirmModal .section-header h2::before {
-    content: "⚠️ ";
-    font-size: 1.3rem;
-  }
+#imagePreviewModal .admin-modal-shell {
+    max-width: 800px;
+    background: linear-gradient(180deg, rgba(16, 20, 31, 0.98), rgba(12, 15, 24, 0.98));
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#previewImage {
+    transition: transform 0.2s ease;
+    cursor: zoom-out;
+}
+
+#previewImage:hover {
+    transform: scale(1.02);
+}
+
+#imagePreviewModal .modal-close-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+#imagePreviewModal .modal-close-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: scale(1.05);
+}
 </style>
 @endsection

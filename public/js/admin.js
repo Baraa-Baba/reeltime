@@ -43,6 +43,62 @@ document.addEventListener('DOMContentLoaded', function() {
             if (messageDiv) messageDiv.style.display = 'none';
         }
     };
+ // Image show Modal for Hero Banners
+function openImagePreviewModal(imageUrl, title) {
+    const modal = document.getElementById('imagePreviewModal');
+    const previewImage = document.getElementById('previewImage');
+    const previewTitle = document.getElementById('previewImageTitle');
+    const modalTitle = document.getElementById('previewModalTitle');
+    const closeBtn = modal ? modal.querySelector('.modal-close-btn') : null;
+    
+    if (modal && previewImage) {
+        previewImage.src = imageUrl;
+        previewTitle.textContent = title || 'Hero Banner';
+        modalTitle.textContent = title ? `${title}` : 'Hero Banner';
+        modal.classList.add('is-open');
+        document.body.classList.add('modal-open');
+        
+        
+        if (closeBtn) {
+            closeBtn.onclick = function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                closeImagePreviewModal();
+            };
+        }
+    }
+    
+const xButton = document.getElementById('previewModalCloseBtn');
+if (xButton) {
+    xButton.onclick = function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        closeImagePreviewModal();
+    };
+}
+}
+
+function closeImagePreviewModal() {
+    const modal = document.getElementById('imagePreviewModal');
+    if (modal) {
+        modal.classList.remove('is-open');
+        document.body.classList.remove('modal-open');
+        const previewImage = document.getElementById('previewImage');
+        if (previewImage) {
+            previewImage.src = '';
+        }
+    }
+}
+
+// Close with Escape key alsi
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        const modal = document.getElementById('imagePreviewModal');
+        if (modal && modal.classList.contains('is-open')) {
+            closeImagePreviewModal();
+        }
+    }
+});
 
     window.switchTab = function(tab) {
         const tabs = ['movies', 'games', 'bookings', 'users','heroBanners'];
@@ -406,6 +462,14 @@ function escapeHtml(str) {
         return m;
     });
 }
+// in the hero banner image click to show larger preview
+function handleBannerImageClick(e) {
+    e.stopPropagation();
+    const img = e.currentTarget;
+    const imageUrl = img.getAttribute('data-src') || img.src;
+    const title = img.getAttribute('data-title') || 'Hero Banner';
+    openImagePreviewModal(imageUrl, title);
+}
 // Render table rows
 function renderHeroBannersTable(banners) {
     const tbody = document.getElementById('heroBannersList');
@@ -421,7 +485,7 @@ function renderHeroBannersTable(banners) {
         html += `
             <tr data-id="${banner.hero_banner_id}">
                 <td>${banner.hero_banner_id}</td>
-                <td><img src="${banner.background_image}" class="admin-thumb" style="width: 52px; height: 52px; object-fit: cover; border-radius: 8px;"></td>
+                <td><img src="${banner.background_image}" class="admin-thumb preview-img banner-preview-img" data-src="${banner.background_image}" data-title="${escapeHtml(banner.title)}" style="width: 52px; height: 52px; object-fit: cover; border-radius: 8px; cursor: pointer;"></td>
                 <td><strong>${escapeHtml(banner.title)}</strong></td>
                 <td>${escapeHtml(banner.subtitle || '—')}</td>
                 <td>${escapeHtml(banner.cta_label || '—')}</td>
@@ -454,7 +518,11 @@ function renderHeroBannersTable(banners) {
         `;
     });
     tbody.innerHTML = html;
-    
+    // Add click handler for banner image p
+    document.querySelectorAll('.banner-preview-img').forEach(img => {
+        img.removeEventListener('click', handleBannerImageClick);
+        img.addEventListener('click', handleBannerImageClick);
+    });
     
     document.querySelectorAll('.toggle-active').forEach(btn => {
         btn.removeEventListener('change', handleToggleActive);
