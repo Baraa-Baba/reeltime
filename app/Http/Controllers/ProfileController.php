@@ -18,4 +18,5 @@ class ProfileController extends Controller
 
         return view('pages.profile', compact('user', 'watchlist'));
     }
-}
+    
+    

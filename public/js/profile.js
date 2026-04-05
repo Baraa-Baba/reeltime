@@ -49,83 +49,7 @@ $(document).ready(function () {
 
     //this function giv all part of DOM in html
     function renderProfile(user) {
-        $('main').html(`
-        <div class="profile-modern">
-            <div class="profile-hero">
-                <div class="user-avatar-container">
-                    <img src="${user.img || '../../imgs/default-avatar.jpg'}" alt="${user.username}" class="user-avatar" onerror="this.src='../../imgs/default-avatar.jpg'">
-                    <div class="online-status"></div>
-                </div>
-                <div class="profile-info-modern">
-                    <h1>${user.username}</h1>
-                    <p class="profile-meta">${user.email}</p>
-                    <p class="profile-meta">${user.id}</p>
-                    <div class="profile-stats">
-                        <div class="stat-item">
-                            <span class="stat-number" id="watchlist-count">0</span>
-                            <span class="stat-label">In Watchlist</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-number" id="rated-count">0</span>
-                            <span class="stat-label">Movies Rated</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-number" id="total-bookings">0</span>
-                            <span class="stat-label">Total Bookings</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-number" id="member-since">${user.since}</span>
-                            <span class="stat-label">Member Since</span>
-                        </div>
-                    </div>
-                    <button class="logout-btn" id="logoutBtn">
-                        <i class="fas fa-sign-out-alt"></i> Log Out
-                    </button>
-                </div>
-            </div>
-            <div class="search">
-                <input id="SearchInput" placeholder="Search movies in your watchlist..." />
-            </div>
-            <div class="watchlist-section">
-                <div class="section-header">
-                    <div class="section-title">My Watchlist</div>
-                    <div class="watchlist-count" id="watchlist-counter">0 movies</div>
-                </div>
-                <div class="watchlist-grid-modern" id="modern-watchlist">
-                    <div class="loading-watchlist">Loading watchlist...</div>
-                </div>
-            </div>
-            
-            <div class="rated-section">
-                <div class="section-header">
-                    <div class="section-title">My Rated Movies</div>
-                    <div class="watchlist-count" id="rated-counter">0 movies rated</div>
-                </div>
-                <div class="rated-grid-modern" id="modern-rated">
-                    <div class="loading-rated">Loading ratings...</div>
-                </div>
-            </div>
-            
-            <div class="booked-section">
-                <div class="section-header">
-                    <div class="section-title">My Booked Movies</div>
-                    <div class="watchlist-count" id="booked-counter">0 bookings</div>
-                    <select id="booked-sort">
-                    <option value="nearest">Nearest date first</option>
-                    <option value="latest">Farthest date first</option>
-                    <option value="original">Original order</option>
-                     <option value="watched">Watched bookings</option>
-                     <option value="cancelled">Cancelled bookings</option>
-                    <option value="upcoming">Upcoming bookings</option>
-                     </select>
-                </div>
-                <div class="booked-grid-modern" id="booked-grid">
-                    <div class="loading-booked">Loading bookings...</div>
-                </div>
-            </div>
-        </div>
-    `);
-
+   //i put everythimg in blade
         // Logout handler
         $('#logoutBtn').on('click', function () {
             let $btn = $(this);
@@ -153,58 +77,34 @@ $(document).ready(function () {
 
 
     //this function load the movies in watch list and its rating if it has
-    function loadWatchlist(user) {
-        let saved = JSON.parse(localStorage.getItem('watchlist')) || [];
-        let userWatchlist = saved.filter(movie => movie.username === user.username);
-        $('#watchlist-count').text(userWatchlist.length);
-        $('#watchlist-counter').text(userWatchlist.length + ' movie' + (userWatchlist.length !== 1 ? 's' : ''));
-        let $modernWatchlist = $('#modern-watchlist');
-        if (userWatchlist.length === 0) {
-            $modernWatchlist.html(`
-                <div class="empty-watchlist" style="grid-column: 1 / -1;">
-                    <h3>Your Watchlist is Empty</h3>
-                    <p>Start adding movies to build your personalized collection!</p>
-                    <a href="/search" class="accent-link">Browse Movies <i class="fas fa-arrow-right"></i></a>
-                </div>
-            `);
-            return;
+   function loadWatchlist(user) {
+    // Just update 
+    let savedRatings = JSON.parse(localStorage.getItem('movieRatings')) || {};
+    const userRatings = savedRatings[user.username] || {};
+    
+    $('#modern-watchlist .watchlist-card-modern').each(function() {
+        const $card = $(this);
+        const title = $card.find('.card-title').text();
+        const isRated = userRatings[title];
+        $card.find('.rated-badge').remove();
+        
+        if (isRated) {
+            $card.prepend(`<div class="rated-badge">Rated ${userRatings[title].rating}/5 <i class="fas fa-star"></i></div>`);
+            $card.find('.btn-rate-large').text('Update');
+        } else {
+            $card.find('.btn-rate-large').text('Rate');
         }
-        // Get user ratings
-        let savedRatings = {};
-        savedRatings = JSON.parse(localStorage.getItem('movieRatings')) || {};
-        const userRatings = savedRatings[user.username] || {};
-        const watchlistHTML = userWatchlist.map(movie => {
-            const isRated = userRatings[movie.title];
-            const safeImage = movie.image || '../../imgs/default-movie.jpg';
-            return `
-                <div class="watchlist-card-modern">
-                    <img src="${safeImage}" alt="${movie.title}" class="card-image" onerror="this.src='../../imgs/default-movie.jpg'">
-                    ${isRated ? `<div class="rated-badge">Rated ${userRatings[movie.title].rating}/5 <i class="fas fa-star"></i></div>` : ''}
-                    <div class="card-content">
-                        <h3 class="card-title">${movie.title}</h3>
-                        <div class="card-rating"><i class="fas fa-star"></i> ${movie.rating}/5</div>
-                        <div class="card-actions">
-                            <button class="btn-rate-large" data-title="${movie.title}">
-                                ${isRated ? 'Update' : 'Rate'}
-                            </button>
-                            <button class="btn-remove" data-title="${movie.title}">
-                                Remove
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }).join('');
-        $modernWatchlist.html(watchlistHTML);
+    });
         // Add event handlers
-        $modernWatchlist.off('click', '.btn-rate-large').on('click', '.btn-rate-large', function () {
+        $('#modern-watchlist').off('click', '.btn-rate-large').on('click', '.btn-rate-large', function() {
             const title = $(this).data('title');
             const currentRating = userRatings[title] ? userRatings[title].rating : 0;
             openLargeRatingModal(title, currentRating);
         });
-        $modernWatchlist.off('click', '.btn-remove').on('click', '.btn-remove', function () {
+        $('#modern-watchlist').off('click', '.btn-remove').on('click', '.btn-remove', function() {
             const title = $(this).data('title');
-            removeFromWatchlist(title);
+            const movieId = $(this).data('movie-id');
+         removeFromWatchlist(title, movieId);
         });
     }
     
@@ -852,28 +752,53 @@ $(document).ready(function () {
 
 
 
-    function removeFromWatchlist(title) {
-        const userData = JSON.parse(sessionStorage.getItem('loggedInUser'));
-
-        // Remove from watchlist
-        let saved = JSON.parse(localStorage.getItem('watchlist')) || [];
-        saved = saved.filter(m => !(m.title === title && m.username === userData.username));
-        localStorage.setItem('watchlist', JSON.stringify(saved));
-
+    function removeFromWatchlist(title, movieId) {
+    console.log('Deleting movie ID:', movieId);
+    
+    $.ajax({
+        url: '/watchlist/remove/' + movieId,  // This matches your route
+        method: 'DELETE',
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+            'Accept': 'application/json'
+        },
+        success: function(response) {
+            console.log('Success:', response);
+            if (response.success) {
+                // Remove the card from DOM
+                $(`#modern-watchlist .watchlist-card-modern[data-movie-id="${movieId}"]`).remove();
+                
+            
         // Remove rating if exists
         removeMovieRating(title);
-
-        // Update session storage
-        userData.watchlist = saved.filter(m => m.username === userData.username);
-        sessionStorage.setItem('loggedInUser', JSON.stringify(userData));
-
-        // Reload
-        loadWatchlist(userData);
-        loadRatedMovies(userData);
-
-        showToast(`"${title}" removed from watchlist and ratings`, 'removed');
-
-
+                
+                // Update counts
+                const newCount = $('#modern-watchlist .watchlist-card-modern').length;
+                $('#watchlist-count').text(newCount);
+                $('#watchlist-counter').text(newCount + ' movie' + (newCount !== 1 ? 's' : ''));
+                
+                // Show empty message if no movies left
+                if (newCount === 0) {
+                    $('#modern-watchlist').html(`
+                        <div class="empty-watchlist" style="grid-column: 1 / -1;">
+                            <h3>Your Watchlist is Empty</h3>
+                            <p>Start adding movies to build your personalized collection!</p>
+                            <a href="/search" class="accent-link">Browse Movies <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    `);
+                }
+                
+                showToast(response.message, 'removed');
+            } else {
+                showToast(response.message || 'Failed to remove', 'error');
+            }
+        },
+        error: function(xhr) {
+            console.log('Error:', xhr);
+            const message = xhr.responseJSON?.message || 'Error removing from watchlist';
+            showToast(message, 'error');
+        }
+    });
     }
 
     function showToast(message, type) {

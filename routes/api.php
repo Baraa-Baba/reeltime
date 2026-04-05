@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\GameController;
 use App\Http\Controllers\Api\GameRoundController;
 use App\Http\Controllers\Api\HeroBannerController;
 use App\Http\Controllers\Api\AdminController_Api;
+use App\Http\Controllers\Api\ProfileApiController;
 
 Route::get('/movies', [MovieController::class, 'index']);
 Route::get('/movies/{movie_id}', [MovieController::class, 'show']);
@@ -63,6 +64,8 @@ Route::middleware('web')->group(function () {
     Route::post('/game-rounds/{game_round_id}/answer', [GameRoundController::class, 'submitAnswer']);
 }); 
 Route::middleware(['web', 'auth', 'admin'])->prefix('admin-api')->group(function () {
+    //Watchlist in the profiel
+    Route::delete('/watchlist/{movie_id}', [ProfileApiController::class, 'removeFromWatchlist']);
     // Movies
     Route::post('/movies', [App\Http\Controllers\Api\AdminController_Api::class, 'store']);
     Route::put('/movies/{movie_id}', [App\Http\Controllers\Api\AdminController_Api::class, 'update']);
