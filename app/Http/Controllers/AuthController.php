@@ -30,6 +30,16 @@ class AuthController extends Controller
             ], 401);
         }
 
+        // Check if email is verified
+        if (!$user->hasVerifiedEmail()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Please verify your email before logging in. Check your inbox for a verification link.',
+                'requires_verification' => true,
+                'email' => $user->email,
+            ], 403);
+        }
+
         Auth::login($user, $request->boolean('remember'));
 
         $request->session()->regenerate();
@@ -83,12 +93,13 @@ class AuthController extends Controller
             'role' => 'user',
         ]);
 
-        Auth::login($user);
-        $request->session()->regenerate();
+        // Send email verification
+        $user->sendEmailVerificationNotification();
 
         return response()->json([
             'success' => true,
-            'message' => 'Account created successfully! Welcome to ReelTime!',
+            'message' => 'Account created successfully! Please check your email to verify your account.',
+            'requires_verification' => true,
             'user' => [
                 'id' => $user->user_id,
                 'username' => $user->username,
@@ -142,6 +153,53 @@ class AuthController extends Controller
 
         return response()->json([
             'authenticated' => false,
+        ]);
+    }
+
+    /**
+     * Verify the user's email address.
+     */
+    public function verifyEmail(Request $request)
+    {
+        try {
+            $user = User::findOrFail($request->route('id'));
+        } catch (\Exception $e) {
+            return redirect('/')->with('error', 'Invalid verification link.');
+        }
+
+        if (!hash_equals((string) $request->route('hash'), sha1($user->getEmailForVerification()))) {
+            return redirect('/')->with('error', 'Invalid or expired verification link. Please request a new one.');
+        }
+
+        if ($user->hasVerifiedEmail()) {
+            return redirect('/')->with('info', 'Email already verified.');
+        }
+
+        $user->markEmailAsVerified();
+
+        Auth::login($user);
+        $request->session()->regenerate();
+
+        return redirect('/')->with('success', 'Email verified successfully! Welcome to ReelTime!');
+    }
+
+    /**
+     * Resend the email verification notification.
+     */
+    public function resendVerificationEmail(Request $request)
+    {
+        if (Auth::user()->hasVerifiedEmail()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Email is already verified.',
+            ], 422);
+        }
+
+        Auth::user()->sendEmailVerificationNotification();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Verification link sent! Please check your email.',
         ]);
     }
 }
