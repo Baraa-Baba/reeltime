@@ -17,14 +17,14 @@ profile-page
         'role': "{{ $user->role }}",
     };
     window.watchlistCount = {{ $watchlist->count() }};
-    window.userRatings = @json($ratedMovies->map(function($rating) {
+    window.userRatings = {!! json_encode($ratedMovies->map(function($rating) {
     return [
         'title' => $rating->movie->title,
         'rating' => $rating->score,
         'comment' => $rating->comment,
         'image' => $rating->movie->poster ? asset($rating->movie->poster) : asset('imgs/default-movie.jpg'),
     ];
-}));
+})->toArray()) !!};
 </script>
 <script src="{{ asset('js/profile.js') }}" defer></script>
 <script src="{{ asset('js/watchlist.js') }}" defer></script>

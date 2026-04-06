@@ -194,7 +194,7 @@ $(function () {
 
                 // Add each movie card
                 (category.movies || []).forEach(movie => {
-                    let rating = movie.rating ?? "N/A";
+                    let rating = movie.rating ?? "-";
 
                     let $card = $(`
             <figure class="movie-card">

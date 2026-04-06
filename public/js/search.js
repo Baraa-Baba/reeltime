@@ -111,7 +111,7 @@ $(function () {
         list.forEach((movie) => {
             const title = movie.title || "";
             const description = movie.description || movie.overview || "";
-            const rating = movie.rating ?? "N/A";
+            const rating = movie.rating ?? "-";
             const runtime = movie.time || (movie.duration ? `${movie.duration} min` : "");
             const cast = Array.isArray(movie.cast) ? movie.cast.join(", ") : (movie.cast || "");
             const genres = Array.isArray(movie.genres) ? movie.genres.join(", ") : (movie.genre || movie.genres || "");

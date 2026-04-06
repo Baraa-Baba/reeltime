@@ -161,7 +161,7 @@ function renderModalShowtimes(card) {
 
 
 document.querySelectorAll(".movie-card").forEach(card => {
-    let rating = card.dataset.rating || "N/A";
+    let rating = card.dataset.rating || "-";
     let description = card.dataset.description || "N/A";
     let overlay = document.createElement("span");
     overlay.className = "rating-overlay";
@@ -326,7 +326,7 @@ function openMovieModal(cardElement) {
   let title = (h3 && h3.textContent.trim()) || card.dataset.title || card.getAttribute('data-title') || '';
   let text = card.dataset.description || card.getAttribute('data-description') || 'No movie description available yet.';
 
-  let rating = card.dataset.rating || card.getAttribute('data-rating') || 'N/A';
+  let rating = card.dataset.rating || card.getAttribute('data-rating') || '-';
 
   let cast = card.dataset.cast || card.getAttribute('data-cast') || 'N/A';
 

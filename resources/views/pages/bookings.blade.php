@@ -160,7 +160,7 @@ bookings-page
               data-cast="{{ implode(', ', $movie['cast']) }}"
               data-genres="{{ implode(', ', $movie['genres']) }}"
               data-this-movie-is="{{ implode(', ', $movie['tags']) }}"
-              data-rating="{{ $movie['rating'] !== null ? number_format($movie['rating'], 1) : 'N/A' }}"
+              data-rating="{{ $movie['rating'] !== null ? number_format($movie['rating'], 1) : '-' }}"
               data-time="{{ $movie['time'] ?? 'N/A' }}"
               data-showtimes='@json($movie['modal_showtimes'])'>
               <img src="{{ $movie['poster_url'] }}" alt="{{ $movie['title'] }} poster">
@@ -170,7 +170,7 @@ bookings-page
                 <p class="movie-overlay-desc">{{ $movie['description'] }}</p>
                 <div class="movie-overlay-bottom">
                   <span class="film-overlay">{{ $movie['time'] ?? 'N/A' }}</span>
-                  <span class="movie-overlay-rating">{{ $movie['rating'] !== null ? number_format($movie['rating'], 1) : 'N/A' }} / 5 stars</span>
+                  <span class="movie-overlay-rating">{{ $movie['rating'] !== null ? number_format($movie['rating'], 1) : '-' }} / 5 stars</span>
                 </div>
               </div>
             </figure>
