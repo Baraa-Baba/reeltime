@@ -15,6 +15,9 @@ class Question extends Model
         'game_id',
         'question_text',
         'correct_answer',
+        'content',
+        'options',
+        'hint',
         'points',
     ];
 

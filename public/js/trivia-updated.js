@@ -147,6 +147,32 @@ function startGame() {
         });
 }
 
+// Game type configuration
+const gameConfig = {
+    'guess': {
+        title: 'Emoji Challenge',
+        question: 'Which movie is represented by these emojis?',
+        contentClass: 'emoji-clue'
+    },
+    'character': {
+        title: 'Character Match',
+        question: 'Which movie features the character <strong>"{content}"</strong>?',
+        contentClass: 'character-display'
+    },
+    'quotes': {
+        title: 'Movie Quotes',
+        question: 'Which movie is this from?',
+        contentClass: 'quote-text',
+        contentPrefix: '"',
+        contentSuffix: '"'
+    },
+    'scenes': {
+        title: 'Movie Scenes',
+        question: 'Which movie features this scene?',
+        contentClass: 'scene-text'
+    }
+};
+
 // Show question
 function showQuestion() {
     let questions = gameData[currentGame];
@@ -157,40 +183,32 @@ function showQuestion() {
     }
 
     let question = questions[currentQuestion];
-    let gameContent = '';
-    
-    switch(currentGame) {
-        case 'guess':
-            gameContent = createGuessQuestion(question);
-            break;
-        case 'character':
-            gameContent = createCharacterQuestion(question);
-            break;
-        case 'quotes':
-            gameContent = createQuotesQuestion(question);
-            break;
-        case 'scenes':
-            gameContent = createScenesQuestion(question);
-            break;
-    }
+    let gameContent = createQuestion(question, currentGame);
 
     $('#game-content').html(gameContent);
 }
 
-// Create Emoji Challenge Question
-function createGuessQuestion(question) {
+// Create question (generic for all game types)
+function createQuestion(question, gameType) {
+    let config = gameConfig[gameType];
+    let contentPrefix = config.contentPrefix || '';
+    let contentSuffix = config.contentSuffix || '';
+    let questionText = config.question.includes('{content}') 
+        ? config.question.replace('{content}', question.content || '')
+        : config.question;
+    
     return `
         <div class="game-screen">
-            <h2 class="game-title">Emoji Challenge</h2>
+            <h2 class="game-title">${config.title}</h2>
             <div class="game-stats">
                 <span>Score: <span class="score-display">${score}</span></span>
-                <span>Question: ${currentQuestion + 1}/${gameData[currentGame].length}</span>
+                <span>Question: ${currentQuestion + 1}/${gameData[gameType].length}</span>
             </div>
             <div class="progress-bar">
-                <div class="progress-fill" style="width: ${((currentQuestion + 1) / gameData[currentGame].length) * 100}%"></div>
+                <div class="progress-fill" style="width: ${((currentQuestion + 1) / gameData[gameType].length) * 100}%"></div>
             </div>
-            <div class="emoji-clue">${question.emoji || ''}</div>
-            <div class="game-question">Which movie is represented by these emojis?</div>
+            <div class="${config.contentClass}">${contentPrefix}${question.content || ''}${contentSuffix}</div>
+            <div class="game-question">${questionText}</div>
             ${question.hint ? `<div class="hint-text">Hint: ${question.hint}</div>` : ''}
             <div class="options-grid">
                 ${question.options.map((option, index) => 
@@ -201,73 +219,7 @@ function createGuessQuestion(question) {
     `;
 }
 
-// Create Character Match Question
-function createCharacterQuestion(question) {
-    return `
-        <div class="game-screen">
-            <h2 class="game-title">Character Match</h2>
-            <div class="game-stats">
-                <span>Score: <span class="score-display">${score}</span></span>
-                <span>Question: ${currentQuestion + 1}/${gameData[currentGame].length}</span>
-            </div>
-            <div class="progress-bar">
-                <div class="progress-fill" style="width: ${((currentQuestion + 1) / gameData[currentGame].length) * 100}%"></div>
-            </div>
-            <div class="game-question">Which movie features the character <strong>"${question.character || ''}"</strong>?</div>
-            <div class="options-grid">
-                ${question.options.map((option, index) => 
-                    `<button class="option-btn" onclick="checkAnswer(${index})">${option}</button>`
-                ).join('')}
-            </div>
-        </div>
-    `;
-}
 
-// Create Movie Quotes Question
-function createQuotesQuestion(question) {
-    return `
-        <div class="game-screen">
-            <h2 class="game-title">Movie Quotes</h2>
-            <div class="game-stats">
-                <span>Score: <span class="score-display">${score}</span></span>
-                <span>Question: ${currentQuestion + 1}/${gameData[currentGame].length}</span>
-            </div>
-            <div class="progress-bar">
-                <div class="progress-fill" style="width: ${((currentQuestion + 1) / gameData[currentGame].length) * 100}%"></div>
-            </div>
-            <div class="quote-text">"${question.quote || ''}"</div>
-            <div class="game-question">Which movie is this from?</div>
-            <div class="options-grid">
-                ${question.options.map((option, index) => 
-                    `<button class="option-btn" onclick="checkAnswer(${index})">${option}</button>`
-                ).join('')}
-            </div>
-        </div>
-    `;
-}
-
-// Create Movie Scenes Question
-function createScenesQuestion(question) {
-    return `
-        <div class="game-screen">
-            <h2 class="game-title">Movie Scenes</h2>
-            <div class="game-stats">
-                <span>Score: <span class="score-display">${score}</span></span>
-                <span>Question: ${currentQuestion + 1}/${gameData[currentGame].length}</span>
-            </div>
-            <div class="progress-bar">
-                <div class="progress-fill" style="width: ${((currentQuestion + 1) / gameData[currentGame].length) * 100}%"></div>
-            </div>
-            <div class="scene-text">${question.scene || ''}</div>
-            <div class="game-question">Which movie features this scene?</div>
-            <div class="options-grid">
-                ${question.options.map((option, index) => 
-                    `<button class="option-btn" onclick="checkAnswer(${index})">${option}</button>`
-                ).join('')}
-            </div>
-        </div>
-    `;
-}
 
 // Check answer
 function checkAnswer(selectedIndex) {
