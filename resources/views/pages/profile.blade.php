@@ -17,6 +17,8 @@ profile-page
         'role': "{{ $user->role }}",
     };
     window.watchlistCount = {{ $watchlist->count() }};
+    window.ratedCount = {{ $ratedMovies->count() }};
+    window.bookingsCount = {{ $bookings->count() }};
     window.userRatings = {!! json_encode($ratedMovies->map(function($rating) {
     return [
         'title' => $rating->movie->title,
@@ -49,11 +51,11 @@ profile-page
                         <span class="stat-label">In Watchlist</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-number" id="rated-count">0</span>
+                        <span class="stat-number" id="rated-count">{{ $ratedMovies->count() }}</span>
                         <span class="stat-label">Movies Rated</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-number" id="total-bookings">0</span>
+                        <span class="stat-number" id="total-bookings">{{ $bookings->count() }}</span>
                         <span class="stat-label">Total Bookings</span>
                     </div>
                     <div class="stat-item">
@@ -86,7 +88,7 @@ profile-page
                             <h3 class="card-title">{{ $movie->title }}</h3>
                             <div class="card-rating"><i class="fas fa-star"></i> {{ $movie->rating ?? 'N/A' }}/5</div>
                             <div class="card-actions">
-                                <button class="btn-rate-large" data-title="{{ $movie->title }}">Rate</button>
+                               <button class="btn-rate-large" data-title="{{ $movie->title }}" data-movie-id="{{ $movie->movie_id }}">Rate</button>
                                 <button class="btn-remove" data-title="{{ $movie->title }}" data-movie-id="{{ $movie->movie_id }}">Remove</button>
                             </div>
                         </div>

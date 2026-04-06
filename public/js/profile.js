@@ -105,12 +105,8 @@ $(document).ready(function () {
         const isRated = userRatings[title];
         $card.find('.rated-badge').remove();
         
-        if (isRated) {
-            $card.prepend(`<div class="rated-badge">Rated ${userRatings[title].rating}/5 <i class="fas fa-star"></i></div>`);
-            $card.find('.btn-rate-large').text('Update');
-        } else {
-            $card.find('.btn-rate-large').text('Rate');
-        }
+        
+    $card.find('.btn-rate-large').text('Rate');
     });
         // Add event handlers
         $('#modern-watchlist').off('click', '.btn-rate-large').on('click', '.btn-rate-large', function() {
