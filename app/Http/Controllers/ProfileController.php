@@ -15,8 +15,10 @@ class ProfileController extends Controller
         }
 
         $watchlist = $user->watchlistedMovies()->get();
+        $ratedMovies = $user->ratings()->with('movie')->get();
+        $bookings = $user->bookings()->with('showtime.movie')->get();
 
-        return view('pages.profile', compact('user', 'watchlist'));
+        return view('pages.profile', compact('user', 'watchlist', 'ratedMovies', 'bookings'));
     }
 }
     

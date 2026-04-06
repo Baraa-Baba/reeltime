@@ -17,6 +17,14 @@ profile-page
         'role': "{{ $user->role }}",
     };
     window.watchlistCount = {{ $watchlist->count() }};
+    window.userRatings = @json($ratedMovies->map(function($rating) {
+    return [
+        'title' => $rating->movie->title,
+        'rating' => $rating->score,
+        'comment' => $rating->comment,
+        'image' => $rating->movie->poster ? asset($rating->movie->poster) : asset('imgs/default-movie.jpg'),
+    ];
+}));
 </script>
 <script src="{{ asset('js/profile.js') }}" defer></script>
 <script src="{{ asset('js/watchlist.js') }}" defer></script>
@@ -96,30 +104,90 @@ profile-page
         <div class="rated-section">
             <div class="section-header">
                 <div class="section-title">My Rated Movies</div>
-                <div class="watchlist-count" id="rated-counter">0 movies rated</div>
+                <div class="watchlist-count" id="rated-counter">{{ $ratedMovies->count() }} movies rated</div>
+    </div>
+    <div class="rated-grid-modern" id="modern-rated">
+        @forelse($ratedMovies as $rating)
+            <div class="rated-card-modern" data-movie-id="{{ $rating->movie->movie_id }}">
+                <img src="{{ $rating->movie->poster ? asset($rating->movie->poster) : asset('imgs/default-movie.jpg') }}" 
+                     alt="{{ $rating->movie->title }}" class="card-image">
+                <div class="rated-badge">{{ $rating->score }}/5 <i class="fas fa-star"></i></div>
+                <div class="card-content">
+                    <h3 class="card-title">{{ $rating->movie->title }}</h3>
+                    <div class="card-actions">
+                        <button class="btn-edit-rating" data-title="{{ $rating->movie->title }}">Edit</button>
+                        <button class="btn-remove-rated" data-title="{{ $rating->movie->title }}">Remove</button>
+                    </div>
+                </div>
             </div>
-            <div class="rated-grid-modern" id="modern-rated">
-                <div class="loading-rated">Loading ratings...</div>
+        @empty
+            <div class="empty-rated" style="grid-column: 1 / -1;">
+                <div class="empty-icon"><i class="fas fa-star-half-alt"></i></div>
+                <h3>No Movies Rated Yet</h3>
+                <p>Rate movies from your watchlist to see them here!</p>
+            </div>
+        @endforelse
             </div>
         </div>
         
         <div class="booked-section">
             <div class="section-header">
                 <div class="section-title">My Booked Movies</div>
-                <div class="watchlist-count" id="booked-counter">0 bookings</div>
+                <div class="watchlist-count" id="booked-counter">{{ $bookings->count() }} bookings</div>
                 <select id="booked-sort">
                     <option value="nearest">Nearest date first</option>
                     <option value="latest">Farthest date first</option>
-                    <option value="original">Original order</option>
+                    <option value="upcoming">Upcoming bookings</option>
                     <option value="watched">Watched bookings</option>
                     <option value="cancelled">Cancelled bookings</option>
-                    <option value="upcoming">Upcoming bookings</option>
                 </select>
             </div>
             <div class="booked-grid-modern" id="booked-grid">
-                <div class="loading-booked">Loading bookings...</div>
+        @forelse($bookings as $booking)
+            @php
+                $showtime = $booking->showtime;
+                $movie = $showtime?->movie;
+                $status = $booking->status ?? 'upcoming';
+                $customerInfo = json_decode($booking->customer_info, true);
+            @endphp
+            <div class="booked-card-modern" data-booking-id="{{ $booking->booking_id }}">
+                <div class="booked-header">
+                    <h3 class="booked-movie-title">{{ $movie->title ?? 'Unknown Movie' }}</h3>
+                    <div class="booked-status status-{{ $status }}">
+                        @if($status == 'cancelled')
+                            <i class="fas fa-times"></i> Cancelled
+                        @elseif($status == 'watched')
+                            <i class="fas fa-check"></i> Watched
+                        @else
+                            <i class="fas fa-clock"></i> Upcoming
+                        @endif
+                    </div>
+                </div>
+                <div class="booked-meta">
+                    <span><strong>Date:</strong> {{ $showtime?->show_date ?? 'Not specified' }}</span>
+                    <span><strong>Time:</strong> {{ $showtime?->show_time ?? 'Not specified' }}</span>
+                    <span><strong>Cinema:</strong> {{ $showtime?->cinema?->name ?? 'Not specified' }}</span>
+                </div>
+                <div class="booked-extra">
+                    <div><strong>Seats:</strong> {{ $booking->seats }}</div>
+                    <div><strong>Total:</strong> ${{ number_format($booking->price, 2) }}</div>
+                </div>
+                @if($status == 'upcoming')
+                <div class="booking-actions-small">
+                    <button class="btn-action-small btn-cancel-small" data-booking-id="{{ $booking->booking_id }}">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                </div>
+                @endif
             </div>
+        @empty
+            <div class="empty-booked" style="grid-column: 1 / -1;">
+                <div class="empty-icon"><i class="fas fa-ticket-alt"></i></div>
+                <h3>No Bookings Yet</h3>
+                <p>Book a movie from the bookings page and it will appear here.</p>
+                <a href="{{ route('bookings') }}" class="accent-link">Book a Movie <i class="fas fa-arrow-right"></i></a>
         </div>
+        @endforelse
     </div>
     </main>
 @endsection

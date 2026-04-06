@@ -50,10 +50,27 @@ $(document).ready(function () {
     //this function giv all part of DOM in html
     function renderProfile(user) {
    //i put everythimg in blade
+    $('.user-avatar').attr('src', user.img || '../../imgs/default-avatar.jpg');
+    $('.profile-info-modern h1').text(user.username);
+    $('.profile-meta:first').text(user.email);
+    $('.profile-meta:last').text(user.id);
+    $('#member-since').text(user.since);
+    
+    const watchlistCount = window.watchlistCount || 0;
+    const ratedCount = window.ratedMoviesCount || 0;
+    const bookingsCount = window.bookingsCount || 0;
+    
+    $('#watchlist-count').text(watchlistCount);
+    $('#watchlist-counter').text(watchlistCount + ' movie' + (watchlistCount !== 1 ? 's' : ''));
+    $('#rated-count').text(ratedCount);
+    $('#rated-counter').text(ratedCount + ' movie' + (ratedCount !== 1 ? 's' : '') + ' rated');
+    $('#total-bookings').text(bookingsCount);
+    $('#booked-counter').text(bookingsCount + (bookingsCount === 1 ? ' booking' : ' bookings'));
+    
         // Logout handler
-        $('#logoutBtn').on('click', function () {
+        $('#logoutBtn').off('click').on('click', function () {
             let $btn = $(this);
-            $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Logging out...');
+
 
             $.ajax({
                 url: '/auth/logout',
@@ -98,6 +115,8 @@ $(document).ready(function () {
         // Add event handlers
         $('#modern-watchlist').off('click', '.btn-rate-large').on('click', '.btn-rate-large', function() {
             const title = $(this).data('title');
+        let savedRatings = JSON.parse(localStorage.getItem('movieRatings')) || {};
+        const userRatings = savedRatings[user.username] || {};
             const currentRating = userRatings[title] ? userRatings[title].rating : 0;
             openLargeRatingModal(title, currentRating);
         });
@@ -112,45 +131,13 @@ $(document).ready(function () {
 
     //this function load the movies that is rated and we can edit the rate or remove
     function loadRatedMovies(user) {
-        let savedRatings = {};
-        savedRatings = JSON.parse(localStorage.getItem('movieRatings')) || {};
+      const $ratedGrid = $('#modern-rated');
+    
+    $ratedGrid.off('click', '.btn-edit-rating').on('click', '.btn-edit-rating', function() {
+        const title = $(this).data('title');
+        let savedRatings = JSON.parse(localStorage.getItem('movieRatings')) || {};
         const userRatings = savedRatings[user.username] || {};
-        const ratedCount = Object.keys(userRatings).length;
-        $('#rated-count').text(ratedCount);
-        $('#rated-counter').text(ratedCount + ' movie' + (ratedCount !== 1 ? 's' : '') + ' rated');
-        const $ratedGrid = $('#modern-rated');
-        if (ratedCount === 0) {
-            $ratedGrid.html(`
-                <div class="empty-rated">
-                    <div class="empty-icon"><i class="fas fa-star-half-alt"></i></div>
-                    <h3>No Movies Rated Yet</h3>
-                    <p>Rate movies from your watchlist to see them here!</p>
-                </div>
-            `);
-            return;
-        }
-        const ratedHTML = Object.entries(userRatings).map(([movieTitle, ratingData]) => {
-            const safeImage = ratingData.image || '../imgs/default-movie.jpg';
-
-            return `
-                <div class="rated-card-modern">
-                    <img src="${safeImage}" alt="${movieTitle}" class="card-image" onerror="this.src='../imgs/default-movie.jpg'">
-                    <div class="rated-badge">${ratingData.rating}/5 <i class="fas fa-star"></i></div>
-                    <div class="card-content">
-                        <h3 class="card-title">${movieTitle}</h3>
-                        <div class="card-actions">
-                            <button class="btn-edit-rating" data-title="${movieTitle}">Edit</button>
-                            <button class="btn-remove-rated" data-title="${movieTitle}">Remove</button>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }).join('');
-        $ratedGrid.html(ratedHTML);
-        // Add event handlers
-        $ratedGrid.off('click', '.btn-edit-rating').on('click', '.btn-edit-rating', function () {
-            const title = $(this).data('title');
-            const currentRating = userRatings[title].rating;
+        const currentRating = userRatings[title] ? userRatings[title].rating : 0;
             openLargeRatingModal(title, currentRating);
         });
         $ratedGrid.off('click', '.btn-remove-rated').on('click', '.btn-remove-rated', function () {
@@ -161,127 +148,36 @@ $(document).ready(function () {
 
 
     function loadBookedMovies(user) {
-        let allBookings = {};
+    setupBookingSorting();
+    
+    // Cancel button handlers
+    $('.btn-cancel-small').off('click').on('click', function() {
+        const bookingId = $(this).data('booking-id');
+        openCancelConfirmModal(bookingId);
+    });
+}
 
-        allBookings = JSON.parse(localStorage.getItem('bookings')) || {};
-
-        let userBookings = allBookings[user.username] || [];
-        let $bookedGrid = $('#booked-grid');
-        let $bookedCounter = $('#booked-counter');
-
-        let now = new Date();
-        let changed = false;
-
-        userBookings.forEach((b) => {
-            let dateObj = parseBookingDate(b);
-
-            // Only change if aana a valid date and eza mara2 w its not already cancelled
-            if (dateObj && dateObj < now && b.status !== 'cancelled') {
-                if (b.status !== 'watched') {
-                    b.status = 'watched';
-                    b.watchedDate = new Date().toISOString();
-                    changed = true;
-                }
-            } else if (!b.status) {
-                // upcoming
-                b.status = 'upcoming';
-                changed = true;
+function setupBookingSorting() {
+    $('#booked-sort').off('change').on('change', function() {
+        const sortMode = $(this).val();
+        const $grid = $('#booked-grid');
+        const $bookings = $grid.children('.booked-card-modern').toArray();
+        
+        $bookings.sort(function(a, b) {
+            const dateA = $(a).find('.booked-meta span:first').text().replace('Date:', '').trim();
+            const dateB = $(b).find('.booked-meta span:first').text().replace('Date:', '').trim();
+            
+            if (sortMode === 'nearest') {
+                return new Date(dateA) - new Date(dateB);
+            } else if (sortMode === 'latest') {
+                return new Date(dateB) - new Date(dateA);
             }
+            return 0;
         });
-
-        if (changed) {
-            allBookings[user.username] = userBookings;
-            localStorage.setItem('bookings', JSON.stringify(allBookings));
-        }
-
-
-        let bookedCount = userBookings.length;
-
-        $('#total-bookings').text(bookedCount);
-        $bookedCounter.text(bookedCount + (bookedCount === 1 ? ' booking' : ' bookings'));
-
-        if (userBookings.length === 0) {
-            $bookedGrid.html(`
-                <div class="empty-booked">
-                    <div class="empty-icon"><i class="fas fa-ticket-alt"></i></div>
-                    <h3>No Bookings Yet</h3>
-                    <p>Book a movie from the bookings page and it will appear here.</p>
-                    <a href="/bookings" class="accent-link">Book a Movie <i class="fas fa-arrow-right"></i></a>
-                </div>
-            `);
-            return;
-        }
-        let sortMode = $('#booked-sort').val() || 'nearest';
-        let sortedBookings = sortBookingsByMode(userBookings, sortMode);
-        let bookedHTML = sortedBookings.map((b, index) => {
-            let originalIndex = userBookings.findIndex(booking =>
-                booking.movie === b.movie &&
-                booking.date === b.date &&
-                booking.time === b.time
-            );
-
-            let status = b.status || 'upcoming';
-            let statusClass = status === 'cancelled' ? 'status-cancelled' :
-                status === 'watched' ? 'status-watched' : 'status-upcoming';
-            // here i used <i> tag which is used for icons
-            return `
-        <div class="booked-card-modern" data-index="${originalIndex}">
-            <div class="booked-header">
-                <h3 class="booked-movie-title">${b.movie || 'Unknown Movie'}</h3>
-                <div class="booked-status ${statusClass}">
-                    ${status === 'cancelled' ? '<i class="fas fa-times"></i> Cancelled' :
-                    status === 'watched' ? '<i class="fas fa-check"></i> Watched' : '<i class="fas fa-clock"></i> Upcoming'}
-                </div>
-            </div>
-            <div class="booked-meta">
-                <span><strong>Date:</strong> ${b.date || 'Not specified'}</span>
-                <span><strong>Time:</strong> ${b.time || 'Not specified'}</span>
-            </div>
-            <div class="booked-extra">
-                ${b.seats && b.seats.length ? `<div><strong>Seats:</strong> ${Array.isArray(b.seats) ? b.seats.join(', ') : b.seats}</div>` : ''}
-                ${b.price ? `<div><strong>Total:</strong> $${b.price}</div>` : ''}
-            </div>
-            ${status === 'upcoming' ? `
-            <div class="booking-actions-small">
-                <button class="btn-action-small btn-cancel-small" data-index="${originalIndex}">
-                    <i class="fas fa-times"></i> Cancel
-                </button>
-            </div>
-            ` : ''}
-        </div>`;
-        }).join('');
-
-
-        $bookedGrid.html(bookedHTML);
-        // Add event handlers for booking actions
-        $bookedGrid.off('click', '.btn-watch-small').on('click', '.btn-watch-small', function (e) {
-            e.stopPropagation();
-            const userData = JSON.parse(sessionStorage.getItem('loggedInUser'));
-            const index = $(this).data('index');
-            updateBookingStatus(userData, index, 'watched');
-        });
-
-        $bookedGrid.off('click', '.btn-cancel-small').on('click', '.btn-cancel-small', function (e) {
-            e.stopPropagation();
-            const index = $(this).data('index');
-            openCancelConfirmModal(index);
-        });
-
-        $bookedGrid.off('click', '.booked-card-modern').on('click', '.booked-card-modern', function (e) {
-            if ($(e.target).closest('.btn-action-small').length) {
-                return;
-            }
-
-            const userData = JSON.parse(sessionStorage.getItem('loggedInUser'));
-            const index = $(this).data('index');
-            const allBookings = JSON.parse(localStorage.getItem("bookings")) || {};
-            const userBookings = allBookings[userData.username] || [];
-
-            if (index >= 0 && index < userBookings.length) {
-                openBookingDetailsModal(userBookings[index], index);
-            }
-        });
-    }
+        
+        $grid.empty().append($bookings);
+    });
+}
     // Add after loadBookedMovies function in profile.js
 
     function updateBookingStatus(user, bookingIndex, status) {
