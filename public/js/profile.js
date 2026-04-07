@@ -172,23 +172,54 @@ function setupBookingSorting() {
 }
     // Add after loadBookedMovies function in profile.js
 
-    function updateBookingStatus(user, bookingIndex, status) {
-        let allBookings = JSON.parse(localStorage.getItem("bookings")) || {};
-        const userBookings = allBookings[user.username] || [];
+    function updateBookingStatus(user, bookingId, status) {
+    if (status !== 'cancelled') return;
 
-        if (bookingIndex >= 0 && bookingIndex < userBookings.length) {
-            userBookings[bookingIndex].status = status;
-            if (status === 'cancelled') {
-                userBookings[bookingIndex].cancelledDate = new Date().toISOString();
-            } else if (status === 'watched') {
-                userBookings[bookingIndex].watchedDate = new Date().toISOString();
+    $.ajax({
+        url: `/api/bookings/${bookingId}`,
+        method: 'PUT',
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+        },
+        data: JSON.stringify({ status: 'cancelled' }),
+        contentType: 'application/json',
+        success: function(response) {
+            if (response.success) {
+                showToast('Booking cancelled successfully', 'removed');
+                const $card = $(`.booked-card-modern[data-booking-id="${bookingId}"]`);
+                const $statusDiv = $card.find('.booked-status');
+                const $actionsDiv = $card.find('.booking-actions-small');
+                
+                
+                $statusDiv.removeClass('status-upcoming status-confirmed status-pending');
+                $statusDiv.addClass('status-cancelled');
+                $statusDiv.html('<i class="fas fa-times"></i> Cancelled');
+                
+                 if ($actionsDiv.length) {
+                    $actionsDiv.remove();
+                } else {
+                    $card.find('.btn-cancel-small').remove();
+                }
+                
+                
+                updateBookingCounters();
+            } else {
+                showToast(response.message || 'Failed to cancel booking', 'error');
             }
-
-            localStorage.setItem("bookings", JSON.stringify(allBookings));
-            loadBookedMovies(user);
-            const movieTitle = userBookings[bookingIndex].movie || 'Booking';
-            showToast(`${movieTitle} marked as ${status}`, status === 'cancelled' ? 'removed' : 'rated');
+        },
+        error: function(xhr) {
+            const msg = xhr.responseJSON?.message || 'Error cancelling booking';
+            showToast(msg, 'error');
         }
+    });
+}
+
+    function updateBookingCounters() {
+        const total = $('#booked-grid .booked-card-modern').length;
+        $('#total-bookings').text(total);
+        $('#booked-counter').text(total + (total === 1 ? ' booking' : ' bookings'));
     }
 
     function openBookingDetailsModal(booking, bookingIndex) {

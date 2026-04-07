@@ -2,99 +2,71 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use App\Models\Booking;
+use App\Models\Showtime;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class BookingController extends Controller
 {
     /**
-     * Get user's bookings
-     */
-    public function index(Request $request)
-    {
-        $bookings = $request->user()
-            ->bookings()
-            ->with('user', 'movie')
-            ->paginate(10);
-
-        return response()->json($bookings);
-    }
-
-    /**
-     * Create a new booking
-     */
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'movie_id' => 'required|exists:movies,movie_id',
-            'showtime_id' => 'required|exists:showtimes,showtime_id',
-            'seats' => 'required|array|min:1',
-            'seats.*' => 'string',
-            'payment_method' => 'required|in:card,cash',
-            'total_price' => 'required|numeric|min:0.01',
-        ]);
-
-        $booking = Booking::create([
-            'user_id' => $request->user()->user_id,
-            'movie_id' => $validated['movie_id'],
-            'showtime_id' => $validated['showtime_id'] ?? null,
-            'seats' => json_encode($validated['seats']),
-            'total_price' => $validated['total_price'],
-            'payment_method' => $validated['payment_method'],
-            'status' => 'confirmed',
-        ]);
-
-        return response()->json([
-            'message' => 'Booking created successfully',
-            'booking' => $booking
-        ], 201);
-    }
-
-    /**
-     * Get single booking
-     */
-    public function show(Request $request, $booking_id)
-    {
-        $booking = Booking::where('booking_id', $booking_id)
-            ->where('user_id', $request->user()->user_id)
-            ->with('movie')
-            ->firstOrFail();
-
-        return response()->json($booking);
-    }
-
-    /**
-     * Update booking (cancel or modify)
+     * Update booking status only
      */
     public function update(Request $request, $booking_id)
     {
         $booking = Booking::where('booking_id', $booking_id)
-            ->where('user_id', $request->user()->user_id)
+            ->where('user_id', auth()->id())
             ->firstOrFail();
 
-        $validated = $request->validate([
-            'status' => 'in:confirmed,cancelled',
+        // Only allow cancellation if status is 'confirmed' or 'pending'
+        if (!in_array($booking->status, ['confirmed', 'pending'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Booking cannot be cancelled.'
+            ], 422);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'status' => ['required', 'in:cancelled'],
         ]);
 
-        $booking->update($validated);
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors()->first(),
+            ], 422);
+        }
 
-        return response()->json([
-            'message' => 'Booking updated',
-            'booking' => $booking
-        ]);
-    }
+        DB::beginTransaction();
 
-    /**
-     * Cancel booking
-     */
-    public function destroy(Request $request, $booking_id)
-    {
-        $booking = Booking::where('booking_id', $booking_id)
-            ->where('user_id', $request->user()->user_id)
-            ->firstOrFail();
+        try {
+            // Restore seats to showtime
+            $showtime = Showtime::lockForUpdate()->findOrFail($booking->showtime_id);
+            $showtime->available_seats += $booking->seats;
+            $showtime->save();
 
-        $booking->update(['status' => 'cancelled']);
+            // Update booking status
+            $booking->status = 'cancelled';
+            $booking->save();
 
-        return response()->json(['message' => 'Booking cancelled']);
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Booking cancelled successfully.',
+                'booking' => [
+                    'id' => $booking->booking_id,
+                    'status' => $booking->status,
+                ],
+            ]);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to cancel booking: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 }

@@ -164,7 +164,7 @@ profile-page
                     <div><strong>Seats:</strong> {{ $booking->seats }}</div>
                     <div><strong>Total:</strong> ${{ number_format($booking->price, 2) }}</div>
                 </div>
-                @if($status == 'upcoming')
+               @if(in_array($status, ['confirmed', 'pending', 'upcoming']))
                 <div class="booking-actions-small">
                     <button class="btn-action-small btn-cancel-small" data-booking-id="{{ $booking->booking_id }}">
                         <i class="fas fa-times"></i> Cancel
