@@ -22,7 +22,7 @@ class MovieFactory extends Factory
             'trailer_link' => 'https://www.youtube.com/watch?v=' . fake()->lexify('???????????'),
             'cast' => implode(', ', fake()->words(5)),
             'genres' => implode(', ', fake()->words(3)),
-            'rating' => fake()->randomFloat(1, 1, 10),
+            'rating' => 0,
             'duration' => fake()->numberBetween(80, 180),
             'poster' => fake()->imageUrl(300, 450, 'movies'),
         ];

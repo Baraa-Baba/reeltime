@@ -52,15 +52,15 @@ class WatchlistController extends Controller
     /**
      * Remove from watchlist
      */
-    public function destroy(Request $request, $watchlist_id)
+    public function destroy(Request $request, $movie_id)
     {
-        $watchlist = Watchlist::where('watchlist_id', $watchlist_id)
+        $watchlist = Watchlist::where('movie_id', $movie_id)
             ->where('user_id', $request->user()->user_id)
             ->firstOrFail();
 
         $watchlist->delete();
 
-        return response()->json(['message' => 'Removed from watchlist']);
+        return response()->json(['message' => 'Removed from watchlist', 'success' => true]);
     }
 
     /**

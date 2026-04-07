@@ -36,7 +36,7 @@ class SearchController extends Controller
     private function mapMovie(Movie $movie): array
     {
         return [
-            'id' => $movie->movie_id,
+            'movie_id' => $movie->movie_id,
             'title' => $movie->title,
             'description' => $movie->description ?? '',
             'rating' => $movie->rating !== null ? (float) $movie->rating : null,

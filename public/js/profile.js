@@ -18,7 +18,6 @@ $(document).ready(function () {
         }
         renderProfile(user);
         loadWatchlist(user);
-        loadRatedMovies(user);
         loadBookedMovies(user);
         //.off to remove previous handlers and .on to add new handler and rerender booked movies
         $(document).off('change', '#booked-sort').on('change', '#booked-sort', function () {
@@ -95,52 +94,49 @@ $(document).ready(function () {
 
     //this function load the movies in watch list and its rating if it has
    function loadWatchlist(user) {
-    // Just update 
-    let savedRatings = JSON.parse(localStorage.getItem('movieRatings')) || {};
-    const userRatings = savedRatings[user.username] || {};
-    
-    $('#modern-watchlist .watchlist-card-modern').each(function() {
-        const $card = $(this);
-        const title = $card.find('.card-title').text();
-        const isRated = userRatings[title];
-        $card.find('.rated-badge').remove();
-        
-        
-    $card.find('.btn-rate-large').text('Rate');
-    });
-        // Add event handlers
-        $('#modern-watchlist').off('click', '.btn-rate-large').on('click', '.btn-rate-large', function() {
-            const title = $(this).data('title');
+    // Add event handlers
+    $('#modern-watchlist').off('click', '.btn-rate-icon').on('click', '.btn-rate-icon', function() {
+        const $card = $(this).closest('.watchlist-card-modern');
+        const title = $(this).data('title');
+        const movieId = $card.data('movie-id');
         let savedRatings = JSON.parse(localStorage.getItem('movieRatings')) || {};
         const userRatings = savedRatings[user.username] || {};
-            const currentRating = userRatings[title] ? userRatings[title].rating : 0;
-            openLargeRatingModal(title, currentRating);
-        });
-        $('#modern-watchlist').off('click', '.btn-remove').on('click', '.btn-remove', function() {
-            const title = $(this).data('title');
-            const movieId = $(this).data('movie-id');
-         removeFromWatchlist(title, movieId);
-        });
+        const currentRating = userRatings[title] ? userRatings[title].rating : 0;
+        
+        openLargeRatingModal(title, currentRating, movieId);
+    });
+    
+    $('#modern-watchlist').off('click', '.btn-remove-card').on('click', '.btn-remove-card', function(e) {
+        e.stopPropagation();
+        const title = $(this).data('title');
+        const movieId = $(this).data('movie-id');
+        removeFromWatchlist(title, movieId);
+    });
     }
     
 
 
     //this function load the movies that is rated and we can edit the rate or remove
+    // REMOVED - Rated movies now shown as badge on watchlist cards
+    /*
     function loadRatedMovies(user) {
       const $ratedGrid = $('#modern-rated');
     
     $ratedGrid.off('click', '.btn-edit-rating').on('click', '.btn-edit-rating', function() {
+        const $card = $(this).closest('.rated-card-modern');
         const title = $(this).data('title');
+        const movieId = $card.data('movie-id');
         let savedRatings = JSON.parse(localStorage.getItem('movieRatings')) || {};
         const userRatings = savedRatings[user.username] || {};
         const currentRating = userRatings[title] ? userRatings[title].rating : 0;
-            openLargeRatingModal(title, currentRating);
+            openLargeRatingModal(title, currentRating, movieId);
         });
         $ratedGrid.off('click', '.btn-remove-rated').on('click', '.btn-remove-rated', function () {
             const title = $(this).data('title');
             removeMovieRating(title);
         });
     }
+    */
 
 
     function loadBookedMovies(user) {
@@ -396,7 +392,7 @@ function setupBookingSorting() {
     }
 
     //this function open RATING MODAL FUNCTIONS 
-    function openLargeRatingModal(movieTitle, currentRating = 0) {
+    function openLargeRatingModal(movieTitle, currentRating = 0, movieId = null) {
 
         const userData = JSON.parse(sessionStorage.getItem('loggedInUser'));
         if (!userData) {
@@ -416,26 +412,30 @@ function setupBookingSorting() {
         const modalHTML = `
             <div class="rating-modal-overlay" id="largeRatingModal">
                 <div class="rating-modal-large">
+                    <button class="rating-modal-close" id="closeRatingModal">
+                        <i class="fas fa-times"></i>
+                    </button>
                     <div class="rating-modal-header">
                         <h3>Rate "${movieTitle}"</h3>
-                        <p>How would you rate this movie?</p>
+                        <p>Share your thoughts on this movie</p>
                     </div>
                     
-                    <div class="rating-stars-large" id="largeRatingStars">
-                        <span class="rating-star-large" data-rating="1"><i class="fas fa-star"></i></span>
-                        <span class="rating-star-large" data-rating="2"><i class="fas fa-star"></i></span>
-                        <span class="rating-star-large" data-rating="3"><i class="fas fa-star"></i></span>
-                        <span class="rating-star-large" data-rating="4"><i class="fas fa-star"></i></span>
-                        <span class="rating-star-large" data-rating="5"><i class="fas fa-star"></i></span>
-                    </div>
-                    
-                    <div class="rating-value-large" id="largeRatingValue">
-                        ${currentRating > 0 ? `Current Rating: ${currentRating}/5` : 'Select your rating'}
+                    <div class="rating-stars-container">
+                        <div class="rating-stars-large" id="largeRatingStars">
+                            <span class="rating-star-large" data-rating="1"><i class="fas fa-star"></i></span>
+                            <span class="rating-star-large" data-rating="2"><i class="fas fa-star"></i></span>
+                            <span class="rating-star-large" data-rating="3"><i class="fas fa-star"></i></span>
+                            <span class="rating-star-large" data-rating="4"><i class="fas fa-star"></i></span>
+                            <span class="rating-star-large" data-rating="5"><i class="fas fa-star"></i></span>
+                        </div>
+                        <div class="rating-value-large" id="largeRatingValue">
+                            ${currentRating > 0 ? `<span class="rating-number">${currentRating}</span><span class="rating-text">/5</span>` : '<span class="rating-hint">Select a rating</span>'}
+                        </div>
                     </div>
                     
                     <div class="rating-comment-wrapper">
-                        <label for="largeRatingComment">Your comment (optional)
-                        <span id="commentCounter" style="font-size: 0.8rem; opacity: 0.8;"> 0/${MAX_COMMENT_CHARS}</span>
+                        <label for="largeRatingComment">Your comment <span class="optional">(optional)</span>
+                        <span id="commentCounter" class="comment-counter"> 0/${MAX_COMMENT_CHARS}</span>
                         </label>
                         <textarea id="largeRatingComment" rows="3" maxlength="${MAX_COMMENT_CHARS}" placeholder="What did you think of this movie?">${existingComment}</textarea>
                     </div>
@@ -485,7 +485,7 @@ function setupBookingSorting() {
         ).click(function () {
             selectedRating = $(this).data('rating');
             highlightLargeStars(selectedRating);
-            $('#largeRatingValue').text(`Your Rating: ${selectedRating}/5`);
+            $('#largeRatingValue').html(`<span class="rating-number">${selectedRating}</span><span class="rating-text">/5</span>`);
             $confirmBtn.prop('disabled', false).css('opacity', '1');
         });
 
@@ -493,11 +493,15 @@ function setupBookingSorting() {
         $('#cancelLargeRating').click(() => {
             $('#largeRatingModal').remove();
         });
+        
+        $('#closeRatingModal').click(() => {
+            $('#largeRatingModal').remove();
+        });
 
         $('#confirmLargeRating').click(() => {
             if (selectedRating > 0) {
                 const commentText = $('#largeRatingComment').val().trim();
-                saveMovieRating(movieTitle, selectedRating, commentText);
+                saveMovieRating(movieTitle, selectedRating, commentText, movieId);
                 $('#largeRatingModal').remove();
                 showToast(`"${movieTitle}" rated ${selectedRating}/5 stars!`, 'rated');
             }
@@ -531,166 +535,220 @@ function setupBookingSorting() {
         });
     }
 
-    function saveMovieRating(movieTitle, rating, commentText = "") {
+    function saveMovieRating(movieTitle, rating, commentText = "", movieId = null) {
         const userData = JSON.parse(sessionStorage.getItem('loggedInUser'));
-        if (!userData) return;
-
-        let savedRatings = {};
-
-        savedRatings = JSON.parse(localStorage.getItem('movieRatings')) || {};
-
-
-        if (!savedRatings[userData.username]) {
-            savedRatings[userData.username] = {};
+        if (!userData || !userData.id) {
+            alert('Please log in to rate movies.');
+            return;
         }
 
-        // Get movie image from watchlist
-        let movieImage = '../imgs/default-movie.jpg';
-
-        const savedWatchlist = JSON.parse(localStorage.getItem('watchlist')) || [];
-        const movieFromWatchlist = savedWatchlist.find(
-            m => m.title === movieTitle && m.username === userData.username
-        );
-        if (movieFromWatchlist) {
-            movieImage = movieFromWatchlist.image || '../imgs/default-movie.jpg';
+        // If movieId is provided, use it directly
+        if (movieId) {
+            submitRatingToAPI(movieId, rating, commentText);
+            return;
         }
 
-        // Save rating
-        savedRatings[userData.username][movieTitle] = {
-            rating: rating,
-            image: movieImage,
-            dateRated: new Date().toISOString(),
-            comment: commentText
-        };
+        // Otherwise, find movie_id by searching for the movie
+        fetch(`/api/movies?search=${encodeURIComponent(movieTitle)}`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': getCSRFToken() || ''
+            },
+            credentials: 'include'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (!data.data || !data.data.length) {
+                alert('Movie not found in database');
+                return;
+            }
 
-        localStorage.setItem('movieRatings', JSON.stringify(savedRatings));
+            const foundMovieId = data.data[0].movie_id;
+            submitRatingToAPI(foundMovieId, rating, commentText);
+        })
+        .catch(error => {
+            console.error('Error finding movie:', error);
+            alert('Error finding movie');
+        });
+    }
 
-        // Save comment to extra comments if provided
-        if (commentText.trim()) {
-
-
-            let extraComments = JSON.parse(localStorage.getItem('movieCommentsExtra')) || {};
-
-
-            if (!extraComments[movieTitle]) {
-
-            } extraComments[movieTitle] = [];
-
-            extraComments[movieTitle] = extraComments[movieTitle].filter(
-                c => c.user !== userData.username
-            );
-
-            extraComments[movieTitle].push({
-                user: userData.username,
-                rating: rating,
-                text: commentText,
-                date: new Date().toISOString()
-            });
-
-            localStorage.setItem('movieCommentsExtra', JSON.stringify(extraComments));
-        }
-        else {
-            // If comment is empty, remove user's comment if exists
-            let extraComments = JSON.parse(localStorage.getItem('movieCommentsExtra')) || {};
-            if (extraComments[movieTitle]) {
-                extraComments[movieTitle] = extraComments[movieTitle].filter(
-                    c => c.user !== userData.username
-                );
-
-                if (extraComments[movieTitle].length === 0) {
-                    delete extraComments[movieTitle];
+    function submitRatingToAPI(movieId, score, comment) {
+        fetch('/api/ratings', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': getCSRFToken() || ''
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+                movie_id: movieId,
+                score: parseInt(score),
+                comment: comment || null
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => {
+                    throw new Error(err.message || 'Failed to submit rating');
+                });
+            }
+            return response.json();
+        })
+        .then(data => { 
+            $('#largeRatingModal').remove();
+            
+            // Update localStorage with the new rating
+            const userData = JSON.parse(sessionStorage.getItem('loggedInUser'));
+            if (userData) {
+                let savedRatings = JSON.parse(localStorage.getItem('movieRatings')) || {};
+                const movieTitle = $('.rating-modal-header h3').text().replace(/^Rate "/, '').replace(/"$/, '');
+                if (!savedRatings[userData.username]) {
+                    savedRatings[userData.username] = {};
                 }
+                savedRatings[userData.username][movieTitle] = {
+                    rating: data.score,
+                    comment: data.comment
+                };
+                localStorage.setItem('movieRatings', JSON.stringify(savedRatings));
+            }
+            
+            // Reload the profile page to reflect the rating and hide the button
+            location.reload();
+        })
+        .catch(error => {
+            console.error('Error submitting rating:', error);
+            alert('Error submitting rating: ' + error.message);
+        });
+    }
 
-                localStorage.setItem('movieCommentsExtra', JSON.stringify(extraComments));
+    function getCSRFToken() {
+        // Try to get CSRF token from meta tag
+        let token = document.querySelector('meta[name="csrf-token"]')?.content;
+        if (!token) {
+            // Try to get from cookie
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                const [name, value] = cookie.trim().split('=');
+                if (name === 'XSRF-TOKEN') {
+                    token = decodeURIComponent(value);
+                    break;
+                }
             }
         }
-
-        // Refresh profile
-        loadWatchlist(userData);
-        loadRatedMovies(userData);
-
+        return token;
     }
 
     function removeMovieRating(movieTitle) {
-
         const userData = JSON.parse(sessionStorage.getItem('loggedInUser'));
-        let savedRatings = JSON.parse(localStorage.getItem('movieRatings')) || {};
-
-        if (savedRatings[userData.username] && savedRatings[userData.username][movieTitle]) {
-            delete savedRatings[userData.username][movieTitle];
-            localStorage.setItem('movieRatings', JSON.stringify(savedRatings));
+        if (!userData || !userData.id) {
+            alert('Please log in to remove ratings.');
+            return;
         }
 
-        let extraComments = JSON.parse(localStorage.getItem('movieCommentsExtra')) || {};
-        if (extraComments[movieTitle]) {
-            extraComments[movieTitle] = extraComments[movieTitle].filter(
-                c => c.user !== userData.username
-            );
-
-            if (extraComments[movieTitle].length === 0) {
-                delete extraComments[movieTitle];
+        // Find movie_id and delete rating via API
+        fetch(`/api/movies?search=${encodeURIComponent(movieTitle)}`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': getCSRFToken() || ''
+            },
+            credentials: 'include'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (!data.data || !data.data.length) {
+                alert('Movie not found');
+                return;
             }
 
-            localStorage.setItem('movieCommentsExtra', JSON.stringify(extraComments));
-        }
-        loadWatchlist(userData);
-        loadRatedMovies(userData);
-
-        showToast(`Rating for "${movieTitle}" removed`, 'removed');
-
-
-
+            // We would need to fetch the user's rating first to get the rating_id
+            // For now, we'll use updateOrCreate with score = 0 approach
+            // Actually, we should fetch user's ratings first
+            fetch('/api/ratings/my', {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': getCSRFToken() || ''
+                },
+                credentials: 'include'
+            })
+            .then(response => response.json())
+            .then(ratingData => {
+                const movieId = data.data[0].movie_id;
+                const userRating = ratingData.data?.find(r => r.movie_id == movieId);
+                
+                if (userRating && userRating.rating_id) {
+                    // Delete the rating
+                    fetch(`/api/ratings/${userRating.rating_id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-TOKEN': getCSRFToken() || ''
+                        },
+                        credentials: 'include'
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            alert('Rating removed');
+                            // Update localStorage to remove the rating
+                            let savedRatings = JSON.parse(localStorage.getItem('movieRatings')) || {};
+                            if (userData && savedRatings[userData.username]) {
+                                delete savedRatings[userData.username][movieTitle];
+                                localStorage.setItem('movieRatings', JSON.stringify(savedRatings));
+                            }
+                            // Reload the page to show the rate button again
+                            location.reload();
+                        }
+                    })
+                    .catch(error => console.error('Error deleting rating:', error));
+                }
+            });
+        })
+        .catch(error => console.error('Error finding movie:', error));
     }
 
-
-
     function removeFromWatchlist(title, movieId) {
-    console.log('Deleting movie ID:', movieId);
-    
-    $.ajax({
-        url: '/watchlist/remove/' + movieId,  // This matches your route
-        method: 'DELETE',
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
-            'Accept': 'application/json'
-        },
-        success: function(response) {
-            console.log('Success:', response);
-            if (response.success) {
+        console.log('Removing from watchlist - Movie ID:', movieId);
+        
+        $.ajax({
+            url: '/api/watchlist/' + movieId,
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            },
+            success: function(response) {
+                console.log('Successfully removed:', response);
+                
                 // Remove the card from DOM
-                $(`#modern-watchlist .watchlist-card-modern[data-movie-id="${movieId}"]`).remove();
+                $(`#modern-watchlist .watchlist-card-modern[data-movie-id="${movieId}"]`).fadeOut(300, function() {
+                    $(this).remove();
+                    
+                    // Update counts
+                    const newCount = $('#modern-watchlist .watchlist-card-modern').length;
+                    $('#watchlist-count').text(newCount);
+                    $('#watchlist-counter').text(newCount + ' movie' + (newCount !== 1 ? 's' : ''));
+                    
+                    // Show empty message if no movies left
+                    if (newCount === 0) {
+                        $('#modern-watchlist').html(`
+                            <div class="empty-watchlist" style="grid-column: 1 / -1;">
+                                <h3>Your Watchlist is Empty</h3>
+                                <p>Start adding movies to build your personalized collection!</p>
+                                <a href="/search" class="accent-link">Browse Movies <i class="fas fa-arrow-right"></i></a>
+                            </div>
+                        `);
+                    }
+                });
                 
-            
-        // Remove rating if exists
-        removeMovieRating(title);
-                
-                // Update counts
-                const newCount = $('#modern-watchlist .watchlist-card-modern').length;
-                $('#watchlist-count').text(newCount);
-                $('#watchlist-counter').text(newCount + ' movie' + (newCount !== 1 ? 's' : ''));
-                
-                // Show empty message if no movies left
-                if (newCount === 0) {
-                    $('#modern-watchlist').html(`
-                        <div class="empty-watchlist" style="grid-column: 1 / -1;">
-                            <h3>Your Watchlist is Empty</h3>
-                            <p>Start adding movies to build your personalized collection!</p>
-                            <a href="/search" class="accent-link">Browse Movies <i class="fas fa-arrow-right"></i></a>
-                        </div>
-                    `);
-                }
-                
-                showToast(response.message, 'removed');
-            } else {
-                showToast(response.message || 'Failed to remove', 'error');
+                showToast('Removed from watchlist', 'removed');
+            },
+            error: function(xhr) {
+                console.error('Error removing from watchlist:', xhr);
+                const message = xhr.responseJSON?.message || 'Failed to remove from watchlist';
+                showToast(message, 'error');
             }
-        },
-        error: function(xhr) {
-            console.log('Error:', xhr);
-            const message = xhr.responseJSON?.message || 'Error removing from watchlist';
-            showToast(message, 'error');
-        }
-    });
+        });
     }
 
     function showToast(message, type) {

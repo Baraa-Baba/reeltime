@@ -14,7 +14,7 @@ class ProfileController extends Controller
             return redirect()->route('home')->with('login_required', true);
         }
 
-        $watchlist = $user->watchlistedMovies()->get();
+        $watchlist = $user->watchlistedMovies()->with('ratings')->get();
         $ratedMovies = $user->ratings()->with('movie')->get();
         $bookings = $user->bookings()->with('showtime.movie')->get();
 

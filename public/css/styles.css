@@ -1342,10 +1342,51 @@ body.profile-page main.profile-page {
 }
 .card-content { display: grid; gap: 0.65rem; padding: 1rem; }
 .card-title, .booked-movie-title { margin: 0; font-family: 'Space Grotesk', sans-serif; font-size: 1rem; }
-.card-rating { color: var(--text-muted); display: inline-flex; align-items: center; gap: 0.35rem; }
+.card-rating-wrapper { display: flex; flex-direction: column; gap: 0.4rem; }
+.card-rating, .user-rating { color: var(--text-muted); display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.9rem; }
+.user-rating { color: var(--accent); font-weight: 600; }
+.rating-label { font-size: 0.75rem; opacity: 0.7; }
 .rated-badge, .booked-status {
   position: absolute; top: 0.75rem; left: 0.75rem; z-index: 2; padding: 0.4rem 0.65rem; border-radius: 999px;
   background: rgba(9, 11, 16, 0.72); color: #fff; font-size: 0.78rem; font-weight: 800; backdrop-filter: blur(12px);
+}
+.rated-badge-small {
+  position: absolute; top: 0.75rem; right: 0.75rem; z-index: 2; padding: 0.35rem 0.6rem; border-radius: 999px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; font-size: 0.75rem; font-weight: 800;
+  display: inline-flex; align-items: center; gap: 0.3rem; backdrop-filter: blur(12px);
+}
+.btn-remove-card {
+  position: absolute; top: 0.75rem; right: 0.75rem; z-index: 3;
+  width: 36px; height: 36px; display: grid; place-items: center;
+  background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 59, 48, 0.5);
+  color: #ff3b30; border-radius: 10px; cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 1rem;
+  backdrop-filter: blur(8px);
+}
+.btn-remove-card:hover {
+  background: rgba(0, 0, 0, 0.7);
+  border-color: rgba(255, 59, 48, 0.8);
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(255, 59, 48, 0.3);
+}
+.btn-rate-icon {
+  position: absolute; top: 0.75rem; right: 3.2rem; z-index: 2;
+  width: 40px; height: 40px; display: grid; place-items: center;
+  background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(251, 191, 36, 0.5);
+  color: #fbbf24; border-radius: 10px; cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 1.1rem;
+  backdrop-filter: blur(8px);
+}
+.btn-rate-icon:hover {
+  background: rgba(0, 0, 0, 0.7);
+  border-color: rgba(251, 191, 36, 0.8);
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
+}
+.btn-rate-icon:active {
+  transform: scale(0.95);
 }
 .booked-status.status-upcoming { color: var(--accent-3); }
 .booked-status.status-watched { color: var(--success); }
@@ -1373,15 +1414,65 @@ body.profile-page main.profile-page {
 .btn-rating-large.btn-cancel-large, .btn-booking-action.btn-cancel-keep {
   background: rgba(255, 255, 255, 0.06); color: var(--text-color);
 }
+.rating-modal-large .rating-actions-large {
+  display: flex; gap: 1rem; margin-top: 2rem; justify-content: flex-end;
+}
+.rating-modal-large .btn-rating-large {
+  padding: 0.95rem 1.5rem; font-size: 0.95rem; border-radius: 12px;
+  flex: auto; max-width: 180px; font-weight: 800;
+}
+.rating-modal-large .btn-confirm-large {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  color: #0a0d11;
+  border: none;
+  box-shadow: 0 8px 20px rgba(251, 191, 36, 0.25);
+}
+.rating-modal-large .btn-confirm-large:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(251, 191, 36, 0.35);
+}
+.rating-modal-large .btn-confirm-large:disabled {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.4);
+  cursor: not-allowed;
+}
+.rating-modal-large .btn-cancel-large {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+.rating-modal-large .btn-cancel-large:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.25);
+}
 .booking-modal-overlay, .rating-modal-overlay {
   position: fixed; inset: 0; z-index: 3200; display: grid; place-items: center; padding: 1rem;
   background: rgba(4, 6, 10, 0.72); backdrop-filter: blur(16px);
 }
-.booking-modal-large, .rating-modal-large { width: min(660px, 100%); padding: 1.25rem; }
-.booking-modal-header, .rating-modal-header {
-  display: flex; justify-content: space-between; align-items: start; gap: 1rem;
+.booking-modal-large, .rating-modal-large { 
+  width: min(660px, 100%); padding: 2rem; border-radius: 24px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  position: relative;
 }
-.booking-modal-header h3, .rating-modal-header h3 { margin: 0; font-family: 'Space Grotesk', sans-serif; }
+.rating-modal-large {
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+.rating-modal-close {
+  position: absolute; top: 1.5rem; right: 1.5rem; z-index: 10;
+  background: transparent; border: none; color: var(--text-muted); cursor: pointer;
+  font-size: 1.25rem; transition: color 0.2s ease;
+  display: flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; border-radius: 8px;
+}
+.rating-modal-close:hover { color: var(--text-color); background: rgba(255, 255, 255, 0.08); }
+.booking-modal-header, .rating-modal-header {
+  display: flex; justify-content: space-between; align-items: start; gap: 1rem; margin-bottom: 1.5rem;
+}
+.booking-modal-header h3, .rating-modal-header h3 { 
+  margin: 0; font-family: 'Space Grotesk', sans-serif; font-size: 1.5rem; font-weight: 900; color: #fff;
+}
+.rating-modal-header p { margin: 0.25rem 0 0 0; color: rgba(255, 255, 255, 0.7); font-size: 0.9rem; }
 .booking-details-content { display: grid; gap: 0.8rem; margin-top: 1rem; color: var(--text-muted); }
 .booking-detail-row {
   display: flex; justify-content: space-between; gap: 1rem; padding: 0.8rem 0.95rem; border-radius: 16px;
@@ -1402,16 +1493,55 @@ body.profile-page main.profile-page {
   color: var(--text-muted);
 }
 .booked-extra strong { color: var(--text-color); }
-.rating-stars-large { display: flex; gap: 0.55rem; margin: 1rem 0; }
+.rating-stars-large { display: flex; gap: 0.5rem; margin: 1.5rem 0; justify-content: center; flex-wrap: wrap; }
 .rating-star-large {
-  width: 46px; height: 46px; display: grid; place-items: center; border-radius: 14px;
-  background: rgba(255, 255, 255, 0.05); color: rgba(255, 255, 255, 0.3); transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease;
+  width: 42px; height: 42px; display: grid; place-items: center; border-radius: 10px; cursor: pointer;
+  background: rgba(255, 255, 255, 0.08); color: rgba(255, 255, 255, 0.4); font-size: 1.35rem;
+  transition: transform 0.15s ease, background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
-.rating-star-large.active { color: var(--accent-3); background: rgba(249, 115, 22, 0.16); }
-.rating-value-large { color: var(--text-muted); }
-.rating-comment-wrapper { display: grid; gap: 0.45rem; margin-top: 1rem; }
-.rating-comment-wrapper label { color: var(--text-muted); font-size: 0.88rem; }
-.rating-comment-wrapper textarea { min-height: 96px; resize: vertical; }
+.rating-star-large:hover {
+  transform: scale(1.12);
+  background: rgba(168, 85, 247, 0.25);
+  color: #a855f7;
+  border-color: rgba(168, 85, 247, 0.4);
+}
+.rating-star-large.active { 
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.25);
+  border-color: rgba(251, 191, 36, 0.4);
+  box-shadow: 0 0 20px rgba(251, 191, 36, 0.25);
+  font-weight: 900;
+}
+.rating-stars-container { display: grid; gap: 1rem; }
+.rating-value-large { 
+  text-align: center; display: flex; align-items: center; justify-content: center; gap: 0.5rem; min-height: 52px;
+}
+.rating-number { 
+  font-size: 2.8rem; font-weight: 900; color: #fbbf24; font-family: 'Space Grotesk', sans-serif;
+  text-shadow: 0 0 12px rgba(251, 191, 36, 0.3);
+}
+.rating-text { font-size: 1.1rem; color: rgba(255, 255, 255, 0.6); font-weight: 600; }
+.rating-hint { color: var(--text-muted); font-size: 1rem; }
+.rating-comment-wrapper { display: grid; gap: 0.6rem; margin-top: 1.5rem; }
+.rating-comment-wrapper label { color: rgba(255, 255, 255, 0.85); font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; font-weight: 600; }
+.rating-comment-wrapper .optional { font-size: 0.8rem; opacity: 0.65; font-weight: 400; }
+.comment-counter { font-size: 0.8rem; color: rgba(255, 255, 255, 0.6); opacity: 0.8; margin-left: auto; }
+.rating-comment-wrapper textarea { 
+  min-height: 100px; resize: vertical; padding: 0.9rem; border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.9); font-family: inherit; font-size: 0.95rem;
+  transition: border 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+.rating-comment-wrapper textarea::placeholder {
+  color: rgba(255, 255, 255, 0.35);
+}
+.rating-comment-wrapper textarea:focus {
+  border-color: rgba(251, 191, 36, 0.4);
+  background: rgba(251, 191, 36, 0.08);
+  box-shadow: 0 0 12px rgba(251, 191, 36, 0.15);
+  outline: none;
+}
 .loading-watchlist, .loading-rated, .loading-booked, .empty-watchlist, .empty-rated, .empty-booked {
   display: grid; gap: 0.55rem; align-items: center; justify-items: center; min-height: 180px;
   padding: 1.5rem; border-radius: 18px; border: 1px dashed rgba(255, 255, 255, 0.1); color: var(--text-muted); text-align: center;

@@ -1,18 +1,31 @@
 
 $(function() {
-    $(function() {
     // Only initialize if user is logged in
     if (sessionStorage.getItem('loggedInUser')) {
         initializeWatchlist();
     }
     setupWatchlistEventHandlers();  
 });
-    setupWatchlistEventHandlers();
-});
+
+function getCSRFToken() {
+    // Try to get CSRF token from meta tag
+    let token = document.querySelector('meta[name="csrf-token"]')?.content;
+    if (!token) {
+        // Try to get from cookie
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            const [name, value] = cookie.trim().split('=');
+            if (name === 'XSRF-TOKEN') {
+                token = decodeURIComponent(value);
+                break;
+            }
+        }
+    }
+    return token;
+}
 
 function initializeWatchlist() {
     const userData = sessionStorage.getItem('loggedInUser');
-    
     
     if (!userData) {
         return;
@@ -20,114 +33,270 @@ function initializeWatchlist() {
     
     try {
         const user = JSON.parse(userData);
-        
-        
         if (!user) {
            return;
         }
         
-        if (!user.watchlist) {
-            const saved = JSON.parse(localStorage.getItem('watchlist')) || [];
-            user.watchlist = saved.filter(movie => movie.username === user.username);
-            sessionStorage.setItem('loggedInUser', JSON.stringify(user));
-        }
+        // Load watchlist from API
+        loadWatchlistFromAPI();
     } catch (error) {
-        console.error('Error parsing user data:', error);
+        console.error('Error initializing watchlist:', error);
     }
 }
 
+function loadWatchlistFromAPI() {
+    const userData = JSON.parse(sessionStorage.getItem('loggedInUser'));
+    if (!userData || !userData.id) return;
+
+    const csrfToken = getCSRFToken();
+
+    fetch('/api/watchlist', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': csrfToken || ''
+        },
+        credentials: 'include'
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Failed to fetch watchlist');
+        return response.json();
+    })
+    .then(data => {
+        // Handle paginated response from Laravel
+        const watchlistData = data.data || data;
+        
+        if (Array.isArray(watchlistData)) {
+            userData.watchlist = watchlistData.map(item => ({
+                watchlist_id: item.watchlist_id,
+                movie_id: item.movie_id,
+                title: item.movie?.title || '',
+                image: item.movie?.poster || '',
+                rating: item.movie?.rating || '0'
+            }));
+        } else {
+            userData.watchlist = [];
+        }
+        sessionStorage.setItem('loggedInUser', JSON.stringify(userData));
+        
+        // Update UI to show correct button states
+        updateWatchlistUIOnAllPages();
+    })
+    .catch(error => {
+        console.error('Error loading watchlist:', error);
+        // Initialize empty watchlist on error
+        if (!userData.watchlist) userData.watchlist = [];
+        sessionStorage.setItem('loggedInUser', JSON.stringify(userData));
+    });
+}
+
+function updateWatchlistUIOnAllPages() {
+    const userData = JSON.parse(sessionStorage.getItem('loggedInUser'));
+    if (!userData || !userData.watchlist) return;
+
+    // Update all watchlist buttons across the page
+    $('.add-watchlist-btn').each(function() {
+        const $btn = $(this);
+        const movieId = $btn.data('movie-id');
+        const movieTitle = $('#modal-title').text().trim() || $btn.data('title');
+        
+        const inWatchlist = userData.watchlist.some(m => m.movie_id == movieId);
+        
+        if (inWatchlist) {
+            $btn.text('Remove from Watchlist').addClass('added');
+        } else {
+            $btn.text('+ Add to Watchlist').removeClass('added').css('background', '');
+        }
+    });
+
+    // Update all watch-flag icons
+    $('.watch-flag').each(function() {
+        const $flag = $(this);
+        const $card = $flag.closest('.movie-card');
+        const movieId = $flag.data('movie-id') || $card.data('movie-id');
+        
+        const inWatchlist = userData.watchlist.some(m => m.movie_id == movieId);
+        
+        if (inWatchlist) {
+            $flag.addClass('in-watchlist');
+            $flag.find('.fa-heart')
+                 .removeClass('fa-regular')
+                 .addClass('fa-solid');
+        } else {
+            $flag.removeClass('in-watchlist');
+            $flag.find('.fa-heart')
+                 .removeClass('fa-solid')
+                 .addClass('fa-regular');
+        }
+    });
+}
+
 function setupWatchlistEventHandlers() {
-   
-   
     $(document).off('click', '.add-watchlist-btn').on('click', '.add-watchlist-btn', function(event) {
         event.preventDefault();
         event.stopPropagation();
         handleWatchlistAdd($(this));
-        window.dispatchEvent(new CustomEvent('watchlist-updated'));   
     });
-     $(document).off('click', '.watch-flag').on('click', '.watch-flag', function (event) {
-          event.preventDefault();
-          event.stopPropagation();
-          handleWatchlistToggleFromCard($(this));
-      });
+    $(document).off('click', '.watch-flag').on('click', '.watch-flag', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        handleWatchlistToggleFromCard($(this));
+    });
+    
+    // Listen for watchlist updates from other tabs/windows
+    window.addEventListener('storage', function(e) {
+        if (e.key === 'loggedInUser') {
+            loadWatchlistFromAPI();
+        }
+    });
+    
+    // Listen for watchlist-updated custom event
+    window.addEventListener('watchlist-updated', function() {
+        // Delay slightly to ensure state is updated
+        setTimeout(() => {
+            updateWatchlistUIOnAllPages();
+        }, 100);
+    });
 }
 
 function handleWatchlistAdd($button) {
-   
     // Check if user is logged in
-    let userData;
-        userData = JSON.parse(sessionStorage.getItem('loggedInUser'));
-         let movieTitle = '';
-         if (!userData) {
-       return;
+    const userData = JSON.parse(sessionStorage.getItem('loggedInUser'));
+    if (!userData || !userData.id) {
+        alert('Please log in to use watchlist');
+        return;
     }
    
-        movieTitle = $('#modal-title').text().trim();
-       
-       
-let movieImage = '';
-
-    const $modalImage = $('.modal__media img');
-    if ($modalImage.length) {
-        // DOM property absolute URL
-        movieImage = $modalImage[0].src || '';
-    }
-
-    if (!movieImage) {
-        const cardImg = $(`.movie-card[data-title="${movieTitle}"] img`).get(0);
-        if (cardImg) {
-            movieImage = cardImg.src;  // absolute URL, works from any page
-        } else {
-            movieImage = 'imgs/default-movie.jpg';
-        }
-    }
-    // Get movie rating
-    let movieRating = '0';
+    const movieTitle = $('#modal-title').text().trim();
     
+    // Get movie ID from data attribute or search for it
+    let movieId = $button.data('movie-id') || null;
+    
+    if (!movieId) {
+        // Try to find movie ID from the movie card
         const $movieCard = $(`.movie-card[data-title="${movieTitle}"]`).first();
-        movieRating = $movieCard.attr('data-rating') || '0';
-   
+        movieId = $movieCard.data('movie-id') || null;
+    }
 
-    // Get current watchlist
-    let saved = [];
+    if (!movieId) {
+        // Query API to find movie by title
+        fetch(`/api/movies?search=${encodeURIComponent(movieTitle)}`, {
+            headers: {'X-Requested-With': 'XMLHttpRequest'},
+            credentials: 'include'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.data && data.data.length > 0) {
+                const movie = data.data[0];
+                toggleWatchlistAPI(movie.movie_id, $button);
+            } else {
+                alert('Movie not found');
+            }
+        })
+        .catch(error => {
+            console.error('Error searching for movie:', error);
+            alert('Error adding to watchlist');
+        });
+    } else {
+        toggleWatchlistAPI(movieId, $button);
+    }
+}
+
+function toggleWatchlistAPI(movieId, $button) {
+    const userData = JSON.parse(sessionStorage.getItem('loggedInUser'));
+    const csrfToken = getCSRFToken();
     
-        saved = JSON.parse(localStorage.getItem('watchlist')) || [];
-       
-
-    // Check if movie is already in watchlist
-    const alreadyAdded = saved.some(m => m.title === movieTitle && m.username === userData.username);
-   
-        if (alreadyAdded) {
-            // REMOVE from watchlist
-            saved = saved.filter(m => !(m.title === movieTitle && m.username === userData.username));
-            $button.text('+ Add to Watchlist').removeClass('added');
-            $button.css('background', '');
-           } else {
-            // ADD to watchlist
-            const newMovie = {
-                username: userData.username,
-                title: movieTitle,
-                image: movieImage,
-                rating: movieRating,
-                dateAdded: new Date().toISOString()
-            };
-            saved.push(newMovie);
-            $button.text('Remove from Watchlist').addClass('added');
-           }
-
-        // Save to localStorage
-        localStorage.setItem('watchlist', JSON.stringify(saved));
-       
-        // Update user data in sessionStorage
-        userData.watchlist = saved.filter(m => m.username === userData.username);
-        sessionStorage.setItem('loggedInUser', JSON.stringify(userData));
-       
-        // Refresh profile if we're on profile page
-        if (typeof loadModernWatchlist === 'function') {
-            loadModernWatchlist(userData);
+    if (!userData || !userData.id) {
+        alert('Please log in to use watchlist');
+        return;
+    }
+    
+    // Ensure watchlist array exists
+    if (!userData.watchlist) userData.watchlist = [];
+    
+    // Check if already in watchlist
+    const watchlistItem = userData.watchlist.find(m => m.movie_id == movieId);
+    const inWatchlist = !!watchlistItem;
+    
+    if (inWatchlist) {
+        // Remove from watchlist
+        if (!watchlistItem.watchlist_id) {
+            alert('Error: Cannot remove from watchlist');
+            return;
         }
-
-    } 
+        
+        fetch(`/api/watchlist/${watchlistItem.watchlist_id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': csrfToken || ''
+            },
+            credentials: 'include'
+        })
+        .then(response => {
+            if (response.ok) {
+                // Remove from local state
+                userData.watchlist = userData.watchlist.filter(m => m.movie_id != movieId);
+                sessionStorage.setItem('loggedInUser', JSON.stringify(userData));
+                
+                // Update UI
+                $button.text('+ Add to Watchlist').removeClass('added').css('background', '');
+                window.dispatchEvent(new CustomEvent('watchlist-updated'));
+                updateWatchlistUIOnAllPages();
+            } else {
+                alert('Error removing from watchlist');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error removing from watchlist');
+        });
+    } else {
+        // Add to watchlist
+        fetch('/api/watchlist', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': csrfToken || ''
+            },
+            credentials: 'include',
+            body: JSON.stringify({ movie_id: movieId })
+        })
+        .then(response => {
+            if (response.status === 409) {
+                // Already in watchlist - reload from API
+                loadWatchlistFromAPI();
+                return null;
+            }
+            if (response.ok) {
+                return response.json();
+            }
+            throw new Error('Failed to add to watchlist');
+        })
+        .then(data => {
+            if (data && data.watchlist) {
+                // Add to local state
+                userData.watchlist.push({
+                    watchlist_id: data.watchlist.watchlist_id,
+                    movie_id: data.watchlist.movie_id
+                });
+                sessionStorage.setItem('loggedInUser', JSON.stringify(userData));
+                
+                // Update UI
+                $button.text('Remove from Watchlist').addClass('added');
+                window.dispatchEvent(new CustomEvent('watchlist-updated'));
+                updateWatchlistUIOnAllPages();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error adding to watchlist');
+        });
+    }
+} 
 function handleWatchlistToggleFromCard($flag) {
     const userDataRaw = sessionStorage.getItem('loggedInUser');
     if (!userDataRaw) {
@@ -136,69 +305,107 @@ function handleWatchlistToggleFromCard($flag) {
     }
     const userData = JSON.parse(userDataRaw);
 
-    // 2) Get movie title, image, rating from the card
+    // Get movie ID from data attribute
     const $card = $flag.closest('.movie-card');
+    let movieId = $flag.data('movie-id') || $card.data('movie-id') || null;
     const movieTitle = $flag.data('title') || $card.data('title') || '';
 
-    if (!movieTitle) {
-        console.warn('No movie title found for watch-flag click.');
-        return;
-    }
-
-    // Image
-    let movieImage = '';
-    const cardImg = $card.find('img').get(0);
-    if (cardImg) {
-        movieImage = cardImg.src;  // absolute URL
+    if (!movieId) {
+        // Query API to find movie by title
+        fetch(`/api/movies?search=${encodeURIComponent(movieTitle)}`, {
+            headers: {'X-Requested-With': 'XMLHttpRequest'},
+            credentials: 'include'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.data && data.data.length > 0) {
+                const movie = data.data[0];
+                toggleWatchlistFromCardAPI(movie.movie_id, $flag, userData);
+            }
+        })
+        .catch(error => console.error('Error searching for movie:', error));
     } else {
-        movieImage = 'imgs/default-movie.jpg';
+        toggleWatchlistFromCardAPI(movieId, $flag, userData);
     }
+}
 
-    // Rating from data-rating on figure
-    const movieRating = $card.attr('data-rating') || '0';
+function toggleWatchlistFromCardAPI(movieId, $flag, userData) {
+    const csrfToken = getCSRFToken();
+    
+    // Ensure watchlist array exists
+    if (!userData.watchlist) userData.watchlist = [];
+    
+    const watchlistItem = userData.watchlist.find(m => m.movie_id == movieId);
+    const inWatchlist = !!watchlistItem;
 
-    // 3) Load existing watchlist
-    let saved = JSON.parse(localStorage.getItem('watchlist')) || [];
+    if (inWatchlist) {
+        // REMOVE from watchlist
+        if (!watchlistItem.watchlist_id) return;
 
-    const alreadyAdded = saved.some(
-        m => m.title === movieTitle && m.username === userData.username
-    );
-
-    if (alreadyAdded) {
-        // REMOVE
-        saved = saved.filter(
-            m => !(m.title === movieTitle && m.username === userData.username)
-        );
-
-        $flag.removeClass('in-watchlist');
-        $flag.find('.fa-heart')
-             .removeClass('fa-solid')
-             .addClass('fa-regular');
+        fetch(`/api/watchlist/${watchlistItem.watchlist_id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': csrfToken || ''
+            },
+            credentials: 'include'
+        })
+        .then(response => {
+            if (response.ok) {
+                userData.watchlist = userData.watchlist.filter(m => m.movie_id != movieId);
+                sessionStorage.setItem('loggedInUser', JSON.stringify(userData));
+                
+                $flag.removeClass('in-watchlist');
+                $flag.find('.fa-heart')
+                     .removeClass('fa-solid')
+                     .addClass('fa-regular');
+                
+                window.dispatchEvent(new CustomEvent('watchlist-updated'));
+                updateWatchlistUIOnAllPages();
+            }
+        })
+        .catch(error => console.error('Error removing from watchlist:', error));
 
     } else {
-        // ADD
-        const newMovie = {
-            username: userData.username,
-            title: movieTitle,
-            image: movieImage,
-            rating: movieRating,
-            dateAdded: new Date().toISOString()
-        };
-        saved.push(newMovie);
-
-        $flag.addClass('in-watchlist');
-        $flag.find('.fa-heart')
-             .removeClass('fa-regular')
-             .addClass('fa-solid');
+        // ADD to watchlist
+        fetch('/api/watchlist', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': csrfToken || ''
+            },
+            credentials: 'include',
+            body: JSON.stringify({ movie_id: movieId })
+        })
+        .then(response => {
+            if (response.status === 409) {
+                // Already in watchlist - reload
+                loadWatchlistFromAPI();
+                return null;
+            }
+            if (response.ok) return response.json();
+            throw new Error('Failed to add to watchlist');
+        })
+        .then(data => {
+            if (data && data.watchlist) {
+                if (!userData.watchlist) userData.watchlist = [];
+                userData.watchlist.push({
+                    watchlist_id: data.watchlist.watchlist_id,
+                    movie_id: data.watchlist.movie_id
+                });
+                sessionStorage.setItem('loggedInUser', JSON.stringify(userData));
+                
+                $flag.addClass('in-watchlist');
+                $flag.find('.fa-heart')
+                     .removeClass('fa-regular')
+                     .addClass('fa-solid');
+                
+                window.dispatchEvent(new CustomEvent('watchlist-updated'));
+                updateWatchlistUIOnAllPages();
+            }
+        })
+        .catch(error => console.error('Error adding to watchlist:', error));
     }
-
-    // 4) Save to storage
-    localStorage.setItem('watchlist', JSON.stringify(saved));
-
-    // Update userData in sessionStorage
-    userData.watchlist = saved.filter(m => m.username === userData.username);
-    sessionStorage.setItem('loggedInUser', JSON.stringify(userData));
-
-    // 5) Notify others (search / header / profile)
-    window.dispatchEvent(new CustomEvent('watchlist-updated'));
 }

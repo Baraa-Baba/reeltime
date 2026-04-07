@@ -17,7 +17,7 @@ class MovieSeeder extends Seeder
 
         // If JSON file is missing, fall back to dummy factory data
         if (! File::exists($path)) {
-            Movie::factory()->count(10)->create();
+            Movie::factory()->count(10)->create(['rating' => 0]);
             return;
         }
 
@@ -26,7 +26,7 @@ class MovieSeeder extends Seeder
 
         // If JSON structure is not as expected, also fall back to dummy data
         if (! is_array($data) || ! isset($data['categories'])) {
-            Movie::factory()->count(10)->create();
+            Movie::factory()->count(10)->create(['rating' => 0]);
             return;
         }
 
@@ -61,7 +61,7 @@ class MovieSeeder extends Seeder
                     'genres'       => isset($movieData['genres']) && is_array($movieData['genres'])
                         ? implode(', ', $movieData['genres'])
                         : null,
-                    'rating'       => $movieData['rating'] ?? fake()->randomFloat(1, 2, 5),
+                    'rating'       => 0,
                     'duration'     => $duration,
                     'poster'       => $movieData['image'] ?? null,
                     'created_at'   => now(),
@@ -72,7 +72,7 @@ class MovieSeeder extends Seeder
 
         // If JSON was empty or invalid after parsing, still seed some dummy movies
         if (empty($movies)) {
-            Movie::factory()->count(10)->create();
+            Movie::factory()->count(10)->create(['rating' => 0]);
             return;
         }
 

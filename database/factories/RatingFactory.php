@@ -19,7 +19,7 @@ class RatingFactory extends Factory
         return [
             'user_id' => \App\Models\User::factory(),
             'movie_id' => \App\Models\Movie::factory(),
-            'score' => fake()->randomFloat(1, 1, 10),
+            'score' => fake()->randomElement([1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5]),
             'comment' => fake()->sentence(),
         ];
     }

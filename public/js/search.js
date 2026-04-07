@@ -34,17 +34,15 @@ $(function () {
 
     function refreshWatchlistTitles() {
         try {
-            const userData = getCurrentUser();
-            if (!userData) {
+            const userData = JSON.parse(sessionStorage.getItem('loggedInUser'));
+            if (!userData || !userData.watchlist) {
                 watchlistTitles = new Set();
                 return;
             }
 
-            const saved = JSON.parse(localStorage.getItem("watchlist")) || [];
+            // Use API-based watchlist from sessionStorage
             watchlistTitles = new Set(
-                saved
-                    .filter((item) => item.username === userData.username)
-                    .map((item) => item.title)
+                userData.watchlist.map(item => item.movie_id)
             );
         } catch (err) {
             console.error("Error building watchlist titles:", err);
@@ -117,7 +115,8 @@ $(function () {
             const genres = Array.isArray(movie.genres) ? movie.genres.join(", ") : (movie.genre || movie.genres || "");
             const mood = Array.isArray(movie.tags) ? movie.tags.join(", ") : (movie.thisMovieIs || movie.tags || "");
             const imgSrc = resolveImagePath(movie.poster_url || movie.image);
-            const inWatchlist = watchlistTitles.has(title);
+            const movieId = movie.movie_id || null;
+            const inWatchlist = movieId ? watchlistTitles.has(movieId) : false;
             const trailerUrl = movie.trailer_url || "";
             const modalShowtimes = Array.isArray(movie.showtimes)
                 ? movie.showtimes.map((showtime) => showtime.display).filter(Boolean)
@@ -126,6 +125,7 @@ $(function () {
             const $card = $(`
                 <figure class="movie-card search-result-card"
                     data-title="${escapeHtml(title)}"
+                    data-movie-id="${escapeHtml(movieId || '')}"
                     data-description="${escapeHtml(description)}"
                     data-trailer-url="${escapeHtml(trailerUrl)}"
                     data-rating="${escapeHtml(rating)}"
@@ -136,6 +136,7 @@ $(function () {
                     data-showtimes='${escapeHtml(JSON.stringify(modalShowtimes))}'>
                     <span class="rating-overlay">${escapeHtml(rating)} / 5</span>
                     <button class="watch-flag ${inWatchlist ? "in-watchlist" : ""}" type="button"
+                        data-movie-id="${escapeHtml(movieId || '')}"
                         data-title="${escapeHtml(title)}"
                         aria-label="Toggle ${escapeHtml(title)} watchlist status">
                         <i class="${inWatchlist ? "fa-solid" : "fa-regular"} fa-heart" aria-hidden="true"></i>

@@ -4,7 +4,7 @@
   <meta http-equiv="Permissions-Policy" content="autoplay=(self),encrypted-media=(self)">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <meta name="csrf-token" content="{{ csrf_token() }}"> 
   <meta name="theme-color" content="#0b1320">
   <title>@yield('title', 'ReelTime')</title>
   <link rel="shortcut icon" href="{{ asset('imgs/movie.png') }}" type="image/x-icon">

@@ -43,7 +43,7 @@ Route::middleware('web')->group(function () {
         
     Route::get('/watchlist', [WatchlistController::class, 'index']);
     Route::post('/watchlist', [WatchlistController::class, 'store']);
-    Route::delete('/watchlist/{watchlist_id}', [WatchlistController::class, 'destroy']);
+    Route::delete('/watchlist/{movie_id}', [WatchlistController::class, 'destroy']);
     Route::get('/watchlist/check/{movie_id}', [WatchlistController::class, 'check']);
         
     Route::get('/ratings/my', [RatingController::class, 'myRatings']);

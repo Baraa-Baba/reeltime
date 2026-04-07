@@ -84,12 +84,31 @@ profile-page
                     <div class="watchlist-card-modern" data-movie-id="{{ $movie->movie_id }}">
                         <img src="{{ $movie->poster ? asset($movie->poster) : asset('imgs/default-movie.jpg') }}" 
                              alt="{{ $movie->title }}" class="card-image">
+                        <button class="btn-remove-card" data-title="{{ $movie->title }}" data-movie-id="{{ $movie->movie_id }}" aria-label="Remove from watchlist">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        @if(!$movie->ratings->where('user_id', auth()->id())->first())
+                            <button class="btn-rate-icon" data-title="{{ $movie->title }}" data-movie-id="{{ $movie->movie_id }}" aria-label="Rate this movie">
+                                <i class="far fa-star"></i>
+                            </button>
+                        @endif
                         <div class="card-content">
                             <h3 class="card-title">{{ $movie->title }}</h3>
-                            <div class="card-rating"><i class="fas fa-star"></i> {{ $movie->rating ?? 'N/A' }}/5</div>
+                            <div class="card-rating-wrapper">
+                                <div class="card-rating">
+                                    <i class="fas fa-star"></i> 
+                                    <span class="avg-rating">{{ $movie->rating ?? 'N/A' }}/5</span>
+                                    <span class="rating-label">(avg)</span>
+                                </div>
+                                @if($userRating = $movie->ratings->where('user_id', auth()->id())->first())
+                                    <div class="user-rating">
+                                        <i class="fas fa-star-solid"></i> 
+                                        <span class="your-rating">{{ $userRating->score }}/5</span>
+                                        <span class="rating-label">(yours)</span>
+                                    </div>
+                                @endif
+                            </div>
                             <div class="card-actions">
-                               <button class="btn-rate-large" data-title="{{ $movie->title }}" data-movie-id="{{ $movie->movie_id }}">Rate</button>
-                                <button class="btn-remove" data-title="{{ $movie->title }}" data-movie-id="{{ $movie->movie_id }}">Remove</button>
                             </div>
                         </div>
                     </div>
@@ -100,35 +119,6 @@ profile-page
                         <a href="{{ route('search') }}" class="accent-link">Browse Movies</a>
                     </div>
                 @endforelse
-            </div>
-        </div>
-        
-        <div class="rated-section">
-            <div class="section-header">
-                <div class="section-title">My Rated Movies</div>
-                <div class="watchlist-count" id="rated-counter">{{ $ratedMovies->count() }} movies rated</div>
-    </div>
-    <div class="rated-grid-modern" id="modern-rated">
-        @forelse($ratedMovies as $rating)
-            <div class="rated-card-modern" data-movie-id="{{ $rating->movie->movie_id }}">
-                <img src="{{ $rating->movie->poster ? asset($rating->movie->poster) : asset('imgs/default-movie.jpg') }}" 
-                     alt="{{ $rating->movie->title }}" class="card-image">
-                <div class="rated-badge">{{ $rating->score }}/5 <i class="fas fa-star"></i></div>
-                <div class="card-content">
-                    <h3 class="card-title">{{ $rating->movie->title }}</h3>
-                    <div class="card-actions">
-                        <button class="btn-edit-rating" data-title="{{ $rating->movie->title }}">Edit</button>
-                        <button class="btn-remove-rated" data-title="{{ $rating->movie->title }}">Remove</button>
-                    </div>
-                </div>
-            </div>
-        @empty
-            <div class="empty-rated" style="grid-column: 1 / -1;">
-                <div class="empty-icon"><i class="fas fa-star-half-alt"></i></div>
-                <h3>No Movies Rated Yet</h3>
-                <p>Rate movies from your watchlist to see them here!</p>
-            </div>
-        @endforelse
             </div>
         </div>
         

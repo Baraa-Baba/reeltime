@@ -336,6 +336,10 @@ function openMovieModal(cardElement) {
 
   let trailerFromCard = card.dataset.trailerUrl || card.getAttribute('data-trailer-url') || '';
   let youtubeEmbedUrl = findTrailerUrlByTitle(title) || normalizeTrailerUrl(trailerFromCard);
+  
+  // Get movie_id from card for watchlist functionality
+  let movieId = card.dataset.movieId || card.getAttribute('data-movie-id') || null;
+  
   if (modalTitle) modalTitle.textContent = title;
   if (modalText) modalText.textContent = text;
   if (modalCast) modalCast.textContent = cast;
@@ -370,23 +374,22 @@ function openMovieModal(cardElement) {
   }
 
   try {
-    updateWatchlistButton(title);
+    updateWatchlistButton(title, movieId);
   } catch (error) {
     console.error("Failed to update watchlist button.", error);
   }
 }
 
-function updateWatchlistButton(movieTitle) {
+function updateWatchlistButton(movieTitle, movieId = null) {
     let watchlistBtn = document.querySelector('.add-watchlist-btn');
     if (!watchlistBtn) return;
     
     let newWatchlistBtn = watchlistBtn.cloneNode(true);
     watchlistBtn.parentNode.replaceChild(newWatchlistBtn, watchlistBtn);
 
-    let userData = parseSessionJson('loggedInUser', null);
+    let userData = JSON.parse(sessionStorage.getItem('loggedInUser'));
 
-    let saved = [];
-    if (!userData) {
+    if (!userData || !userData.id) {
         // User not logged in
         newWatchlistBtn.textContent = "Login to Add to Watchlist";
         newWatchlistBtn.classList.add('login-required');
@@ -396,23 +399,48 @@ function updateWatchlistButton(movieTitle) {
         newWatchlistBtn.style.cursor = "pointer";
         return;
     }
-        saved = parseStoredJson('watchlist', []);
-    
 
-    let inList = saved.some(m => m.title === movieTitle && m.username === userData.username);
-
-    if (inList) {
-        newWatchlistBtn.textContent = " Remove from Watchlist";
-        newWatchlistBtn.classList.add('added');
-        newWatchlistBtn.classList.remove('login-required');
+    // Get movie_id from API if not provided
+    if (!movieId) {
+        fetch(`/api/movies?search=${encodeURIComponent(movieTitle)}`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            credentials: 'include'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.data && data.data.length > 0) {
+                movieId = data.data[0].movie_id;
+                updateButtonState(newWatchlistBtn, userData, movieId);
+            }
+        })
+        .catch(error => console.error('Error fetching movie:', error));
     } else {
-        newWatchlistBtn.textContent = "+ Add to Watchlist";
-        newWatchlistBtn.classList.remove('added', 'login-required');
+        updateButtonState(newWatchlistBtn, userData, movieId);
     }
-    newWatchlistBtn.disabled = false;
-    newWatchlistBtn.style.opacity = "1";
+}
 
-  }
+function updateButtonState(btn, userData, movieId) {
+    if (!userData.watchlist) userData.watchlist = [];
+    
+    let inWatchlist = userData.watchlist.some(m => m.movie_id == movieId);
+
+    if (inWatchlist) {
+        btn.textContent = "Remove from Watchlist";
+        btn.classList.add('added');
+        btn.classList.remove('login-required');
+    } else {
+        btn.textContent = "+ Add to Watchlist";
+        btn.classList.remove('added', 'login-required');
+    }
+    
+    btn.disabled = false;
+    btn.style.opacity = "1";
+    
+    // Store movieId on button for later use
+    btn.dataset.movieId = movieId;
+}
 // Event listeners
 document.addEventListener("click", (e) => {
   let card = e.target.closest(".movie-card");
