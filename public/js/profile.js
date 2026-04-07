@@ -416,8 +416,7 @@ function setupBookingSorting() {
                         <i class="fas fa-times"></i>
                     </button>
                     <div class="rating-modal-header">
-                        <h3>Rate "${movieTitle}"</h3>
-                        <p>Share your thoughts on this movie</p>
+                        <h3>Rate "${movieTitle}"</h3> 
                     </div>
                     
                     <div class="rating-stars-container">
