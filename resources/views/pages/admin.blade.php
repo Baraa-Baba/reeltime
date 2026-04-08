@@ -35,6 +35,10 @@ admin-page
         <i class="fas fa-plus" aria-hidden="true"></i>
         <span>Add Game</span>
       </button>
+      <a href="{{ route('profile') }}" class="button button-secondary">
+          <i class="fas fa-user" aria-hidden="true"></i>
+          <span>View Profile</span>
+      </a>
     </div>
   </section>
 
