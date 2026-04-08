@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('games', function (Blueprint $table) {
-            $table->string('icon')->default('fa-gamepad')->after('game_type');
+            $table->string('icon')->default('fa-gamepad');
         });
     }
 

@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('games', function (Blueprint $table) {
             $table->id('game_id');
             $table->string('title');
-            $table->text('description')->nullable()->change();
-            $table->string('game_type')->change();
+            $table->text('description')->nullable();
+            $table->string('game_type');
             $table->timestamps();
         });
     }
