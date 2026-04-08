@@ -94,20 +94,21 @@ profile-page
                         @endif
                         <div class="card-content">
                             <h3 class="card-title">{{ $movie->title }}</h3>
-                            <div class="card-rating-wrapper">
-                                <div class="card-rating">
-                                    <i class="fas fa-star"></i> 
-                                    <span class="avg-rating">{{ $movie->rating ?? 'N/A' }}/5</span>
-                                    <span class="rating-label">(avg)</span>
-                                </div>
-                                @if($userRating = $movie->ratings->where('user_id', auth()->id())->first())
+                            @if($userRating = $movie->ratings->where('user_id', auth()->id())->first())
+                                <div class="card-rating-wrapper">
                                     <div class="user-rating">
-                                        <i class="fas fa-star-solid"></i> 
-                                        <span class="your-rating">{{ $userRating->score }}/5</span>
-                                        <span class="rating-label">(yours)</span>
+                                        @for($i = 1; $i <= 5; $i++)
+                                            @if($i <= floor($userRating->score))
+                                                <i class="fas fa-star"></i>
+                                            @elseif($i - $userRating->score < 1 && $userRating->score % 1 != 0)
+                                                <i class="fas fa-star-half-alt"></i>
+                                            @else
+                                                <i class="far fa-star"></i>
+                                            @endif
+                                        @endfor 
                                     </div>
-                                @endif
-                            </div>
+                                </div>
+                            @endif
                             <div class="card-actions">
                             </div>
                         </div>
