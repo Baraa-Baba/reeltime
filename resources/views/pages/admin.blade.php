@@ -267,7 +267,7 @@ admin-page
                   </td>
                   <td>
                     <div class="admin-actions">
-                      <button type="button" class="button button-secondary admin-icon-btn" aria-label="View booking">
+                      <button type="button" class="button button-secondary admin-icon-btn view-booking-btn" data-booking-id="{{ $booking->booking_id }}" aria-label="View booking">
                         <i class="fas fa-eye" aria-hidden="true"></i>
                       </button>
                       <button type="button" class="button button-secondary admin-icon-btn admin-icon-btn-danger delete-btn" data-url="{{ route('admin.bookings.destroy', $booking->booking_id) }}" aria-label="Delete booking">
@@ -853,6 +853,27 @@ admin-page
         <div class="admin-actions" style="justify-content: flex-end; margin-top:1.5rem;">
             <button class="button button-secondary" onclick="closeQuestionFormModal()">Cancel</button>
             <button class="button button-primary" id="submitQuestionBtn">Save Question</button>
+    </div>
+  </div>
+</div>
+<!-- Booking show Modal -->
+<div id="bookingDetailsModal" class="admin-modal" onclick="closeBookingDetailsModal()">
+    <div class="surface-card admin-modal-shell" onclick="event.stopPropagation()" style="max-width: 700px;">
+        <button type="button" class="modal-close-btn" onclick="closeBookingDetailsModal()">
+            <i class="fas fa-times"></i>
+        </button>
+        <div class="section-header">
+            <span class="eyebrow"><i class="fas fa-ticket-alt"></i> Booking Details</span>
+            <h2 id="bookingDetailsTitle">Booking #<span id="bookingIdSpan"></span></h2>
+        </div>
+        <div id="bookingDetailsContent" style="display: grid; gap: 1rem;">
+            <!-- Loading state -->
+            <div class="admin-empty" id="bookingDetailsLoading">
+                <i class="fas fa-spinner fa-pulse"></i> Loading...
+            </div>
+        </div>
+        <div class="admin-actions" style="justify-content: flex-end; margin-top: 1rem;">
+            <button class="button button-secondary" onclick="closeBookingDetailsModal()">Close</button>
     </div>
   </div>
 </div>

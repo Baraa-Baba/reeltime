@@ -69,4 +69,22 @@ class BookingController extends Controller
             ], 500);
         }
     }
+
+    public function show($booking_id)
+    {
+        $booking = Booking::with(['user', 'showtime.movie', 'showtime.cinema'])
+                        ->find($booking_id);
+
+        if (!$booking) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Booking not found'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data'    => $booking
+        ]);
+    }
 }

@@ -88,4 +88,6 @@ Route::middleware(['web', 'auth', 'admin'])->prefix('admin-api')->group(function
     Route::post('/games/{game_id}/questions', [AdminController_Api::class, 'storeQuestion']);
     Route::put('/questions/{question_id}', [AdminController_Api::class, 'updateQuestion']);
     Route::delete('/questions/{question_id}', [AdminController_Api::class, 'destroyQuestion']);
+    //bookings
+    Route::get('/bookings/{booking_id}', [BookingController::class, 'show']);
 });

@@ -498,7 +498,8 @@ function loadHeroBanners() {
 }
 // Helper: escape HTML to prevent XSS
 function escapeHtml(str) {
-    if (!str) return '';
+   if (str === null || str === undefined) return '';
+    str = String(str);
     return str.replace(/[&<>]/g, function(m) {
         if (m === '&') return '&amp;';
         if (m === '<') return '&lt;';
@@ -1118,4 +1119,134 @@ document.addEventListener('DOMContentLoaded', function() {
             container.append($iconDiv);
         });
     }
+    // Show booking 
+    window.showBookingDetails = async function(bookingId) {
+        const modal = document.getElementById('bookingDetailsModal');
+        const contentDiv = document.getElementById('bookingDetailsContent');
+        const idSpan = document.getElementById('bookingIdSpan');
+
+        idSpan.textContent = bookingId;
+        contentDiv.innerHTML = '<div class="admin-empty"><i class="fas fa-spinner fa-pulse"></i> Loading...</div>';
+        modal.classList.add('is-open');
+        document.body.classList.add('modal-open');
+
+        try {
+            const response = await fetch(`/api/bookings/${bookingId}`, {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                credentials: 'include'
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            const result = await response.json();
+
+            if (result.success && result.data) {
+                renderBookingDetails(result.data);
+            } else {
+                contentDiv.innerHTML = `<div class="admin-empty text-danger"> ${result.message || 'Failed to load booking'}</div>`;
+            }
+        } catch (error) {
+            contentDiv.innerHTML = `<div class="admin-empty text-danger"> ${error.message}</div>`;
+        }
+    };
+
+    function renderBookingDetails(booking) {
+        const movie = booking.showtime?.movie || {};
+        const showtime = booking.showtime || {};
+        const cinema = showtime.cinema || {};
+        const user = booking.user || {};
+
+        let showtimeValue = 'N/A';
+        if (showtime.show_date && showtime.show_time) {
+           const date = new Date(showtime.show_date);
+            const timeStr = showtime.show_time.substring(0, 5); 
+            showtimeValue = `${date.toLocaleDateString()} at ${timeStr}`;
+        } else if (showtime.show_date) {
+            showtimeValue = showtime.show_date;
+        } else if (showtime.show_time) {
+            showtimeValue = showtime.show_time;
+        }
+
+       let seatsDisplay = '—';
+        if (booking.seats) {
+            try {
+                const seats = typeof booking.seats === 'string' ? JSON.parse(booking.seats) : booking.seats;
+                seatsDisplay = seats.join(', ');
+            } catch(e) { seatsDisplay = booking.seats; }
+        }
+
+        const html = `
+            <div style="display: grid; gap: 0.8rem;">
+                <div class="booking-detail-row">
+                    <span class="detail-label">Booking ID:</span>
+                    <span class="detail-value">${booking.booking_id}</span>
+                </div>
+                <div class="booking-detail-row">
+                    <span class="detail-label">User:</span>
+                    <span class="detail-value">${escapeHtml(user.username || 'N/A')} (${escapeHtml(user.email || 'N/A')})</span>
+                </div>
+                <div class="booking-detail-row">
+                    <span class="detail-label">Movie:</span>
+                    <span class="detail-value">${escapeHtml(movie.title || 'N/A')}</span>
+                </div>
+                <div class="booking-detail-row">
+                    <span class="detail-label">Cinema:</span>
+                    <span class="detail-value">${escapeHtml(cinema.name || 'N/A')}</span>
+                </div>
+                <div class="booking-detail-row">
+                    <span class="detail-label">Showtime:</span>
+                    <span class="detail-value">${escapeHtml(showtimeValue)}</span>
+                </div>
+                <div class="booking-detail-row">
+                    <span class="detail-label">Seats:</span>
+                    <span class="detail-value">${escapeHtml(seatsDisplay)}</span>
+                </div>
+                <div class="booking-detail-row">
+                    <span class="detail-label">Total Price:</span>
+                    <span class="detail-value">$${parseFloat(booking.total_price || booking.price || 0).toFixed(2)}</span>
+                </div>
+                <div class="booking-detail-row">
+                    <span class="detail-label">Booking Date:</span>
+                    <span class="detail-value">${escapeHtml(booking.booking_date)}</span>
+                </div>
+                <div class="booking-detail-row">
+                    <span class="detail-label">Status:</span>
+                    <span class="detail-value status-${(booking.status || 'pending').toLowerCase()}">${escapeHtml(booking.status || 'pending')}</span>
+                </div>
+            </div>
+        `;
+        document.getElementById('bookingDetailsContent').innerHTML = html;
+    }
+
+    window.closeBookingDetailsModal = function() {
+        const modal = document.getElementById('bookingDetailsModal');
+        if (modal) {
+            modal.classList.remove('is-open');
+            document.body.classList.remove('modal-open');
+        }
+    };
+
+    
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const modal = document.getElementById('bookingDetailsModal');
+            if (modal && modal.classList.contains('is-open')) {
+                closeBookingDetailsModal();
+            }
+        }
+    });
+
+   document.addEventListener('click', function(e) {
+        const btn = e.target.closest('.view-booking-btn');
+        if (btn) {
+            e.preventDefault();
+            const bookingId = btn.getAttribute('data-booking-id');
+            if (bookingId) showBookingDetails(bookingId);
+        }
+    });
 });
