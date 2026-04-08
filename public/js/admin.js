@@ -109,10 +109,17 @@ document.addEventListener('keydown', function(e) {
             if (content) content.classList.toggle('d-none', !isActive);
             if (btn) btn.classList.toggle('is-active', isActive);
         });
+        if (tab === 'games') {
+            loadGames();
+        }
+        if (tab === 'heroBanners') {
+            loadHeroBanners();
+        }
     };
 
     let pendingDeleteUrl = null;
     let pendingDeleteButton = null;
+    let pendingQuestionId = null;
 
     const deleteModal = document.getElementById('deleteConfirmModal');
     const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
@@ -131,6 +138,7 @@ document.addEventListener('keydown', function(e) {
         deleteModal.classList.remove('is-open');
         pendingDeleteUrl = null;
         pendingDeleteButton = null;
+        pendingQuestionId = null;
     }
 
     if (closeDeleteBtn) closeDeleteBtn.onclick = closeDeleteModal;
@@ -142,6 +150,42 @@ document.addEventListener('keydown', function(e) {
     }
     if (confirmDeleteBtn) {
         confirmDeleteBtn.addEventListener('click', function() {
+        if (pendingQuestionId) {
+            const qid = pendingQuestionId;
+            const btn = $('.delete-question-btn[data-id="' + qid + '"]')[0];
+            if (btn) {
+                const original = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = 'Deleting...';
+                $.ajax({
+                    url: `/api/admin-api/questions/${qid}`,
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+                    data: { _method: 'DELETE' },
+                    success: function(res) {
+                        if (res.success) {
+                            showToast('Question deleted', 'success');
+                            loadQuestions(currentGameForQuestions);
+                        } else {
+                            showToast(res.message, 'error');
+                        }
+                    },
+                    error: function() {
+                        showToast('Error deleting question', 'error');
+                    },
+                    complete: function() {
+                        if (btn) {
+                            btn.disabled = false;
+                            btn.innerHTML = original;
+                        }
+                        closeDeleteModal();
+                        pendingQuestionId = null;
+                    }
+                });
+            }
+            return; 
+        }
+
             if (!pendingDeleteUrl || !pendingDeleteButton) return;
 
             const btn = pendingDeleteButton;
@@ -694,4 +738,384 @@ document.addEventListener('DOMContentLoaded', function() {
         if (originalCloseModal) originalCloseModal(modalId);
     };
 
+    // GAMES
+    function loadGames() {
+        fetch('/api/admin-api/games', {
+            headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
+        })
+        .then(res => res.json())
+        .then(result => {
+            if (result.success) {
+                renderGamesTable(result.data);
+            } else {
+                showToast('Failed to load games', 'error');
+            }
+        });
+    }
+
+    
+    function renderGamesTable(games) {
+        const tbody = $('#gamesTab .admin-table tbody');
+        if (!tbody.length) return;
+        if (!games.length) {
+            tbody.html('<tr><td colspan="5" class="admin-empty">No games yet.</td></tr>');
+            return;
+        }
+        let html = '';
+        games.forEach(game => {
+            html += `
+                <tr data-game-id="${game.game_id}">
+                    <td>${game.game_id}</td>
+                    <td><div class="admin-table-icon"><i class="fas ${game.icon || 'fa-gamepad'}"></i></div></td>
+                    <td>${escapeHtml(game.title)}</td>
+                    <td>${escapeHtml(game.game_type)}</td>
+                    <td>
+                        <div class="admin-actions">
+                            <button type="button" class="button button-secondary admin-icon-btn edit-game-btn"
+                                    data-id="${game.game_id}"
+                                    data-title="${escapeHtml(game.title)}"
+                                    data-description="${escapeHtml(game.description || '')}"
+                                    data-game_type="${escapeHtml(game.game_type)}"
+                                    data-icon="${game.icon || 'fa-gamepad'}">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button type="button" class="button button-secondary admin-icon-btn manage-questions-btn"
+                                    data-id="${game.game_id}" data-title="${escapeHtml(game.title)}" data-game-type="${escapeHtml(game.game_type)}">
+                                <i class="fas fa-question-circle"></i>
+                            </button>
+                            <button type="button" class="button button-secondary admin-icon-btn admin-icon-btn-danger delete-btn"
+                                    data-url="/api/admin-api/games/${game.game_id}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+        tbody.html(html);
+    }
+    function openGameModal(gameId = null) {
+        $('#game_id').val('');
+        $('#gameForm')[0].reset();
+        $('#gameFormMessage').hide();
+        
+        
+        renderIconPicker('fa-gamepad');
+        $('#game_icon').val('fa-gamepad');
+        
+        if (gameId) {
+            $('#gameModalTitle').text('Edit Game');
+            fetch(`/api/admin-api/games/${gameId}`, {
+                headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
+            })
+            .then(res => res.json())
+            .then(result => {
+                if (result.success) {
+                    let g = result.data;
+                    $('#game_id').val(g.game_id);
+                    $('#game_title').val(g.title);
+                    $('#game_description').val(g.description);
+                    $('#game_type').val(g.game_type);
+                   
+                    const savedIcon = g.icon || 'fa-gamepad';
+                    renderIconPicker(savedIcon);
+                    $('#game_icon').val(savedIcon);
+                } else {
+                    showToast('Failed to load game', 'error');
+                }
+            });
+        } else {
+            $('#gameModalTitle').text('Add Game');
+            renderIconPicker('fa-gamepad');
+            $('#game_icon').val('fa-gamepad');
+        }
+        $('#gameModal').addClass('is-open');
+        document.body.classList.add('modal-open');
+    }
+    window.openGameModal = openGameModal;
+
+    function closeGameModal() {
+        $('#gameModal').removeClass('is-open');
+        document.body.classList.remove('modal-open');
+    }
+    window.closeGameModal = closeGameModal;
+    $('#submitGameBtn').on('click', function() {
+        const gameId = $('#game_id').val();
+        const url = gameId ? `/api/admin-api/games/${gameId}` : '/api/admin-api/games';
+        const method = gameId ? 'PUT' : 'POST';
+        const formData = {
+            title: $('#game_title').val(),
+            description: $('#game_description').val(),
+            game_type: $('#game_type').val(),
+            icon: $('#game_icon').val()
+        };
+        $.ajax({
+            url: url,
+            method: 'POST', 
+            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+            data: { ...formData, _method: method },
+            success: function(res) {
+                if (res.success) {
+                    showToast(res.message, 'success');
+                    closeGameModal();
+                    loadGames(); 
+                } else {
+                    $('#gameFormMessage').text(res.message).addClass('alert-error').show();
+                }
+            },
+            error: function(xhr) {
+                let msg = xhr.responseJSON?.message || 'Error saving game';
+                $('#gameFormMessage').text(msg).addClass('alert-error').show();
+            }
+        });
+    });
+
+    $(document).on('click', '.delete-btn', function(e) {
+        let url = $(this).data('url');
+        if (url && url.includes('/admin/games/')) {
+            let gameId = url.split('/').pop();
+            $(this).data('url', `/api/admin-api/games/${gameId}`);
+        }
+       
+    });
+    // questions
+    let currentGameForQuestions = null;
+    let currentGameType = null;
+
+    function openQuestionsModal(gameId, gameTitle, gameType) {
+        currentGameForQuestions = gameId;
+        currentGameType = gameType;
+        $('#currentGameId').val(gameId);
+        $('#questionsModalTitle').text(`Questions for ${gameTitle}`);
+        loadQuestions(gameId);
+        $('#questionsModal').addClass('is-open');
+        document.body.classList.add('modal-open');
+    }
+    window.openQuestionsModal = openQuestionsModal;
+
+    function closeQuestionsModal() {
+        $('#questionsModal').removeClass('is-open');
+        document.body.classList.remove('modal-open');
+    }
+    window.closeQuestionsModal = closeQuestionsModal;
+
+    function loadQuestions(gameId) {
+        $('#questionsList').html('<p>Loading questions...</p>');
+        fetch(`/api/admin-api/games/${gameId}/questions`, {
+            headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
+        })
+        .then(res => res.json())
+        .then(result => {
+            if (result.success && result.data.length) {
+                let html = '<div style="display:flex; flex-direction:column; gap:1rem;">';
+                result.data.forEach(q => {
+                    html += `
+                        <div class="surface-card" style="padding:0.75rem; border-radius:12px;" data-qid="${q.question_id}">
+                            <strong>${escapeHtml(q.content || 'No content')}</strong>
+                            ${q.question_text ? `<div><small>${escapeHtml(q.question_text)}</small></div>` : ''}
+                            <div><small>Correct: ${escapeHtml(q.correct_answer)}</small></div>
+                            <div class="admin-actions" style="margin-top:0.5rem;">
+                                <button class="button button-secondary edit-question-btn" data-q='${JSON.stringify(q)}'>Edit</button>
+                                <button class="button button-secondary admin-icon-btn-danger delete-question-btn" data-id="${q.question_id}">Delete</button>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                $('#questionsList').html(html);
+            } else {
+                $('#questionsList').html('<p>No questions yet. Add one below.</p>');
+            }
+            attachQuestionButtons();
+        });
+    }
+
+    function attachQuestionButtons() {
+        $('.edit-question-btn').off('click').on('click', function() {
+            let q = $(this).data('q');
+            openAddQuestionModal(q);
+        });
+        $('.delete-question-btn').off('click').on('click', function() {
+        pendingQuestionId = $(this).data('id');
+        $('#deleteConfirmModal .section-header p').text('Are you sure you want to permanently delete this question?');
+        $('#deleteConfirmModal').addClass('is-open');
+        document.body.classList.add('modal-open');
+    });
+    }
+
+    function openAddQuestionModal(questionData = null) {
+        $('#questionForm')[0].reset();
+        $('#question_id').val('');
+        $('#questionFormMessage').hide();
+        $('#q_correct').val('');
+
+        if (questionData) {
+            $('#questionFormModalTitle').text('Edit Question');
+            $('#question_id').val(questionData.question_id);
+            $('#q_text').val(questionData.question_text || '');
+            $('#q_content').val(questionData.content || '');
+            $('#q_hint').val(questionData.hint || '');
+            $('#q_points').val(questionData.points || 10);
+
+            
+            let opts = questionData.options;
+            if (typeof opts === 'string') {
+                try {
+                    opts = JSON.parse(opts);
+                } catch(e) {
+                    opts = ['', '', '', ''];
+                }
+            }
+            if (!Array.isArray(opts)) opts = ['', '', '', ''];
+            // Ensure we have 4 items
+            while (opts.length < 4) opts.push('');
+            
+            $('#opt_a').val(opts[0] || '');
+            $('#opt_b').val(opts[1] || '');
+            $('#opt_c').val(opts[2] || '');
+            $('#opt_d').val(opts[3] || '');
+
+            
+            const correctValue = questionData.correct_answer || '';
+            let correctLetter = '';
+            if (correctValue === opts[0]) correctLetter = 'A';
+            else if (correctValue === opts[1]) correctLetter = 'B';
+            else if (correctValue === opts[2]) correctLetter = 'C';
+            else if (correctValue === opts[3]) correctLetter = 'D';
+            $('#q_correct').val(correctLetter);
+        } else {
+            $('#questionFormModalTitle').text('Add Question');
+            $('#q_text, #q_content, #q_hint').val('');
+            $('#opt_a, #opt_b, #opt_c, #opt_d').val('');
+            $('#q_correct').val('');
+            $('#q_points').val(10);
+        }
+
+        $('#questionFormModal').addClass('is-open');
+        document.body.classList.add('modal-open');
+    }
+    window.openAddQuestionModal = openAddQuestionModal;
+
+    function closeQuestionFormModal() {
+        $('#questionFormModal').removeClass('is-open');
+        document.body.classList.remove('modal-open');
+    }
+    window.closeQuestionFormModal = closeQuestionFormModal;
+
+    $('#submitQuestionBtn').off('click').on('click', function() {
+        const gameId = $('#currentGameId').val();
+        const questionId = $('#question_id').val();
+        const url = questionId ? `/api/admin-api/questions/${questionId}` : `/api/admin-api/games/${gameId}/questions`;
+        const method = questionId ? 'PUT' : 'POST';
+
+        const optionsArray = [
+            $('#opt_a').val().trim(),
+            $('#opt_b').val().trim(),
+            $('#opt_c').val().trim(),
+            $('#opt_d').val().trim()
+        ];
+        if (optionsArray.some(opt => opt === '')) {
+            $('#questionFormMessage').text('Please fill all four options.').show();
+            return;
+        }
+
+        const correctLetter = $('#q_correct').val();
+        if (!correctLetter) {
+            $('#questionFormMessage').text('Please select the correct answer.').show();
+            return;
+        }
+        let correctAnswer = '';
+        if (correctLetter === 'A') correctAnswer = optionsArray[0];
+        else if (correctLetter === 'B') correctAnswer = optionsArray[1];
+        else if (correctLetter === 'C') correctAnswer = optionsArray[2];
+        else if (correctLetter === 'D') correctAnswer = optionsArray[3];
+
+        const content = ($('#q_content').val() || '').trim();
+        if (!content) {
+            $('#questionFormMessage').text('Content is required.').show();
+            return;
+        }
+
+        const payload = {
+            question_text: ($('#q_text').val() || '').trim() || null,
+            content: content,
+            correct_answer: correctAnswer,
+            options: optionsArray,
+            hint: ($('#q_hint').val() || '').trim() || null,
+            points: parseInt($('#q_points').val()) || 10,
+            _method: method
+        };
+
+        $.ajax({
+            url: url,
+            method: 'POST',
+            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+            data: payload,
+            success: function(res) {
+                if (res.success) {
+                    showToast(res.message, 'success');
+                    closeQuestionFormModal();
+                    loadQuestions(gameId);
+                } else {
+                    $('#questionFormMessage').text(res.message).show();
+                }
+            },
+            error: function(xhr) {
+                let msg = xhr.responseJSON?.message || 'Error saving question';
+                $('#questionFormMessage').text(msg).show();
+            }
+        });
+    });
+
+    $('#openAddQuestionBtn').off('click').on('click', function() {
+        openAddQuestionModal();
+    });
+
+    $(document).on('click', '.edit-game-btn', function() {
+        openGameModal($(this).data('id'));
+    });
+    $(document).on('click', '.manage-questions-btn', function() {
+        openQuestionsModal($(this).data('id'), $(this).data('title'), $(this).data('game-type'));
+    });
+    //ICON PICKER 
+    const gameIcons = [
+        'fa-gamepad', 'fa-film', 'fa-mask', 'fa-quote-left', 'fa-image',
+        'fa-music', 'fa-brain', 'fa-crown', 'fa-dice-d6', 'fa-hat-wizard',
+        'fa-robot', 'fa-star', 'fa-ticket-alt', 'fa-clapperboard', 'fa-theater-masks',
+        'fa-fire', 'fa-dragon', 'fa-ghost', 'fa-cat', 'fa-dog', 'fa-tree',
+        'fa-heart', 'fa-skull', 'fa-moon', 'fa-sun', 'fa-cloud-moon',
+        'fa-car', 'fa-rocket', 'fa-space-shuttle', 'fa-subway', 'fa-bicycle',
+        'fa-camera', 'fa-video', 'fa-headphones', 'fa-microphone', 'fa-volume-up'
+    ];
+
+    function renderIconPicker(selectedIcon = 'fa-gamepad') {
+        const container = $('#iconPicker');
+        container.empty();
+        gameIcons.forEach(icon => {
+            const isSelected = (icon === selectedIcon);
+            const $iconDiv = $(`
+                <div class="icon-option ${isSelected ? 'selected' : ''}" 
+                    data-icon="${icon}" 
+                    style="padding: 10px; border-radius: 12px; cursor: pointer; 
+                            background: ${isSelected ? 'rgba(122, 92, 255, 0.3)' : 'rgba(255,255,255,0.05)'};
+                            border: 1px solid ${isSelected ? 'var(--accent)' : 'rgba(255,255,255,0.15)'};
+                            transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center;
+                            width: 44px; height: 44px;">
+                    <i class="fas ${icon}" style="font-size: 1.4rem;"></i>
+                </div>
+            `);
+            $iconDiv.on('click', function() {
+                $('#iconPicker .icon-option').removeClass('selected').css({
+                    background: 'rgba(255,255,255,0.05)',
+                    borderColor: 'rgba(255,255,255,0.15)'
+                });
+                $(this).addClass('selected').css({
+                    background: 'rgba(122, 92, 255, 0.3)',
+                    borderColor: 'var(--accent)'
+                });
+                $('#game_icon').val(icon);
+            });
+            container.append($iconDiv);
+        });
+    }
 });

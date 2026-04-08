@@ -31,7 +31,7 @@ admin-page
         <i class="fas fa-plus" aria-hidden="true"></i>
         <span>Add Movie</span>
       </button>
-      <button type="button" onclick="openModal('addGameModal')" class="button button-secondary">
+      <button type="button" onclick="openGameModal()" class="button button-secondary">
         <i class="fas fa-plus" aria-hidden="true"></i>
         <span>Add Game</span>
       </button>
@@ -197,32 +197,36 @@ admin-page
             </thead>
             <tbody>
               @forelse($games as $game)
-                <tr>
+                <tr data-game-id="{{ $game->game_id }}">
                   <td>{{ $game->game_id }}</td>
-                  <td>
-                    <div class="admin-table-icon">
-                      <i class="fas {{ $game->icon }}" aria-hidden="true"></i>
-                    </div>
-                  </td>
+                  <td><div class="admin-table-icon"><i class="fas {{ $game->icon }}"></i></div></td>
                   <td>{{ $game->title }}</td>
-                  <td>{{ $game->game_type }}</td>
+                  <td>{{ ucfirst($game->game_type) }}</td>
                   <td>
                     <div class="admin-actions">
-                      <button type="button" class="button button-secondary admin-icon-btn" aria-label="Edit game">
-                        <i class="fas fa-edit" aria-hidden="true"></i>
+                      <button type="button" class="button button-secondary admin-icon-btn edit-game-btn"
+                                    data-id="{{ $game->game_id }}"
+                                    data-title="{{ addslashes($game->title) }}"
+                                    data-description="{{ addslashes($game->description) }}"
+                                    data-game_type="{{ $game->game_type }}"
+                                    data-icon="{{ $game->icon }}">
+                        <i class="fas fa-edit"></i>
                       </button>
-                      <button type="button" class="button button-secondary admin-icon-btn admin-icon-btn-danger delete-btn" data-url="{{ route('admin.games.destroy', $game->game_id) }}" aria-label="Delete game">
-                        <i class="fas fa-trash" aria-hidden="true"></i>
-                      </button>
-                    </div>
-                  </td>
+                            <button type="button" class="button button-secondary admin-icon-btn manage-questions-btn"
+                                    data-id="{{ $game->game_id }}" data-title="{{ addslashes($game->title) }}">
+                                <i class="fas fa-question-circle"></i>
+                            </button>
+                            <button type="button" class="button button-secondary admin-icon-btn admin-icon-btn-danger delete-btn"
+                                    data-url="/api/admin-api/games/{{ $game->game_id }}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
                 </tr>
-              @empty
-                <tr>
-                  <td colspan="5" class="admin-empty">No games yet.</td>
-                </tr>
-              @endforelse
-            </tbody>
+                @empty
+                <tr><td colspan="5" class="admin-empty">No games yet.</td></tr>
+                @endforelse
+            </tbody> 
           </table>
         </div>
       </div>
@@ -686,17 +690,53 @@ admin-page
         </div>
     </div>
 </div>
-<div id="addGameModal" class="admin-modal" onclick="closeModal('addGameModal')">
-  <div class="surface-card admin-modal-shell" onclick="event.stopPropagation()">
-    <button type="button" class="modal-close-btn" onclick="closeModal('addGameModal')" aria-label="Close">
-      <i class="fas fa-times" aria-hidden="true"></i>
-    </button>
-    <div class="section-header">
-      <span class="eyebrow">Game Tools</span>
-      <h2>Add game</h2>
-      <p>The create flow can be wired into this panel when you are ready to manage new trivia content.</p>
+<!-- Game Modal-->
+<div id="gameModal" class="admin-modal" onclick="closeGameModal()">
+    <div class="surface-card admin-modal-shell" onclick="event.stopPropagation()" style="max-width: 600px;">
+        <button type="button" class="modal-close-btn" onclick="closeGameModal()"><i class="fas fa-times"></i></button>
+        <div class="section-header">
+            <span class="eyebrow">Game Manager</span>
+            <h2 id="gameModalTitle">Add Game</h2>
+        </div>
+        <form id="gameForm">
+            <input type="hidden" id="game_id" name="game_id">
+            <div style="display: grid; gap: 1rem;">
+                <div>
+                    <label>Title *</label>
+                    <input type="text" name="title" id="game_title" required class="form-control" placeholder="e.g., Emoji Challenge">
+                </div>
+                <div>
+                    <label>Description</label>
+                    <textarea name="description" id="game_description" rows="3" class="form-control" placeholder="Short description of the game"></textarea>
+                </div>
+                <div>
+                    <label>Game Type * </label>
+                    <input type="text" name="game_type" id="game_type" required list="gameTypeSuggestions" class="form-control" placeholder="e.g., Emoji Challenge, Character Match, Movie Quotes, etc.">
+                    <datalist id="gameTypeSuggestions">
+                        <option value="Emoji Challenge">
+                        <option value="Character Match">
+                        <option value="Movie Quotes">
+                        <option value="Movie Scenes">
+                        <option value="Sound Clips">
+                        <option value="Year Guess">
+                    </datalist>
+                  </div>
+                <div>
+                    <label>Icon (click to select)</label>
+                    <div id="iconPicker" style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; background: rgba(255,255,255,0.03); border-radius: 16px; padding: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                        <!-- icons will be populated by JS -->
+                    </div>
+                    <input type="hidden" name="icon" id="game_icon" value="fa-gamepad">
+                    <small>Selected icon will appear in the games list</small>
+                </div>
+            </div>
+            <div id="gameFormMessage" class="alert" style="display:none; margin-top:1rem;"></div>
+        </form>
+        <div class="admin-actions" style="justify-content: flex-end; margin-top:1.5rem;">
+            <button type="button" class="button button-secondary" onclick="closeGameModal()">Cancel</button>
+            <button type="button" class="button button-primary" id="submitGameBtn">Save Game</button>
+        </div>
     </div>
-  </div>
 </div>
 <!-- Delete Confirmation Modal -->
 <div id="deleteConfirmModal" class="admin-modal">
@@ -745,6 +785,74 @@ admin-page
         <h4>Reviews</h4>
         <div id="comments-list"></div>
       </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Questions Modal -->
+<div id="questionsModal" class="admin-modal" onclick="closeQuestionsModal()">
+    <div class="surface-card admin-modal-shell" onclick="event.stopPropagation()" style="max-width: 900px; max-height: 85vh; display: flex; flex-direction: column;">
+        <button type="button" class="modal-close-btn" onclick="closeQuestionsModal()"><i class="fas fa-times"></i></button>
+        <div class="section-header" style="flex-shrink: 0;">
+            <span class="eyebrow">Game Questions</span>
+            <h2 id="questionsModalTitle">Manage Questions</h2>
+            <input type="hidden" id="currentGameId">
+        </div>
+
+        <!-- Scrollable question list -->
+        <div id="questionsList" style="flex: 1; overflow-y: auto; margin: 1rem 0; padding-right: 0.5rem;">
+            <!-- dynamically loaded questions -->
+        </div>
+
+        <!-- Sticky Add Button -->
+        <div style="flex-shrink: 0; text-align: right; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
+            <button type="button" class="button button-primary" id="openAddQuestionBtn">
+                <i class="fas fa-plus"></i> Add Question
+            </button>
+        </div>
+    </div>
+</div>
+<!-- Question Form Modal (Add/Edit) -->
+<div id="questionFormModal" class="admin-modal" onclick="closeQuestionFormModal()">
+    <div class="surface-card admin-modal-shell" onclick="event.stopPropagation()" style="max-width: 700px;">
+        <button type="button" class="modal-close-btn" onclick="closeQuestionFormModal()"><i class="fas fa-times"></i></button>
+        <div class="section-header">
+            <span class="eyebrow">Question Details</span>
+            <h2 id="questionFormModalTitle">Add Question</h2>
+        </div>
+        <form id="questionForm">
+            <input type="hidden" id="question_id">
+            <div style="display: grid; gap: 1rem;">
+                <div><label>Question Text</label><input type="text" id="q_text" class="form-control"></div>
+                <div><label>Content *</label><textarea id="q_content" rows="2" class="form-control" required></textarea></div>
+                <div><label>Options *</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                        <input type="text" id="opt_a" placeholder="Option A" class="form-control">
+                        <input type="text" id="opt_b" placeholder="Option B" class="form-control">
+                        <input type="text" id="opt_c" placeholder="Option C" class="form-control">
+                        <input type="text" id="opt_d" placeholder="Option D" class="form-control">
+                    </div>
+                </div>
+                <div><label>Correct Answer *</label>
+                    <select id="q_correct" class="form-control">
+                        <option value="">-- Select --</option>
+                        <option value="A">Option A</option>
+                        <option value="B">Option B</option>
+                        <option value="C">Option C</option>
+                        <option value="D">Option D</option>
+                    </select>
+                </div>
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem;">
+                    <div><label>Hint</label><input type="text" id="q_hint" class="form-control"></div>
+                    <div><label>Points</label><input type="number" id="q_points" value="10" class="form-control"></div>
+                </div>
+            </div>
+            <div id="questionFormMessage" class="alert" style="display:none; margin-top:1rem;"></div>
+        </form>
+        <div class="admin-actions" style="justify-content: flex-end; margin-top:1.5rem;">
+            <button class="button button-secondary" onclick="closeQuestionFormModal()">Cancel</button>
+            <button class="button button-primary" id="submitQuestionBtn">Save Question</button>
     </div>
   </div>
 </div>
@@ -959,6 +1067,14 @@ admin-page
 #imagePreviewModal .modal-close-btn:hover {
     background: rgba(255, 255, 255, 0.25);
     transform: scale(1.05);
+}
+.icon-option:hover {
+    background: rgba(122, 92, 255, 0.2) !important;
+    transform: scale(1.05);
+    border-color: var(--accent) !important;
+}
+#deleteConfirmModal {
+    z-index: 10001 !important;
 }
 </style>
 @endsection

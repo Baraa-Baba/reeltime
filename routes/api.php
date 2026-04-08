@@ -77,4 +77,15 @@ Route::middleware(['web', 'auth', 'admin'])->prefix('admin-api')->group(function
     Route::patch('/hero-banners/{id}/toggle-active', [App\Http\Controllers\Api\HeroBannerController::class, 'toggleActive']);
     Route::delete('/hero-banners/{id}', [App\Http\Controllers\Api\HeroBannerController::class, 'destroy']);
     Route::post('/hero-banners/reorder', [App\Http\Controllers\Api\HeroBannerController::class, 'reorder']);
+    //games
+    Route::get('/games', [AdminController_Api::class, 'indexGames']);
+    Route::get('/games/{game_id}', [AdminController_Api::class, 'showGame']);
+    Route::post('/games', [AdminController_Api::class, 'storeGame']);
+    Route::put('/games/{game_id}', [AdminController_Api::class, 'updateGame']);
+    Route::delete('/games/{game_id}', [AdminController_Api::class, 'destroyGame']);
+    //questions
+    Route::get('/games/{game_id}/questions', [AdminController_Api::class, 'indexQuestions']);
+    Route::post('/games/{game_id}/questions', [AdminController_Api::class, 'storeQuestion']);
+    Route::put('/questions/{question_id}', [AdminController_Api::class, 'updateQuestion']);
+    Route::delete('/questions/{question_id}', [AdminController_Api::class, 'destroyQuestion']);
 });

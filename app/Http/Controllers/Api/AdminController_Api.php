@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\Movie;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use App\Models\Game;
+use App\Models\Question;   
 
 class AdminController_Api extends Controller
 {
@@ -146,5 +148,100 @@ class AdminController_Api extends Controller
     public function destroy(string $id)
     {
         //
+    } 
+
+    //game
+    public function indexGames()
+    {
+        $games = Game::all();
+        return response()->json(['success' => true, 'data' => $games]);
+    }
+    public function showGame($game_id)
+    {
+        $game = Game::with('questions')->findOrFail($game_id);
+        return response()->json(['success' => true, 'data' => $game]);
+    }
+
+    public function storeGame(Request $request)
+    {
+        $validated = $request->validate([
+            'title'       => 'required|string|max:255|unique:games,title',
+            'description' => 'nullable|string',
+            'game_type'   => 'required|string|max:50',
+            'icon'        => 'nullable|string|max:50',
+        ]);
+
+        $game = Game::create($validated);
+        return response()->json(['success' => true, 'message' => 'Game created', 'data' => $game], 201);
+    }
+
+    public function updateGame(Request $request, $game_id)
+    {
+        $game = Game::findOrFail($game_id);
+        $validated = $request->validate([
+            'title'       => 'required|string|max:255|unique:games,title,' . $game_id . ',game_id',
+            'description' => 'nullable|string',
+            'game_type'   => 'required|string|max:50',
+            'icon'        => 'nullable|string|max:50',
+        ]);
+        $game->update($validated);
+        return response()->json(['success' => true, 'message' => 'Game updated', 'data' => $game]);
+    }
+
+    public function destroyGame($game_id)
+    {
+        $game = Game::findOrFail($game_id);
+        $game->questions()->delete();
+        $game->delete();
+        return response()->json(['success' => true, 'message' => 'Game deleted']);
+    }
+    //questions 
+    public function indexQuestions($game_id)
+    {
+        $game = Game::findOrFail($game_id);
+        $questions = $game->questions;
+        return response()->json(['success' => true, 'data' => $questions]);
+    }
+
+    public function storeQuestion(Request $request, $game_id)
+    {
+        $game = Game::findOrFail($game_id);
+        $validated = $request->validate([
+            'question_text'  => 'nullable|string',
+            'content'        => 'required|string',
+            'correct_answer' => 'required|string',
+            'options'        => 'required|array|min:2',
+            'options.*'      => 'string',
+            'hint'           => 'nullable|string',
+            'points'         => 'integer|min:1',
+        ]);
+        $validated['options'] = json_encode($validated['options']);
+        $validated['game_id'] = $game_id;
+        $question = Question::create($validated);
+        return response()->json(['success' => true, 'message' => 'Question added', 'data' => $question], 201);
+    }
+
+    public function updateQuestion(Request $request, $question_id)
+    {
+        $question = Question::findOrFail($question_id);
+        $validated = $request->validate([
+            'question_text'  => 'nullable|string',
+            'content'        => 'required|string',
+            'correct_answer' => 'required|string',
+            'options'        => 'required|array|min:2',
+            'options.*'      => 'string',
+            'hint'           => 'nullable|string',
+            'points'         => 'integer|min:1',
+        ]);
+        $validated['options'] = json_encode($validated['options']);
+        $question->update($validated);
+        return response()->json(['success' => true, 'message' => 'Question updated', 'data' => $question]);
+    }
+
+    public function destroyQuestion($question_id)
+    {
+        $question = Question::findOrFail($question_id);
+        $question->delete();
+        return response()->json(['success' => true, 'message' => 'Question deleted']);
     }
 }

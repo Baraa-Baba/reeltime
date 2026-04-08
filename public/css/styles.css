@@ -2013,3 +2013,14 @@ body.profile-page main.profile-page {
 .btn-cancel-small:active {
     transform: translateY(1px);
 }
+.full-width {
+    grid-column: span 2;
+}
+@media (max-width: 640px) {
+    #questionFormModal .admin-modal-shell > div > div {
+        grid-template-columns: 1fr !important;
+    }
+    .full-width {
+        grid-column: span 1;
+    }
+}
