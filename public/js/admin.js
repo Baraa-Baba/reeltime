@@ -1333,6 +1333,90 @@ document.addEventListener('click', function(e) {
         if (userId) showUserDetails(userId);
     }
 });
+document.addEventListener('click', function(e) {
+    const btn = e.target.closest('.cancel-booking-btn');
+    if (!btn) return;
+    e.preventDefault();
+    const bookingId = btn.getAttribute('data-booking-id');
+    if (bookingId) {
+        openCancelBookingModal(bookingId, btn);
+    }
+});
+let pendingCancelBookingId = null;
+let pendingCancelButton = null;
+
+function openCancelBookingModal(bookingId, button) {
+    const modal = document.getElementById('cancelBookingModal');
+    if (!modal) return;
+    pendingCancelBookingId = bookingId;
+    pendingCancelButton = button;
+    modal.classList.add('is-open');
+    document.body.classList.add('modal-open');
+}
+
+function closeCancelBookingModal() {
+    const modal = document.getElementById('cancelBookingModal');
+    if (modal) {
+        modal.classList.remove('is-open');
+        document.body.classList.remove('modal-open');
+    }
+    pendingCancelBookingId = null;
+    pendingCancelButton = null;
+}
 
 
+document.getElementById('closeCancelModal')?.addEventListener('click', closeCancelBookingModal);
+document.getElementById('keepBookingBtn')?.addEventListener('click', closeCancelBookingModal);
+document.getElementById('cancelBookingModal')?.addEventListener('click', function(e) {
+    if (e.target === this) closeCancelBookingModal();
+});
+
+document.getElementById('confirmCancelBtn')?.addEventListener('click', function() {
+    if (!pendingCancelBookingId || !pendingCancelButton) return;
+    
+    const btn = pendingCancelButton;
+    const originalHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    
+    fetch(`/api/admin-api/bookings/${pendingCancelBookingId}/cancel`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        credentials: 'include'
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            showToast(data.message, 'success');
+            const row = btn.closest('tr');
+            if (row) {
+                const statusCell = row.querySelector('td:nth-child(6) .admin-badge');
+                if (statusCell) {
+                    statusCell.textContent = 'cancelled';
+                    statusCell.classList.remove('status-pending', 'status-confirmed');
+                    statusCell.classList.add('status-cancelled');
+                }
+                btn.disabled = true;
+                btn.style.opacity = '0.5';
+                btn.style.cursor = 'not-allowed';
+                btn.innerHTML = '<i class="fas fa-ban"></i>';
+            }
+        } else {
+            showToast(data.message || 'Failed to cancel booking', 'error');
+            btn.disabled = false;
+            btn.innerHTML = originalHtml;
+        }
+        closeCancelBookingModal();
+    })
+    .catch(error => {
+        showToast('Network error: ' + error.message, 'error');
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
+        closeCancelBookingModal();
+    });
+});
 });

@@ -90,6 +90,7 @@ Route::middleware(['web', 'auth', 'admin'])->prefix('admin-api')->group(function
     Route::delete('/questions/{question_id}', [AdminController_Api::class, 'destroyQuestion']);
     //bookings
     Route::get('/bookings/{booking_id}', [BookingController::class, 'show']);
+    Route::patch('/bookings/{booking_id}/cancel', [AdminController_Api::class, 'cancelBooking']);
     //users
     Route::get('/users/{user_id}', [AdminController_Api::class, 'showUser']);
 });

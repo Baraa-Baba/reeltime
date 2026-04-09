@@ -274,9 +274,11 @@ admin-page
                       <button type="button" class="button button-secondary admin-icon-btn view-booking-btn" data-booking-id="{{ $booking->booking_id }}" aria-label="View booking">
                         <i class="fas fa-eye" aria-hidden="true"></i>
                       </button>
-                      <button type="button" class="button button-secondary admin-icon-btn admin-icon-btn-danger delete-btn" data-url="{{ route('admin.bookings.destroy', $booking->booking_id) }}" aria-label="Delete booking">
-                        <i class="fas fa-trash" aria-hidden="true"></i>
-                      </button>
+                      <button type="button" class="button button-secondary admin-icon-btn cancel-booking-btn" 
+                                data-booking-id="{{ $booking->booking_id }}" 
+                                aria-label="Cancel booking">
+                            <i class="fas fa-ban" aria-hidden="true"></i>
+                        </button>
                     </div>
                   </td>
                 </tr>
@@ -902,6 +904,30 @@ admin-page
         </div>
         <div class="admin-actions" style="justify-content: flex-end; margin-top: 1rem;">
             <button class="button button-secondary" onclick="closeUserDetailsModal()">Close</button>
+        </div>
+    </div>
+</div>
+<!-- Cancel Booking Confirmation Modal -->
+<div id="cancelBookingModal" class="admin-modal">
+    <div class="surface-card admin-modal-shell" style="max-width: 450px;">
+        <button type="button" class="modal-close-btn" id="closeCancelModal" aria-label="Close">
+            <i class="fas fa-times" aria-hidden="true"></i>
+        </button>
+        <div class="section-header" style="text-align: center;">
+            <span class="eyebrow" style="background: rgba(249, 115, 22, 0.2); color: var(--accent-3);">
+                <i class="fas fa-ban"></i> Cancel Booking
+            </span>
+            <h2 style="color: var(--accent-3);">Confirm Cancellation</h2>
+            <p>Are you sure you want to cancel this booking?<br>Seats will be restored to the showtime.</p>
+            <p style="font-size: 0.9rem; color: var(--text-muted);">This action cannot be undone.</p>
+        </div>
+        <div class="admin-actions" style="justify-content: center; gap: 1rem; margin-top: 1rem;">
+            <button class="button button-secondary" id="keepBookingBtn">
+                <i class="fas fa-times"></i> No, Keep
+            </button>
+            <button class="button button-primary confirm-cancel-btn" id="confirmCancelBtn" style="background: linear-gradient(135deg, var(--danger), #dc2626);">
+                <i class="fas fa-ban"></i> Yes, Cancel
+            </button>
         </div>
     </div>
 </div>

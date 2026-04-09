@@ -10,6 +10,8 @@ use Illuminate\Support\Str;
 use App\Models\Game;
 use App\Models\Question;  
 use App\Models\User; 
+use App\Models\Booking;
+use App\Models\Showtime;
 
 class AdminController_Api extends Controller
 {
@@ -258,6 +260,28 @@ class AdminController_Api extends Controller
             'member_since'  => $user->member_since ? $user->member_since->format('Y-m-d H:i:s') : $user->created_at->format('Y-m-d H:i:s'),
             'profile_image' => $user->profile_image ? (preg_match('/^https?:\/\//', $user->profile_image) ? $user->profile_image : asset($user->profile_image)) : null,
         ]
+    ]);
+}
+public function cancelBooking($booking_id)
+{
+    $booking = Booking::findOrFail($booking_id);
+    
+    if ($booking->status === 'cancelled') {
+        return response()->json([
+            'success' => false,
+            'message' => 'Booking is already cancelled.'
+        ], 422);
+    }
+    
+    $showtime = Showtime::lockForUpdate()->findOrFail($booking->showtime_id);
+    $showtime->available_seats += $booking->seats;
+    $showtime->save();
+    $booking->status = 'cancelled';
+    $booking->save();
+    
+    return response()->json([
+        'success' => true,
+        'message' => 'Booking cancelled successfully.'
     ]);
 }
 }
