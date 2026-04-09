@@ -1249,4 +1249,90 @@ document.addEventListener('DOMContentLoaded', function() {
             if (bookingId) showBookingDetails(bookingId);
         }
     });
+    // Show user details modal by fetching from API
+window.showUserDetails = function(userId) {
+    const modal = document.getElementById('userDetailsModal');
+    const contentDiv = document.getElementById('userDetailsContent');
+    const titleSpan = document.getElementById('userDetailsTitle');
+
+    if (!modal || !contentDiv) return;
+
+    // Show modal and loading state
+    modal.classList.add('is-open');
+    document.body.classList.add('modal-open');
+    contentDiv.innerHTML = '<div class="admin-empty"><i class="fas fa-spinner fa-pulse"></i> Loading user details...</div>';
+
+    fetch(`/api/admin-api/users/${userId}`, {
+        headers: {
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        credentials: 'include'
+    })
+    .then(res => res.json())
+    .then(result => {
+        if (result.success && result.data) {
+            renderUserDetails(result.data);
+        } else {
+            contentDiv.innerHTML = `<div class="admin-empty text-danger">${result.message || 'Failed to load user details'}</div>`;
+        }
+    })
+    .catch(error => {
+        contentDiv.innerHTML = `<div class="admin-empty text-danger">Network error: ${error.message}</div>`;
+    });
+};
+
+function renderUserDetails(user) {
+    const avatarHtml = user.profile_image
+        ? `<img src="${user.profile_image}" class="admin-avatar-sm" style="width:80px; height:80px; border-radius:50%;">`
+        : '<div class="admin-thumb-placeholder" style="width:80px; height:80px; border-radius:50%;"></div>';
+
+    const html = `
+        <div style="display: grid; gap: 1rem;">
+            <div style="text-align: center;">${avatarHtml}</div>
+            <div class="booking-detail-row">
+                <span class="detail-label">User ID:</span>
+                <span class="detail-value">${user.user_id}</span>
+            </div>
+            <div class="booking-detail-row">
+                <span class="detail-label">Username:</span>
+                <span class="detail-value">${escapeHtml(user.username)}</span>
+            </div>
+            <div class="booking-detail-row">
+                <span class="detail-label">Email:</span>
+                <span class="detail-value">${escapeHtml(user.email)}</span>
+            </div>
+            <div class="booking-detail-row">
+                <span class="detail-label">Role:</span>
+                <span class="detail-value">${escapeHtml(user.role)}</span>
+            </div>
+            <div class="booking-detail-row">
+                <span class="detail-label">Member Since:</span>
+                <span class="detail-value">${escapeHtml(user.member_since)}</span>
+            </div>
+        </div>
+    `;
+    document.getElementById('userDetailsContent').innerHTML = html;
+    document.getElementById('userDetailsTitle').innerHTML = `User: ${escapeHtml(user.username)}`;
+}
+
+window.closeUserDetailsModal = function() {
+    const modal = document.getElementById('userDetailsModal');
+    if (modal) {
+        modal.classList.remove('is-open');
+        document.body.classList.remove('modal-open');
+    }
+};
+
+// Attach event listener for the view-user-btn
+document.addEventListener('click', function(e) {
+    const btn = e.target.closest('.view-user-btn');
+    if (btn) {
+        e.preventDefault();
+        const userId = btn.getAttribute('data-user-id');
+        if (userId) showUserDetails(userId);
+    }
+});
+
+
 });

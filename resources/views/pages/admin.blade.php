@@ -329,9 +329,15 @@ admin-page
                   </td>
                   <td>
                     <div class="admin-actions">
-                      <button type="button" class="button button-secondary admin-icon-btn" aria-label="Edit user">
-                        <i class="fas fa-edit" aria-hidden="true"></i>
-                      </button>
+                     <button type="button" class="button button-secondary admin-icon-btn view-user-btn"
+        data-user-id="{{ $member->user_id }}"
+        data-username="{{ addslashes($member->username) }}"
+        data-email="{{ $member->email }}"
+        data-role="{{ $member->role }}"
+        data-member-since="{{ $member->member_since }}"
+        data-avatar="{{ Illuminate\Support\Str::startsWith($member->profile_image, ['http://', 'https://']) ? $member->profile_image : asset($member->profile_image) }}">
+    <i class="fas fa-eye" aria-hidden="true"></i>
+</button>
                       <button type="button" class="button button-secondary admin-icon-btn admin-icon-btn-danger delete-btn" data-url="{{ route('admin.users.destroy', $member->user_id) }}" aria-label="Delete user">
                         <i class="fas fa-trash" aria-hidden="true"></i>
                       </button>
@@ -880,6 +886,24 @@ admin-page
             <button class="button button-secondary" onclick="closeBookingDetailsModal()">Close</button>
     </div>
   </div>
+</div>
+<!-- User Details Modal -->
+<div id="userDetailsModal" class="admin-modal" onclick="closeUserDetailsModal()">
+    <div class="surface-card admin-modal-shell" onclick="event.stopPropagation()" style="max-width: 600px;">
+        <button type="button" class="modal-close-btn" onclick="closeUserDetailsModal()">
+            <i class="fas fa-times"></i>
+        </button>
+        <div class="section-header">
+            <span class="eyebrow"><i class="fas fa-user"></i> User Information</span>
+            <h2 id="userDetailsTitle">User Details</h2>
+        </div>
+        <div id="userDetailsContent" style="display: grid; gap: 1rem;">
+            <div class="admin-empty">Loading...</div>
+        </div>
+        <div class="admin-actions" style="justify-content: flex-end; margin-top: 1rem;">
+            <button class="button button-secondary" onclick="closeUserDetailsModal()">Close</button>
+        </div>
+    </div>
 </div>
 <style>
     .admin-table tbody tr.movie-row {

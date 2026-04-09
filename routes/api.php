@@ -90,4 +90,6 @@ Route::middleware(['web', 'auth', 'admin'])->prefix('admin-api')->group(function
     Route::delete('/questions/{question_id}', [AdminController_Api::class, 'destroyQuestion']);
     //bookings
     Route::get('/bookings/{booking_id}', [BookingController::class, 'show']);
+    //users
+    Route::get('/users/{user_id}', [AdminController_Api::class, 'showUser']);
 });

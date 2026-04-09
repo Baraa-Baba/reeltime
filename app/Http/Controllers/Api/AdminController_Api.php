@@ -8,7 +8,8 @@ use App\Models\Movie;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use App\Models\Game;
-use App\Models\Question;   
+use App\Models\Question;  
+use App\Models\User; 
 
 class AdminController_Api extends Controller
 {
@@ -244,4 +245,19 @@ class AdminController_Api extends Controller
         $question->delete();
         return response()->json(['success' => true, 'message' => 'Question deleted']);
     }
+    public function showUser($user_id)
+{
+    $user = User::findOrFail($user_id);
+    return response()->json([
+        'success' => true,
+        'data' => [
+            'user_id'       => $user->user_id,
+            'username'      => $user->username,
+            'email'         => $user->email,
+            'role'          => $user->role,
+            'member_since'  => $user->member_since ? $user->member_since->format('Y-m-d H:i:s') : $user->created_at->format('Y-m-d H:i:s'),
+            'profile_image' => $user->profile_image ? (preg_match('/^https?:\/\//', $user->profile_image) ? $user->profile_image : asset($user->profile_image)) : null,
+        ]
+    ]);
+}
 }
