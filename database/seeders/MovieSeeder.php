@@ -61,6 +61,9 @@ class MovieSeeder extends Seeder
                     'genres'       => isset($movieData['genres']) && is_array($movieData['genres'])
                         ? implode(', ', $movieData['genres'])
                         : null,
+                    'this_movie_is' => isset($movieData['thisMovieIs']) && is_array($movieData['thisMovieIs'])
+                        ? implode(', ', $movieData['thisMovieIs'])
+                        : null,
                     'rating'       => 0,
                     'duration'     => $duration,
                     'poster'       => $movieData['image'] ?? null,

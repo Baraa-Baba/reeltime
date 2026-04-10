@@ -5,13 +5,10 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\SearchController;
-use App\Models\HeroBanner;
 
-Route::get('/', function () {
-    $heroBanners = HeroBanner::orderBy('position')->get();
-    return view('index', compact('heroBanners'));
-})->name('home');
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::get('/about', function () {
     return view('pages.about');

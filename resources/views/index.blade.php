@@ -8,6 +8,9 @@ home-page
 
 @push('scripts')
 <script src="{{ asset('js/watchlist.js') }}" defer></script>
+<script>
+  window.homeMovies = @json($allMovies);
+</script>
 @endpush
 
 @section('content')
@@ -61,7 +64,18 @@ home-page
     @endforeach
   </div>
 
-  <section class="gallery" id="gallery"></section>
+  <section class="gallery" id="gallery">
+    @foreach($categories as $category)
+      <section class="movies-cat">
+        <h3>{{ $category['name'] }}</h3>
+        <div class="movie">
+          @foreach($category['movies'] as $movie)
+            @include('components.movie-card', ['movie' => $movie])
+          @endforeach
+        </div>
+      </section>
+    @endforeach
+  </section>
 </main>
 
 <div class="modal" id="card-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modal-title">

@@ -94,7 +94,6 @@ function flushPendingToast() {
 
 $(function () {
     window.movieComments = window.movieComments || {};
-    // comments lal movies in bookings
     let bookingMovieComments = {
         "The Running Man": [
             {
@@ -166,80 +165,15 @@ $(function () {
         window.movieComments[title] = existing.concat(comments);
     });
 
-    let $gallery = $("#gallery");
-    //was getting errors when hosting
-    const basePath = window.location.pathname.includes("/")
-        ? "../"
-        : "./";
-    $.getJSON(basePath + "data/movies.json")
-        .done(function (data) {
-            if (!$gallery.length) return;
-            $gallery.empty();
-
-            if (!data || !Array.isArray(data.categories)) {
-                console.error("movies.json: 'categories' is missing or not an array.");
-                return;
+    // Movies are now rendered server-side from the database.
+    // Just register comments into the global movieComments object for the modal.
+    if (Array.isArray(window.homeMovies)) {
+        window.homeMovies.forEach(function (movie) {
+            if (Array.isArray(movie.comments) && movie.comments.length) {
+                window.movieComments[movie.title] = movie.comments;
             }
-
-            data.categories.forEach(category => {
-                // Create the category section
-                let $section = $(`
-          <section class="movies-cat">
-            <h3>${category.name}</h3>
-            <div class="movie"></div>
-          </section>
-        `);
-
-                let $row = $section.find(".movie");
-
-                // Add each movie card
-                (category.movies || []).forEach(movie => {
-                    let rating = movie.rating ?? "-";
-
-                    let $card = $(`
-            <figure class="movie-card">
-              <img src="${movie.image}" alt="${movie.title} poster">
-             
-            </figure>`
-                    );
-
-                    // Data attributes so script.js can use them
-                    $card.attr("data-movie-id", movie.id || "");
-                    $card.attr("data-title", movie.title || "");
-                    $card.attr("data-description", movie.description || "");
-                    $card.attr("data-trailer-id", movie.trailerId || "");
-                    $card.attr("data-rating", rating);
-                    $card.attr("data-cast", (movie.cast || []).join(", "));
-                    $card.attr("data-genres", (movie.genres || []).join(", "));
-                    $card.attr("data-this-movie-is", (movie.thisMovieIs || []).join(", "));
-                    // Store comments globally
-                    if (Array.isArray(movie.comments)) {
-                        window.movieComments[movie.title] = movie.comments;
-                    }
-                    // Rating overlay
-                    let $overlay = $(`
-                    <div class="movie-overlay">
-                        <p class="movie-overlay-title">${movie.title || ""}</p>
-                        <p class="movie-overlay-desc">${movie.description || ""}</p>
-                        <div class="movie-overlay-bottom">
-                            <span class="film-overlay"> ${movie.time} </span>
-                            <span class="movie-overlay-rating">${rating} / 5 ★</span>
-                        </div>
-                    </div>
-                    `);
-
-
-                    $card.append($overlay);
-
-                    $row.append($card);
-                });
-
-                $gallery.append($section);
-            });
-        })
-        .fail(function (jqxhr, textStatus, error) {
-            console.error("Failed to load movies.json:", textStatus, error);
         });
+    }
     //seat selection
     function appendSeats(seats, rowType) {
         let row = $("." + rowType)
@@ -341,12 +275,12 @@ $(function () {
             }
 
             if (window.authUser) {
-                if (window.authUser.role==='admin'){
-                    window.location.href='/admin';
+                if (window.authUser.role === 'admin') {
+                    window.location.href = '/admin';
                 }
-                else{
+                else {
                     window.location.href = '/profile';
-                    }
+                }
             } else {
                 openAuthModal('login');
             }
