@@ -65,7 +65,7 @@ home-page
   </div>
 
   <section class="gallery" id="gallery">
-    @foreach($categories as $category)
+    @foreach($categories->sortByDesc(fn($cat) => count($cat['movies']))->take(3) as $category)
       <section class="movies-cat">
         <h3>{{ $category['name'] }}</h3>
         <div class="movie">
