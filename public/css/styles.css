@@ -791,7 +791,9 @@ body.header-drawer-open {
   border-radius: 50%;
   border: 1px solid rgba(255, 255, 255, 0.14);
   background: rgba(9, 11, 16, 0.6);
-  color: var(--text-color);
+  color: #ffffff;
+  font-size: 1.4rem;
+  line-height: 1;
   backdrop-filter: blur(14px);
   transition: transform 0.18s ease, background 0.18s ease;
   cursor: pointer;
@@ -2465,7 +2467,6 @@ body.profile-page main.profile-page {
 .btn-booking-action.btn-cancel-confirm,
 .showShowTimes-btn,
 .play-btn,
-.next,
 .btn-cancel-small {
   background: var(--accent-gradient);
   color: #0a0d11;
@@ -3240,7 +3241,6 @@ body.profile-page main.profile-page {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.08);
   color: var(--text-color);
-  font-size: 0.82rem;
 }
 
 .search-overlay {
@@ -3773,18 +3773,19 @@ body.profile-page main.profile-page {
 .btn-cancel-small {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
   padding: 0.6rem 1.2rem;
   border-radius: 40px;
+  border: none;
   font-weight: 600;
   font-size: 0.85rem;
   letter-spacing: 0.01em;
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #ffb4a2;
+  background: var(--accent-gradient);
+  color: #0a0d11;
   cursor: pointer;
   transition: all 0.25s ease;
-  backdrop-filter: blur(4px);
+  box-shadow: 0 8px 16px rgba(250, 204, 21, 0.18);
 }
 
 .btn-cancel-small i {
@@ -3793,11 +3794,8 @@ body.profile-page main.profile-page {
 }
 
 .btn-cancel-small:hover {
-  background: rgba(255, 90, 90, 0.12);
-  border-color: rgba(255, 90, 90, 0.6);
-  color: #ff7b6e;
   transform: translateY(-2px);
-  box-shadow: 0 6px 14px rgba(255, 70, 70, 0.2);
+  box-shadow: 0 12px 24px rgba(250, 204, 21, 0.25);
 }
 
 .btn-cancel-small:hover i {
@@ -3820,4 +3818,16 @@ body.profile-page main.profile-page {
   .full-width {
     grid-column: span 1;
   }
+}
+
+/* Icon styling for all accent gradient buttons */
+.btn-rating-large.btn-confirm-large i,
+.btn-booking-action.btn-cancel-confirm i,
+.showShowTimes-btn i,
+.play-btn i,
+.next i,
+.btn-cancel-small i {
+  display: inline-block;
+  line-height: 1;
+  vertical-align: middle;
 }
