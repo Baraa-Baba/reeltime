@@ -164,7 +164,7 @@ admin-page
                     @endif
                   </td>
                   <td>{{ $movie->title }}</td>
-                  <td>{{ $movie->rating ? number_format($movie->rating, 1) : '-' }}</td>
+                  <td>{{ ($movie->rating && $movie->rating > 0) ? number_format($movie->rating, 1) : '-' }}</td>
                   <td>{{ $movie->duration }} min</td>
                   <td>
                     <div class="admin-actions">
