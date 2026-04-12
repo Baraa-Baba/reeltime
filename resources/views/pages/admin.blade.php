@@ -110,7 +110,24 @@ admin-page
 
      <section id="moviesTab" class="admin-tab-pane">
       <div class="section-header">
-        
+        <div class="filter-bar" style="display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; align-items: center;">
+    <div style="flex: 2; min-width: 200px; position: relative;">
+        <i class="fas fa-search" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #9ca3af; pointer-events: none;"></i>
+        <input type="text" id="movieSearch" placeholder="Search by title, cast or genre..." 
+               class="form-control" 
+               style="width: 100%; padding: 0.6rem 1rem 0.6rem 2.5rem; border-radius: 40px;">
+    </div>
+    <div style="flex: 1; min-width: 150px;">
+        <select id="movieGenreFilter" class="form-control" style="border-radius: 40px;">
+            <option value="">All Genres</option>
+        </select>
+    </div>
+    <div>
+        <button id="clearMovieFilters" class="button button-secondary" style="border-radius: 40px;">
+            <i class="fas fa-eraser"></i> Clear
+        </button>
+    </div>
+</div>
       </div>
 
       <div class="admin-data-card">
@@ -184,6 +201,27 @@ admin-page
 
     <section id="gamesTab" class="admin-tab-pane d-none">
       <div class="section-header">
+        <div class="filter-bar" style="display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; align-items: center;">
+    <div style="flex: 2; min-width: 200px; position: relative;">
+        <i class="fas fa-search" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #9ca3af; pointer-events: none;"></i>
+        <input type="text" id="gameSearch" placeholder="Search by title..." 
+               class="form-control" 
+               style="width: 100%; padding: 0.6rem 1rem 0.6rem 2.5rem; border-radius: 40px;">
+    </div>
+    <div style="flex: 1; min-width: 150px;">
+        <select id="gameTypeFilter" class="form-control" style="border-radius: 40px;">
+            <option value="">All Types</option>
+        </select>
+    </div>
+    <div>
+        <button id="clearGameFilters" class="button button-secondary" style="border-radius: 40px;">
+            <i class="fas fa-eraser"></i> Clear
+        </button>
+    </div>
+</div>
+        
+   
+</div>
         
       </div>
 
@@ -238,6 +276,27 @@ admin-page
 
     <section id="bookingsTab" class="admin-tab-pane d-none">
       <div class="section-header">
+        <div class="filter-bar" style="display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; align-items: center;">
+    <div style="flex: 2; min-width: 200px; position: relative;">
+        <i class="fas fa-search" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #9ca3af; pointer-events: none;"></i>
+        <input type="text" id="bookingSearch" placeholder="Search by user, movie or booking ID..." 
+               class="form-control" 
+               style="width: 100%; padding: 0.6rem 1rem 0.6rem 2.5rem; border-radius: 40px;">
+    </div>
+    <div style="flex: 1; min-width: 150px;">
+        <select id="bookingStatusFilter" class="form-control" style="border-radius: 40px;">
+            <option value="">All Statuses</option>
+            <option value="pending">Pending</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="cancelled">Cancelled</option>
+        </select>
+    </div>
+    <div>
+        <button id="clearBookingFilters" class="button button-secondary" style="border-radius: 40px;">
+            <i class="fas fa-eraser"></i> Clear
+        </button>
+    </div>
+</div>
         
       </div>
 
@@ -295,7 +354,26 @@ admin-page
 
     <section id="usersTab" class="admin-tab-pane d-none">
       <div class="section-header">
-        
+       <div class="filter-bar" style="display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; align-items: center;">
+    <div style="flex: 2; min-width: 200px; position: relative;">
+        <i class="fas fa-search" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #9ca3af; pointer-events: none;"></i>
+        <input type="text" id="userSearch" placeholder="Search by username or email..." 
+               class="form-control" 
+               style="width: 100%; padding: 0.6rem 1rem 0.6rem 2.5rem; border-radius: 40px;">
+    </div>
+    <div style="flex: 1; min-width: 150px;">
+        <select id="userRoleFilter" class="form-control" style="border-radius: 40px;">
+            <option value="">All Roles</option>
+            <option value="admin">Admin</option>
+            <option value="user">User</option>
+        </select>
+    </div>
+    <div>
+        <button id="clearUserFilters" class="button button-secondary" style="border-radius: 40px;">
+            <i class="fas fa-eraser"></i> Clear
+        </button>
+    </div>
+</div>
       </div>
 
       <div class="admin-data-card">

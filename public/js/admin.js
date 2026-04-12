@@ -748,6 +748,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(result => {
             if (result.success) {
                 renderGamesTable(result.data);
+                populateGameTypeFilter(result.data);
             } else {
                 showToast('Failed to load games', 'error');
             }
@@ -1419,4 +1420,223 @@ document.getElementById('confirmCancelBtn')?.addEventListener('click', function(
         closeCancelBookingModal();
     });
 });
+//filters
+function populateMovieGenres() {
+    const genreSet = new Set();
+    document.querySelectorAll('#moviesTab .movie-row').forEach(row => {
+        const genres = row.getAttribute('data-genres');
+        if (genres) {
+            genres.split(',').forEach(g => genreSet.add(g.trim()));
+        }
+    });
+    const select = document.getElementById('movieGenreFilter');
+    if (select) {
+        select.innerHTML = '<option value="">All Genres</option>';
+        Array.from(genreSet).sort().forEach(genre => {
+            select.innerHTML += `<option value="${escapeHtml(genre)}">${escapeHtml(genre)}</option>`;
+        });
+    }
+}
+
+function filterMovies() {
+    const searchTerm = (document.getElementById('movieSearch')?.value || '').toLowerCase();
+    const selectedGenre = document.getElementById('movieGenreFilter')?.value || '';
+    const rows = document.querySelectorAll('#moviesTab .movie-row');
+    let visibleCount = 0;
+    rows.forEach(row => {
+        const title = (row.getAttribute('data-title') || '').toLowerCase();
+        const cast = (row.getAttribute('data-cast') || '').toLowerCase();
+        const genres = (row.getAttribute('data-genres') || '').toLowerCase();
+        const matchesSearch = searchTerm === '' || title.includes(searchTerm) || cast.includes(searchTerm) || genres.includes(searchTerm);
+        const matchesGenre = selectedGenre === '' || genres.includes(selectedGenre.toLowerCase());
+        if (matchesSearch && matchesGenre) {
+            row.style.display = '';
+            visibleCount++;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+    const tbody = document.querySelector('#moviesTab .admin-table tbody');
+    const emptyMsg = tbody?.querySelector('.filter-empty-row');
+    if (visibleCount === 0 && !emptyMsg) {
+        tbody?.insertAdjacentHTML('beforeend', '<tr class="filter-empty-row"><td colspan="6" class="admin-empty">No movies match your filters.</td></tr>');
+    } else if (visibleCount > 0 && emptyMsg) {
+        emptyMsg.remove();
+    }
+}
+
+function filterGames() {
+    const searchTerm = (document.getElementById('gameSearch')?.value || '').toLowerCase();
+    const typeFilter = (document.getElementById('gameTypeFilter')?.value || '').toLowerCase();
+    const rows = document.querySelectorAll('#gamesTab .admin-table tbody tr');
+    let visibleCount = 0;
+    rows.forEach(row => {
+        const title = (row.querySelector('td:nth-child(3)')?.textContent || '').toLowerCase();
+        const gameType = (row.querySelector('td:nth-child(4)')?.textContent || '').toLowerCase();
+        const matchesSearch = searchTerm === '' || title.includes(searchTerm);
+        const matchesType = typeFilter === '' || gameType === typeFilter;
+        if (matchesSearch && matchesType) {
+            row.style.display = '';
+            visibleCount++;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+    const tbody = document.querySelector('#gamesTab .admin-table tbody');
+    const emptyMsg = tbody?.querySelector('.filter-empty-row');
+    if (visibleCount === 0 && !emptyMsg) {
+        tbody?.insertAdjacentHTML('beforeend', '<tr class="filter-empty-row"><td colspan="5" class="admin-empty">No games match your filters.</td></tr>');
+    } else if (visibleCount > 0 && emptyMsg) {
+        emptyMsg.remove();
+    }
+}
+
+function filterBookings() {
+    const searchTerm = (document.getElementById('bookingSearch')?.value || '').toLowerCase();
+    const statusFilter = (document.getElementById('bookingStatusFilter')?.value || '').toLowerCase();
+    const rows = document.querySelectorAll('#bookingsTab .admin-table tbody tr');
+    let visibleCount = 0;
+    rows.forEach(row => {
+        const userId = (row.querySelector('td:nth-child(2)')?.textContent || '').toLowerCase();
+        const movieTitle = (row.querySelector('td:nth-child(3)')?.textContent || '').toLowerCase();
+        const bookingId = (row.querySelector('td:nth-child(1)')?.textContent || '').toLowerCase();
+        const statusElem = row.querySelector('td:nth-child(6) .admin-badge');
+        const status = (statusElem?.textContent || '').toLowerCase();
+        const matchesSearch = searchTerm === '' || userId.includes(searchTerm) || movieTitle.includes(searchTerm) || bookingId.includes(searchTerm);
+        const matchesStatus = statusFilter === '' || status === statusFilter;
+        if (matchesSearch && matchesStatus) {
+            row.style.display = '';
+            visibleCount++;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+    const tbody = document.querySelector('#bookingsTab .admin-table tbody');
+    const emptyMsg = tbody?.querySelector('.filter-empty-row');
+    if (visibleCount === 0 && !emptyMsg) {
+        tbody?.insertAdjacentHTML('beforeend', '<tr class="filter-empty-row"><td colspan="7" class="admin-empty">No bookings match your filters.</td></tr>');
+    } else if (visibleCount > 0 && emptyMsg) {
+        emptyMsg.remove();
+    }
+}
+
+function filterUsers() {
+    const searchTerm = (document.getElementById('userSearch')?.value || '').toLowerCase();
+    const roleFilter = (document.getElementById('userRoleFilter')?.value || '').toLowerCase();
+    const rows = document.querySelectorAll('#usersTab .admin-table tbody tr');
+    let visibleCount = 0;
+    rows.forEach(row => {
+        const username = (row.querySelector('td:nth-child(3)')?.textContent || '').toLowerCase();
+        const email = (row.querySelector('td:nth-child(4)')?.textContent || '').toLowerCase();
+        const roleElem = row.querySelector('td:nth-child(6) .admin-badge');
+        const role = (roleElem?.textContent || '').toLowerCase();
+        const matchesSearch = searchTerm === '' || username.includes(searchTerm) || email.includes(searchTerm);
+        const matchesRole = roleFilter === '' || role === roleFilter;
+        if (matchesSearch && matchesRole) {
+            row.style.display = '';
+            visibleCount++;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+    const tbody = document.querySelector('#usersTab .admin-table tbody');
+    const emptyMsg = tbody?.querySelector('.filter-empty-row');
+    if (visibleCount === 0 && !emptyMsg) {
+        tbody?.insertAdjacentHTML('beforeend', '<tr class="filter-empty-row"><td colspan="7" class="admin-empty">No users match your filters.</td></tr>');
+    } else if (visibleCount > 0 && emptyMsg) {
+        emptyMsg.remove();
+    }
+}
+
+function debounce(func, delay) {
+    let timer;
+    return function(...args) {
+        clearTimeout(timer);
+        timer = setTimeout(() => func.apply(this, args), delay);
+    };
+}
+
+function initFilters() {
+    const movieSearch = document.getElementById('movieSearch');
+    const movieGenre = document.getElementById('movieGenreFilter');
+    const clearMovie = document.getElementById('clearMovieFilters');
+    if (movieSearch) movieSearch.addEventListener('input', debounce(filterMovies, 300));
+    if (movieGenre) movieGenre.addEventListener('change', filterMovies);
+    if (clearMovie) clearMovie.addEventListener('click', () => {
+        if (movieSearch) movieSearch.value = '';
+        if (movieGenre) movieGenre.value = '';
+        filterMovies();
+    });
+    populateMovieGenres();
+
+  
+    const gameSearch = document.getElementById('gameSearch');
+    const gameType = document.getElementById('gameTypeFilter');
+    const clearGame = document.getElementById('clearGameFilters');
+    if (gameSearch) gameSearch.addEventListener('input', debounce(filterGames, 300));
+    if (gameType) gameType.addEventListener('change', filterGames);
+    if (clearGame) clearGame.addEventListener('click', () => {
+        if (gameSearch) gameSearch.value = '';
+        if (gameType) gameType.value = '';
+        filterGames();
+    });
+
+    const bookingSearch = document.getElementById('bookingSearch');
+    const bookingStatus = document.getElementById('bookingStatusFilter');
+    const clearBooking = document.getElementById('clearBookingFilters');
+    if (bookingSearch) bookingSearch.addEventListener('input', debounce(filterBookings, 300));
+    if (bookingStatus) bookingStatus.addEventListener('change', filterBookings);
+    if (clearBooking) clearBooking.addEventListener('click', () => {
+        if (bookingSearch) bookingSearch.value = '';
+        if (bookingStatus) bookingStatus.value = '';
+        filterBookings();
+    });
+
+    const userSearch = document.getElementById('userSearch');
+    const userRole = document.getElementById('userRoleFilter');
+    const clearUser = document.getElementById('clearUserFilters');
+    if (userSearch) userSearch.addEventListener('input', debounce(filterUsers, 300));
+    if (userRole) userRole.addEventListener('change', filterUsers);
+    if (clearUser) clearUser.addEventListener('click', () => {
+        if (userSearch) userSearch.value = '';
+        if (userRole) userRole.value = '';
+        filterUsers();
+    });
+}
+
+const originalLoadGames = window.loadGames;
+window.loadGames = function() {
+    originalLoadGames();
+    setTimeout(() => {
+        filterGames();
+        const gameSearch = document.getElementById('gameSearch');
+        if (gameSearch && !gameSearch.hasListener) {
+            gameSearch.addEventListener('input', debounce(filterGames, 300));
+            gameSearch.hasListener = true;
+        }
+        const gameType = document.getElementById('gameTypeFilter');
+        if (gameType && !gameType.hasListener) {
+            gameType.addEventListener('change', filterGames);
+            gameType.hasListener = true;
+        }
+    }, 100);
+};
+
+initFilters();
+const observer = new MutationObserver(() => populateMovieGenres());
+observer.observe(document.querySelector('#moviesTab .admin-table tbody'), { childList: true, subtree: true });
+function populateGameTypeFilter(games) {
+    const typeSet = new Set();
+    games.forEach(game => {
+        if (game.game_type) typeSet.add(game.game_type);
+    });
+    const sortedTypes = Array.from(typeSet).sort();
+    const select = document.getElementById('gameTypeFilter');
+    if (!select) return;
+    let html = '<option value="">All Types</option>';
+    sortedTypes.forEach(type => {
+        html += `<option value="${escapeHtml(type)}">${escapeHtml(type)}</option>`;
+    });
+    select.innerHTML = html;
+}
 });
