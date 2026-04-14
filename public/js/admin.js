@@ -1586,7 +1586,7 @@ function filterMovies() {
             (genre === '' || genres.includes(genre))
         );
     });
-    paginateTable(filtered, 1, 'moviePagination');
+    paginateTable(filtered, 1, 'moviePagination','#moviesTab .movie-row');
 }function filterGames() {
     const ITEMS_PER_PAGE = 50;
     const search = document.getElementById('gameSearch').value.toLowerCase();
@@ -1604,7 +1604,7 @@ function filterMovies() {
         );
     });
 
-    paginateTable(filtered, 1, 'gamePagination');
+    paginateTable(filtered, 1, 'gamePagination', '#gamesTab tbody tr');
 }
 function filterBookings() {
     const search = document.getElementById('bookingSearch').value.toLowerCase();
@@ -1624,7 +1624,7 @@ function filterBookings() {
         );
     });
 
-    paginateTable(filtered, 1, 'bookingPagination');
+    paginateTable(filtered, 1, 'bookingPagination', '#bookingsTab tbody tr');
 }function filterUsers() {
     const search = document.getElementById('userSearch').value.toLowerCase();
     const role = document.getElementById('userRoleFilter').value.toLowerCase();
@@ -1642,7 +1642,7 @@ function filterBookings() {
         );
     });
 
-    paginateTable(filtered, 1, 'userPagination');
+    paginateTable(filtered, 1, 'userPagination', '#usersTab tbody tr');
 }
 function debounce(func, delay) {
     let timer;
@@ -1735,16 +1735,21 @@ function populateGameTypeFilter(games) {
     });
     select.innerHTML = html;
 }
-function paginateTable(rows, page, containerId) {
+function paginateTable(rows, page, containerId, tableSelector) {
+    const allRows = document.querySelectorAll(tableSelector);
+    allRows.forEach(row => row.style.display = 'none');
     const start = (page - 1) * ITEMS_PER_PAGE;
     const end = start + ITEMS_PER_PAGE;
 
     rows.forEach((row, index) => {
-        row.style.display = (index >= start && index < end) ? '' : 'none';
+        if (index >= start && index < end) {
+            row.style.display = '';
+        }
     });
 
     renderPagination(rows.length, page, containerId, rows);
-}function renderPagination(totalItems, currentPage, containerId, rows) {
+}
+function renderPagination(totalItems, currentPage, containerId, rows) {
     const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
     const container = document.getElementById(containerId);
     if (!container) return;
