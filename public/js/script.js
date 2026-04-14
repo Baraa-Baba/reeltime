@@ -193,20 +193,27 @@ if (modal) {
 
 //for the welcome box to active the btns set indicator and trnsform to the next img every 3 sec
 let heroBox = document.getElementById("heroBox");
-let heroImages = [
-  "imgs/welcome page.png",
-  "imgs/Premiere.png",
-  "imgs/theatre.png"
-];
+let heroSlides = heroBox ? Array.from(heroBox.querySelectorAll('.hero-slide')) : [];
+let heroImages = heroSlides
+  .map((slide) => slide.dataset.image)
+  .filter((image) => typeof image === 'string' && image.trim().length > 0);
 let heroIndex = 0;
 let autoAdvanceInterval;
 let isTransitioning = false;
 if(heroBox){
+  if (!heroImages.length) {
+    const nextBtn = heroBox.querySelector('.hero-btn.next');
+    const prevBtn = heroBox.querySelector('.hero-btn.prev');
+    if (nextBtn) nextBtn.style.display = 'none';
+    if (prevBtn) prevBtn.style.display = 'none';
+  }
 
   // Create indicator container and circles
   let indicatorsContainer = document.createElement('div');
   indicatorsContainer.className = 'carousel-indicators';
-  heroBox.appendChild(indicatorsContainer);
+  if (heroImages.length > 1) {
+    heroBox.appendChild(indicatorsContainer);
+  }
 
   // Create indicators
   heroImages.forEach((_, index) => {
@@ -218,18 +225,23 @@ if(heroBox){
   });
   //initialize
   setHero(0);
-  startAutoAdvance();
+  if (heroImages.length > 1) {
+    startAutoAdvance();
+  }
   //pasue when hover
   heroBox.addEventListener('mouseenter', () => {
     clearInterval(autoAdvanceInterval);
   });
   //resume when no hover
   heroBox.addEventListener('mouseleave', () => {
-    startAutoAdvance();
+    if (heroImages.length > 1) {
+      startAutoAdvance();
+    }
   });
 }
 function setHero(i) {
   if(!heroBox) return; //la2an mafee hero box ella b index.html
+  if (!heroImages.length) return;
   if (isTransitioning) return;
 
   isTransitioning = true;
@@ -240,7 +252,7 @@ function setHero(i) {
     indicator.classList.toggle('active', index === heroIndex);
   });
   // Update hero slide text (sync text with image)
-  document.querySelectorAll('#heroBox .hero-slide').forEach((slide, index) => {
+  heroSlides.forEach((slide, index) => {
     slide.classList.toggle('active', index === heroIndex);
   });
   // Reset transitioning flag after transition completes

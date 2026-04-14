@@ -706,7 +706,7 @@ body.header-drawer-open {
 /* Home hero */
 .welcome-box {
   position: relative;
-  min-height: clamp(500px, 68vh, 720px);
+  aspect-ratio: 16 / 9;
   border-radius: calc(var(--card-radius) + 8px);
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -714,6 +714,10 @@ body.header-drawer-open {
     radial-gradient(circle at top right, rgba(20, 184, 166, 0.18), transparent 30%),
     radial-gradient(circle at bottom left, rgba(249, 115, 22, 0.18), transparent 32%),
     linear-gradient(160deg, rgba(12, 15, 23, 0.98), rgba(8, 10, 16, 0.96));
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  transition: background-image 0.45s ease-in-out, background-position 0.25s ease;
   box-shadow: var(--shadow-strong);
   isolation: isolate;
 }
@@ -3719,17 +3723,89 @@ body.profile-page main.profile-page {
     width: 100%;
   }
 
+  .home-page .home-hero {
+    text-align: center;
+  }
+
+  .home-page .home-hero .hero-copy {
+    justify-items: center;
+  }
+
+  .home-page .home-hero .hero-copy p {
+    margin-inline: auto;
+  }
+
+  .home-page .home-hero .hero-actions {
+    justify-content: center;
+  }
+
   .hero-notes {
     grid-template-columns: 1fr;
   }
 
   .hero-slide {
-    padding: 1.25rem 4rem 3.5rem;
+    top: 50%;
+    left: 50%;
+    right: auto;
+    bottom: auto;
+    inset: auto !important;
+    max-width: min(22rem, calc(100% - 2rem));
+    width: calc(100% - 2rem);
+    padding: 0.85rem 0.9rem 1rem;
+    text-align: center;
+    transform: translate(-50%, calc(-50% + 24px));
+  }
+
+  .hero-slide.active {
+    transform: translate(-50%, -50%);
+  }
+
+  .hero-slide h1 {
+    font-size: clamp(1.25rem, 5.8vw, 1.8rem);
+    line-height: 1.05;
+    max-width: 13ch;
+    margin-inline: auto;
+  }
+
+  .hero-slide .hero-kicker {
+    display: none;
+  }
+
+  .hero-slide .hero-cta {
+    margin-top: 0.55rem;
+    display: inline-flex;
+    font-size: 0.95rem;
+    padding: 0.55rem 1.25rem;
+    margin-inline: auto;
+  }
+
+  .welcome-box {
+    background-size: cover;
+    background-position: center center;
   }
 
   .hero-btn {
-    width: 42px;
-    height: 42px;
+    top: 50%;
+    bottom: auto;
+    width: 40px;
+    height: 40px;
+    transform: translateY(-50%);
+  }
+
+  .hero-btn:hover {
+    transform: translateY(-50%) scale(1.04);
+  }
+
+  .hero-btn.prev {
+    left: 0.7rem;
+  }
+
+  .hero-btn.next {
+    right: 0.7rem;
+  }
+
+  .carousel-indicators {
+    bottom: 0.55rem;
   }
 
   .movie-overlay {
@@ -3811,6 +3887,28 @@ body.profile-page main.profile-page {
 }
 
 @media (max-width: 640px) {
+  .hero-slide {
+    inset:40% 50% !important ;
+    top: 50%;
+    left: 50%;
+    right: auto;
+    bottom: auto;
+    max-width: min(18.5rem, calc(100% - 1.5rem));
+    width: calc(100% - 1.5rem);
+    padding: 0.75rem 0.8rem 0.9rem;
+  }
+
+  .hero-slide h1 {
+    font-size: clamp(1.1rem, 5.8vw, 1.55rem);
+    line-height: 1.08;
+    max-width: 12ch;
+  }
+
+  .hero-slide .hero-cta {
+    font-size: 0.9rem;
+    padding: 0.5rem 1.1rem;
+  }
+
   #questionFormModal .admin-modal-shell>div>div {
     grid-template-columns: 1fr !important;
   }

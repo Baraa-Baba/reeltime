@@ -12,7 +12,10 @@ class HomeController extends Controller
 {
     public function index()
     {
-        $heroBanners = HeroBanner::orderBy('position')->get();
+        $heroBanners = HeroBanner::query()
+            ->where('is_active', true)
+            ->orderBy('position')
+            ->get();
 
         $movies = Movie::query()
             ->with([
