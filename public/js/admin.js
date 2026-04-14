@@ -42,7 +42,12 @@ document.addEventListener('DOMContentLoaded', function() {
             const messageDiv = document.getElementById('editMovieFormMessage');
             if (messageDiv) messageDiv.style.display = 'none';
         }
+        
     };
+    let movieDetailsCache = {};
+    let bookingDetailsCache = {};
+    let userDetailsCache = {};
+    let questionsCache = {};
  // Image show Modal for Hero Banners
 function openImagePreviewModal(imageUrl, title) {
     const modal = document.getElementById('imagePreviewModal');
@@ -205,7 +210,21 @@ document.addEventListener('keydown', function(e) {
             .then(data => {
                 if (data.success) {
                     const row = btn.closest('tr');
-                    if (row) row.remove();
+                    if (row) {
+        const firstCell = row.cells[0];
+        const idValue = firstCell ? firstCell.textContent.trim() : null;
+        const parentTable = row.closest('table');
+        const isUsersTable = parentTable && parentTable.closest('#usersTab');
+        const isMoviesTable = parentTable && parentTable.closest('#moviesTab');
+        
+        if (isMoviesTable && idValue) {
+            delete movieDetailsCache[idValue];
+        } else if (isUsersTable && idValue) {
+            delete userDetailsCache[idValue];
+        }
+        
+        row.remove();
+    }
                     showToast('Deleted successfully', 'success');
                 } else {
                     showToast(data.message || 'Delete failed', 'error');
@@ -346,6 +365,7 @@ document.addEventListener('keydown', function(e) {
                 });
                 const data = await response.json();
                 if (data.success) {
+                    delete movieDetailsCache[movieId];
                     messageDiv.style.display = 'block';
                     messageDiv.style.background = 'rgba(74, 222, 128, 0.2)';
                     messageDiv.style.border = '1px solid rgba(74, 222, 128, 0.3)';
@@ -404,10 +424,23 @@ document.addEventListener('keydown', function(e) {
         tableBody.addEventListener('click', async function(e) {
             const row = e.target.closest('.movie-row');
             if (!row) return;
-            if (e.target.closest('.admin-actions')) return;
+            if (e.target.closest('.admin-actions')) return; 
 
             const movieId = row.cells[0]?.textContent;
             if (!movieId) return;
+
+           
+            if (movieDetailsCache[movieId]) {
+                const movie = movieDetailsCache[movieId];
+                const tempCard = createTempCardFromMovie(movie);
+                if (typeof window.openMovieModal === 'function') {
+                    window.openMovieModal(tempCard);
+                } else {
+                    console.error('openMovieModal not available');
+                    showToast('Modal function not available', 'error');
+                }
+                return;
+            }
 
             try {
                 const response = await fetch(`/api/admin-api/movies/${movieId}`, {
@@ -421,18 +454,8 @@ document.addEventListener('keydown', function(e) {
                 if (result.success) {
                     const movie = result.data;
                     // Create a temporary card element with required data attributes
-                    const tempCard = document.createElement('div');
-                    tempCard.classList.add('movie-card');
-                    tempCard.setAttribute('data-title', movie.title);
-                    tempCard.setAttribute('data-description', movie.description);
-                    tempCard.setAttribute('data-cast', movie.cast);
-                    tempCard.setAttribute('data-genres', movie.genres);
-                    tempCard.setAttribute('data-this-movie-is', movie.this_movie_is || 'N/A');
-                    tempCard.setAttribute('data-rating', movie.rating);
-                    tempCard.setAttribute('data-trailer-url', movie.trailer_link || '');
-                    const h3 = document.createElement('h3');
-                    h3.textContent = movie.title;
-                    tempCard.appendChild(h3);
+                     movieDetailsCache[movieId] = movie;
+                    const tempCard = createTempCardFromMovie(movie);
                     if (typeof window.openMovieModal === 'function') {
                         window.openMovieModal(tempCard);
                     } else {
@@ -447,6 +470,19 @@ document.addEventListener('keydown', function(e) {
                 showToast('Could not load movie details', 'error');
             }
         });
+    }
+    function createTempCardFromMovie(movie) {
+        const card = document.createElement('div');
+        card.classList.add('movie-card');
+        card.setAttribute('data-title', movie.title);
+        card.setAttribute('data-description', movie.description);
+        card.setAttribute('data-cast', movie.cast);
+        card.setAttribute('data-genres', movie.genres);
+        card.setAttribute('data-this-movie-is', movie.this_movie_is || 'N/A');
+        card.setAttribute('data-rating', movie.rating);
+        card.setAttribute('data-trailer-url', movie.trailer_link || '');
+        // optional: add duration, poster, etc. if needed by openMovieModal
+        return card;
     }
 
     
@@ -902,15 +938,33 @@ document.addEventListener('DOMContentLoaded', function() {
     window.closeQuestionsModal = closeQuestionsModal;
 
     function loadQuestions(gameId) {
+        if (questionsCache[gameId]) {
+            renderQuestionsList(questionsCache[gameId]);
+            return;
+        }
         $('#questionsList').html('<p>Loading questions...</p>');
         fetch(`/api/admin-api/games/${gameId}/questions`, {
             headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
         })
         .then(res => res.json())
         .then(result => {
-            if (result.success && result.data.length) {
+            if (result.success && result.data) {
+                questionsCache[gameId] = result.data;
+                renderQuestionsList(result.data);
+            } else {
+                $('#questionsList').html('<p>No questions yet. Add one below.</p>');
+            }
+            attachQuestionButtons();
+        });
+    }
+    function renderQuestionsList(questions) {
+        if (!questions.length) {
+            $('#questionsList').html('<p>No questions yet. Add one below.</p>');
+            attachQuestionButtons();
+            return;
+        }
                 let html = '<div style="display:flex; flex-direction:column; gap:1rem;">';
-                result.data.forEach(q => {
+        questions.forEach(q => {
                     html += `
                         <div class="surface-card" style="padding:0.75rem; border-radius:12px;" data-qid="${q.question_id}">
                             <strong>${escapeHtml(q.content || 'No content')}</strong>
@@ -925,11 +979,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
                 html += '</div>';
                 $('#questionsList').html(html);
-            } else {
-                $('#questionsList').html('<p>No questions yet. Add one below.</p>');
-            }
             attachQuestionButtons();
-        });
     }
 
     function attachQuestionButtons() {
@@ -1127,6 +1177,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const idSpan = document.getElementById('bookingIdSpan');
 
         idSpan.textContent = bookingId;
+        if (bookingDetailsCache[bookingId]) {
+            renderBookingDetails(bookingDetailsCache[bookingId]);
+            modal.classList.add('is-open');
+            document.body.classList.add('modal-open');
+            return;
+        }
         contentDiv.innerHTML = '<div class="admin-empty"><i class="fas fa-spinner fa-pulse"></i> Loading...</div>';
         modal.classList.add('is-open');
         document.body.classList.add('modal-open');
@@ -1147,6 +1203,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const result = await response.json();
 
             if (result.success && result.data) {
+                bookingDetailsCache[bookingId] = result.data;
                 renderBookingDetails(result.data);
             } else {
                 contentDiv.innerHTML = `<div class="admin-empty text-danger"> ${result.message || 'Failed to load booking'}</div>`;
@@ -1258,6 +1315,12 @@ window.showUserDetails = function(userId) {
 
     if (!modal || !contentDiv) return;
 
+    if (userDetailsCache[userId]) {
+        renderUserDetails(userDetailsCache[userId]);
+        modal.classList.add('is-open');
+        document.body.classList.add('modal-open');
+        return;
+    }
     // Show modal and loading state
     modal.classList.add('is-open');
     document.body.classList.add('modal-open');
@@ -1273,6 +1336,7 @@ window.showUserDetails = function(userId) {
     .then(res => res.json())
     .then(result => {
         if (result.success && result.data) {
+            userDetailsCache[userId] = result.data;
             renderUserDetails(result.data);
         } else {
             contentDiv.innerHTML = `<div class="admin-empty text-danger">${result.message || 'Failed to load user details'}</div>`;
@@ -1392,6 +1456,7 @@ document.getElementById('confirmCancelBtn')?.addEventListener('click', function(
     .then(res => res.json())
     .then(data => {
         if (data.success) {
+             delete bookingDetailsCache[pendingCancelBookingId];
             showToast(data.message, 'success');
             const row = btn.closest('tr');
             if (row) {
