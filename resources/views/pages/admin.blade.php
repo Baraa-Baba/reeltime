@@ -7,6 +7,7 @@ admin-page
 @endsection
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 <script src="{{ asset('js/admin.js') }}" defer></script>
 @endpush
 
@@ -453,6 +454,7 @@ admin-page
             <table class="admin-table">
                 <thead>
                     <tr>
+                        <th style="width: 40px;"><i class="fas fa-bars"></i></th>
                         <th>ID</th>
                         <th>Image</th>
                         <th>Title</th>

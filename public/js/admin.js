@@ -567,16 +567,19 @@ function renderHeroBannersTable(banners) {
     }
     
     let html = '';
-    banners.forEach(banner => {
+    banners.forEach((banner, idx) => {
         html += `
             <tr data-id="${banner.hero_banner_id}">
+                <td class="drag-handle" style="cursor: grab; text-align: center;">
+                    <i class="fas fa-bars"></i>
+                </td>
                 <td>${banner.hero_banner_id}</td>
                 <td><img src="${banner.background_image}" class="admin-thumb preview-img banner-preview-img" data-src="${banner.background_image}" data-title="${escapeHtml(banner.title)}" style="width: 52px; height: 52px; object-fit: cover; border-radius: 8px; cursor: pointer;"></td>
                 <td><strong>${escapeHtml(banner.title)}</strong></td>
                 <td>${escapeHtml(banner.subtitle || '—')}</td>
                 <td>${escapeHtml(banner.cta_label || '—')}</td>
                 <td>${escapeHtml(banner.cta_route_name || '—')}</td>
-                <td>${banner.position}</td>
+                <td>${idx + 1}</td>
                 <td>
                     <label class="switch">
                         <input type="checkbox" class="toggle-active" data-id="${banner.hero_banner_id}" ${banner.is_active ? 'checked' : ''}>
@@ -604,7 +607,58 @@ function renderHeroBannersTable(banners) {
         `;
     });
     tbody.innerHTML = html;
-    // Add click handler for banner image p
+     attachBannerEventListeners();
+    
+    initBannerSortable();
+}
+   let bannerSortable = null;
+
+function initBannerSortable() {
+    const tbody = document.getElementById('heroBannersList');
+    if (!tbody) return;
+    if (bannerSortable) bannerSortable.destroy();
+
+    bannerSortable = new Sortable(tbody, {
+        handle: '.drag-handle',
+        animation: 300,
+        onEnd: function() {
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            const order = rows.map(row => row.getAttribute('data-id'));
+
+            rows.forEach((row, idx) => {
+                const posCell = row.querySelector('td:nth-child(8)'); 
+                if (posCell) posCell.textContent = idx + 1;
+            });
+
+            fetch('/api/admin-api/hero-banners/reorder', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify({ order: order })   
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('Banner order updated', 'success');
+                } else {
+                    showToast(data.message || 'Reorder failed', 'error');
+                    loadHeroBanners(); 
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                showToast('Network error', 'error');
+                loadHeroBanners();
+            });
+        }
+    });
+
+}
+function attachBannerEventListeners() {   
     document.querySelectorAll('.banner-preview-img').forEach(img => {
         img.removeEventListener('click', handleBannerImageClick);
         img.addEventListener('click', handleBannerImageClick);
