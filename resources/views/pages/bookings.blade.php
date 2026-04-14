@@ -68,14 +68,14 @@ bookings-page
               <option value="{{ $cinema['id'] }}">{{ $cinema['name'] }}</option>
             @endforeach
           </select>
-          <button class="button button-primary" type="button" onclick="completeStep()">Submit</button>
+          <button class="button button-primary" type="button" onclick="completeStep()">Next</button>
         </div>
 
         <div class="step-content" id="step2">
           <select id="movieselect">
             <option value="">Choose a movie</option>
           </select>
-          <button class="button button-primary" type="button" onclick="completeStep()">Submit</button>
+          <button class="button button-primary" type="button" onclick="completeStep()">Next</button>
         </div>
 
         <div class="step-content" id="step3">
@@ -85,7 +85,7 @@ bookings-page
           <select id="timeselect">
             <option value="">Choose a time</option>
           </select>
-          <button class="button button-primary" type="button" id="Datebtn" disabled>Submit</button>
+          <button class="button button-primary" type="button" id="Datebtn" disabled>Next</button>
           <div id="datecompletestep"></div>
         </div>
 
