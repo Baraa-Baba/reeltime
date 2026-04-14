@@ -196,6 +196,7 @@ admin-page
             </tbody>
           </table>
         </div>
+        <div id="moviePagination" class="pagination"></div>
       </div>
     </section>
 
@@ -271,6 +272,7 @@ admin-page
             </tbody> 
           </table>
         </div>
+        <div id="gamePagination" class="pagination"></div>
       </div>
     </section>
 
@@ -349,6 +351,7 @@ admin-page
             </tbody>
           </table>
         </div>
+        <div id="bookingPagination" class="pagination"></div>
       </div>
     </section>
 
@@ -432,6 +435,7 @@ admin-page
             </tbody>
           </table>
         </div>
+        <div id="userPagination" class="pagination"></div>
       </div>
   </section>
  <!-- Hero Banners Tab -->
@@ -1228,6 +1232,34 @@ admin-page
 }
 #deleteConfirmModal {
     z-index: 10001 !important;
+}
+.pagination {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+}
+
+.pagination button.is-active {
+    background: var(--accent);
+    color: white;
+}
+.pagination {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    align-items: center;
+    margin-top: 1rem;
+}
+
+.pagination-arrow {
+    min-width: 100px;
+}
+
+.pagination-info {
+    color: var(--text-muted);
+    font-size: 0.9rem;
 }
 </style>
 @endsection

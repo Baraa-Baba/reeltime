@@ -1,4 +1,9 @@
+const ITEMS_PER_PAGE = 50;
 document.addEventListener('DOMContentLoaded', function() {
+    filterMovies();
+    filterGames();
+    filterBookings();
+    filterUsers();
     function showToast(message, type) {
         const toast = document.createElement('div');
         toast.className = `toast toast-${type}`;
@@ -1515,115 +1520,76 @@ function populateMovieGenres() {
 }
 
 function filterMovies() {
-    const searchTerm = (document.getElementById('movieSearch')?.value || '').toLowerCase();
-    const selectedGenre = document.getElementById('movieGenreFilter')?.value || '';
-    const rows = document.querySelectorAll('#moviesTab .movie-row');
-    let visibleCount = 0;
-    rows.forEach(row => {
-        const title = (row.getAttribute('data-title') || '').toLowerCase();
-        const cast = (row.getAttribute('data-cast') || '').toLowerCase();
-        const genres = (row.getAttribute('data-genres') || '').toLowerCase();
-        const matchesSearch = searchTerm === '' || title.includes(searchTerm) || cast.includes(searchTerm) || genres.includes(searchTerm);
-        const matchesGenre = selectedGenre === '' || genres.includes(selectedGenre.toLowerCase());
-        if (matchesSearch && matchesGenre) {
-            row.style.display = '';
-            visibleCount++;
-        } else {
-            row.style.display = 'none';
-        }
+    const search = document.getElementById('movieSearch').value.toLowerCase();
+    const genre = document.getElementById('movieGenreFilter').value.toLowerCase();
+    const rows = Array.from(document.querySelectorAll('.movie-row'));
+    const filtered = rows.filter(row => {
+        const title = row.dataset.title.toLowerCase();
+        const cast = row.dataset.cast.toLowerCase();
+        const genres = row.dataset.genres.toLowerCase();
+        return (
+       (title.includes(search) || cast.includes(search) || genres.includes(search)) &&
+            (genre === '' || genres.includes(genre))
+        );
     });
-    const tbody = document.querySelector('#moviesTab .admin-table tbody');
-    const emptyMsg = tbody?.querySelector('.filter-empty-row');
-    if (visibleCount === 0 && !emptyMsg) {
-        tbody?.insertAdjacentHTML('beforeend', '<tr class="filter-empty-row"><td colspan="6" class="admin-empty">No movies match your filters.</td></tr>');
-    } else if (visibleCount > 0 && emptyMsg) {
-        emptyMsg.remove();
-    }
-}
+    paginateTable(filtered, 1, 'moviePagination');
+}function filterGames() {
+    const ITEMS_PER_PAGE = 50;
+    const search = document.getElementById('gameSearch').value.toLowerCase();
+    const type = document.getElementById('gameTypeFilter').value.toLowerCase();
 
-function filterGames() {
-    const searchTerm = (document.getElementById('gameSearch')?.value || '').toLowerCase();
-    const typeFilter = (document.getElementById('gameTypeFilter')?.value || '').toLowerCase();
-    const rows = document.querySelectorAll('#gamesTab .admin-table tbody tr');
-    let visibleCount = 0;
-    rows.forEach(row => {
-        const title = (row.querySelector('td:nth-child(3)')?.textContent || '').toLowerCase();
-        const gameType = (row.querySelector('td:nth-child(4)')?.textContent || '').toLowerCase();
-        const matchesSearch = searchTerm === '' || title.includes(searchTerm);
-        const matchesType = typeFilter === '' || gameType === typeFilter;
-        if (matchesSearch && matchesType) {
-            row.style.display = '';
-            visibleCount++;
-        } else {
-            row.style.display = 'none';
-        }
+    const rows = Array.from(document.querySelectorAll('#gamesTab tbody tr'));
+
+    const filtered = rows.filter(row => {
+        const title = row.children[2].innerText.toLowerCase();
+        const gameType = row.children[3].innerText.toLowerCase();
+
+        return (
+            title.includes(search) &&
+            (type === '' || gameType.includes(type))
+        );
     });
-    const tbody = document.querySelector('#gamesTab .admin-table tbody');
-    const emptyMsg = tbody?.querySelector('.filter-empty-row');
-    if (visibleCount === 0 && !emptyMsg) {
-        tbody?.insertAdjacentHTML('beforeend', '<tr class="filter-empty-row"><td colspan="5" class="admin-empty">No games match your filters.</td></tr>');
-    } else if (visibleCount > 0 && emptyMsg) {
-        emptyMsg.remove();
-    }
-}
 
+    paginateTable(filtered, 1, 'gamePagination');
+}
 function filterBookings() {
-    const searchTerm = (document.getElementById('bookingSearch')?.value || '').toLowerCase();
-    const statusFilter = (document.getElementById('bookingStatusFilter')?.value || '').toLowerCase();
-    const rows = document.querySelectorAll('#bookingsTab .admin-table tbody tr');
-    let visibleCount = 0;
-    rows.forEach(row => {
-        const userId = (row.querySelector('td:nth-child(2)')?.textContent || '').toLowerCase();
-        const movieTitle = (row.querySelector('td:nth-child(3)')?.textContent || '').toLowerCase();
-        const bookingId = (row.querySelector('td:nth-child(1)')?.textContent || '').toLowerCase();
-        const statusElem = row.querySelector('td:nth-child(6) .admin-badge');
-        const status = (statusElem?.textContent || '').toLowerCase();
-        const matchesSearch = searchTerm === '' || userId.includes(searchTerm) || movieTitle.includes(searchTerm) || bookingId.includes(searchTerm);
-        const matchesStatus = statusFilter === '' || status === statusFilter;
-        if (matchesSearch && matchesStatus) {
-            row.style.display = '';
-            visibleCount++;
-        } else {
-            row.style.display = 'none';
-        }
-    });
-    const tbody = document.querySelector('#bookingsTab .admin-table tbody');
-    const emptyMsg = tbody?.querySelector('.filter-empty-row');
-    if (visibleCount === 0 && !emptyMsg) {
-        tbody?.insertAdjacentHTML('beforeend', '<tr class="filter-empty-row"><td colspan="7" class="admin-empty">No bookings match your filters.</td></tr>');
-    } else if (visibleCount > 0 && emptyMsg) {
-        emptyMsg.remove();
-    }
-}
+    const search = document.getElementById('bookingSearch').value.toLowerCase();
+    const status = document.getElementById('bookingStatusFilter').value.toLowerCase();
 
-function filterUsers() {
-    const searchTerm = (document.getElementById('userSearch')?.value || '').toLowerCase();
-    const roleFilter = (document.getElementById('userRoleFilter')?.value || '').toLowerCase();
-    const rows = document.querySelectorAll('#usersTab .admin-table tbody tr');
-    let visibleCount = 0;
-    rows.forEach(row => {
-        const username = (row.querySelector('td:nth-child(3)')?.textContent || '').toLowerCase();
-        const email = (row.querySelector('td:nth-child(4)')?.textContent || '').toLowerCase();
-        const roleElem = row.querySelector('td:nth-child(6) .admin-badge');
-        const role = (roleElem?.textContent || '').toLowerCase();
-        const matchesSearch = searchTerm === '' || username.includes(searchTerm) || email.includes(searchTerm);
-        const matchesRole = roleFilter === '' || role === roleFilter;
-        if (matchesSearch && matchesRole) {
-            row.style.display = '';
-            visibleCount++;
-        } else {
-            row.style.display = 'none';
-        }
-    });
-    const tbody = document.querySelector('#usersTab .admin-table tbody');
-    const emptyMsg = tbody?.querySelector('.filter-empty-row');
-    if (visibleCount === 0 && !emptyMsg) {
-        tbody?.insertAdjacentHTML('beforeend', '<tr class="filter-empty-row"><td colspan="7" class="admin-empty">No users match your filters.</td></tr>');
-    } else if (visibleCount > 0 && emptyMsg) {
-        emptyMsg.remove();
-    }
-}
+    const rows = Array.from(document.querySelectorAll('#bookingsTab tbody tr'));
 
+    const filtered = rows.filter(row => {
+        const user = row.children[1].innerText.toLowerCase();
+        const movie = row.children[2].innerText.toLowerCase();
+        const id = row.children[0].innerText.toLowerCase();
+        const rowStatus = row.children[5].innerText.toLowerCase();
+
+        return (
+            (user.includes(search) || movie.includes(search) || id.includes(search)) &&
+            (status === '' || rowStatus.includes(status))
+        );
+    });
+
+    paginateTable(filtered, 1, 'bookingPagination');
+}function filterUsers() {
+    const search = document.getElementById('userSearch').value.toLowerCase();
+    const role = document.getElementById('userRoleFilter').value.toLowerCase();
+
+    const rows = Array.from(document.querySelectorAll('#usersTab tbody tr'));
+
+    const filtered = rows.filter(row => {
+        const username = row.children[2].innerText.toLowerCase();
+        const email = row.children[3].innerText.toLowerCase();
+        const userRole = row.children[5].innerText.toLowerCase();
+
+        return (
+            (username.includes(search) || email.includes(search)) &&
+            (role === '' || userRole.includes(role))
+        );
+    });
+
+    paginateTable(filtered, 1, 'userPagination');
+}
 function debounce(func, delay) {
     let timer;
     return function(...args) {
@@ -1715,4 +1681,52 @@ function populateGameTypeFilter(games) {
     });
     select.innerHTML = html;
 }
+function paginateTable(rows, page, containerId) {
+    const start = (page - 1) * ITEMS_PER_PAGE;
+    const end = start + ITEMS_PER_PAGE;
+
+    rows.forEach((row, index) => {
+        row.style.display = (index >= start && index < end) ? '' : 'none';
+    });
+
+    renderPagination(rows.length, page, containerId, rows);
+}function renderPagination(totalItems, currentPage, containerId, rows) {
+    const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    if (totalPages <= 1) return;
+
+    const prevBtn = document.createElement('button');
+    prevBtn.innerHTML = '‹ Prev';
+    prevBtn.className = 'button button-secondary pagination-arrow';
+    if (currentPage === 1) prevBtn.disabled = true;
+    prevBtn.addEventListener('click', () => {
+        if (currentPage > 1) {
+            paginateTable(rows, currentPage - 1, containerId);
+        }
+    });
+
+    const pageIndicator = document.createElement('span');
+    pageIndicator.className = 'pagination-info';
+    pageIndicator.textContent = `Page ${currentPage} of ${totalPages}`;
+
+    
+    const nextBtn = document.createElement('button');
+    nextBtn.innerHTML = 'Next ›';
+    nextBtn.className = 'button button-secondary pagination-arrow';
+    if (currentPage === totalPages) nextBtn.disabled = true;
+    nextBtn.addEventListener('click', () => {
+        if (currentPage < totalPages) {
+            paginateTable(rows, currentPage + 1, containerId);
+        }
+    });
+
+    container.appendChild(prevBtn);
+    container.appendChild(pageIndicator);
+    container.appendChild(nextBtn);
+}
+
 });
