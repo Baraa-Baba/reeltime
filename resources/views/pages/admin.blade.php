@@ -403,7 +403,7 @@ admin-page
                   </td>
                   <td>{{ $member->username }}</td>
                   <td>{{ $member->email }}</td>
-                  <td>{{ $member->member_since }}</td>
+                  <td>{{ $member->member_since ? \Carbon\Carbon::parse($member->member_since)->format('Y-m-d') : '-' }}</td>
                   <td>
                     <span class="admin-badge {{ $member->role === 'admin' ? 'role-admin' : 'role-user' }}">{{ $member->role }}</span>
                   </td>

@@ -257,7 +257,7 @@ class AdminController_Api extends Controller
             'username'      => $user->username,
             'email'         => $user->email,
             'role'          => $user->role,
-            'member_since'  => $user->member_since ? $user->member_since->format('Y-m-d H:i:s') : $user->created_at->format('Y-m-d H:i:s'),
+            'member_since'  => $user->member_since ? $user->member_since->format('Y-m-d') : $user->created_at->format('Y-m-d'),
             'profile_image' => $user->profile_image ? (preg_match('/^https?:\/\//', $user->profile_image) ? $user->profile_image : asset($user->profile_image)) : null,
         ]
     ]);
