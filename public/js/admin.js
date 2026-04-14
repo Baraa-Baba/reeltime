@@ -624,6 +624,7 @@ async function handleToggleActive(e) {
     const cb = e.target;
     const id = cb.dataset.id;
     const originalChecked = cb.checked;
+    cb.disabled = true;
     
     try {
         const response = await fetch(`/api/admin-api/hero-banners/${id}/toggle-active`, {
@@ -638,7 +639,7 @@ async function handleToggleActive(e) {
         const result = await response.json();
         if (result.success) {
             showToast(result.message, 'success');
-            loadHeroBanners(); // refresh to update active count and order
+            updateBannerActiveStatusInRow(id, cb.checked);
         } else {
             cb.checked = !originalChecked;
             showToast(result.message || 'Failed to toggle status', 'error');
@@ -647,6 +648,16 @@ async function handleToggleActive(e) {
         cb.checked = !originalChecked;
         showToast('Network error', 'error');
     }
+     finally {
+        cb.disabled = false;
+    }
+}function updateBannerActiveStatusInRow(bannerId, isActive) {
+    const row = document.querySelector(`#heroBannersList tr[data-id="${bannerId}"]`);
+    if (!row) return;
+    
+    const toggle = row.querySelector('.toggle-active');
+    if (toggle) toggle.checked = isActive;
+    
 }
 
 // Edit banner 
@@ -738,14 +749,14 @@ document.getElementById('submitHeroBannerBtn')?.addEventListener('click', async 
     }
 });
 
-// Load banners when switching to the Hero Banners tab
-const originalSwitchTab = window.switchTab;
-window.switchTab = function(tab) {
-    originalSwitchTab(tab);
-    if (tab === 'heroBanners') {
-        loadHeroBanners();
-    }
-};
+// // Load banners when switching to the Hero Banners tab
+// const originalSwitchTab = window.switchTab;
+// window.switchTab = function(tab) {
+//     originalSwitchTab(tab);
+//     if (tab === 'heroBanners') {
+//         loadHeroBanners();
+//     }
+// };
 
 
 document.addEventListener('DOMContentLoaded', function() {
