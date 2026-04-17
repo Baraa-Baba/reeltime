@@ -57,13 +57,7 @@ home-page
         data-position="{{ $banner->position }}"
         data-image="{{ Illuminate\Support\Str::startsWith($banner->background_image, ['http://', 'https://', '//']) ? $banner->background_image : asset(ltrim($banner->background_image, '/')) }}"
       >
-        @if($banner->subtitle)
-          <p class="hero-kicker">{{ $banner->subtitle }}</p>
-        @endif
-        <h1>{{ $banner->title }}</h1>
-        @if($banner->cta_label && $banner->cta_route_name)
-          <a href="{{ route($banner->cta_route_name) }}" class="button button-primary hero-cta">{{ $banner->cta_label }}</a>
-        @endif
+        
       </div>
     @endforeach
   </div>

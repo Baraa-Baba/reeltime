@@ -25,6 +25,7 @@ class UsersSeeder extends Seeder
             'profile_image' => 'https://robohash.org/admin',
             'member_since' => now(),
             'role' => 'admin',
+            'email_verified_at' => now(),
         ]);
 
 
@@ -34,7 +35,8 @@ class UsersSeeder extends Seeder
             'password' => '123456',
             'profile_image' => 'https://robohash.org/user',
             'member_since' => now(),
-            'role' => 'user',  
+            'role' => 'user',
+            'email_verified_at' => now(),  
         ]);
         
         $movies = Movie::all();
