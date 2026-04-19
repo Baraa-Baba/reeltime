@@ -706,7 +706,8 @@ body.header-drawer-open {
 /* Home hero */
 .welcome-box {
   position: relative;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: auto;
+  height: clamp(220px, 44vw, 340px);
   border-radius: calc(var(--card-radius) + 8px);
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -716,10 +717,16 @@ body.header-drawer-open {
     linear-gradient(160deg, rgba(12, 15, 23, 0.98), rgba(8, 10, 16, 0.96));
   background-position: center center;
   background-repeat: no-repeat;
-  background-size: cover;
+  background-size: contain;
   transition: background-image 0.45s ease-in-out, background-position 0.25s ease;
   box-shadow: var(--shadow-strong);
   isolation: isolate;
+}
+
+@media (min-width: 992px) {
+  .welcome-box {
+    height: clamp(260px, 26vw, 420px);
+  }
 }
 
 .welcome-box::before {
@@ -3780,7 +3787,7 @@ body.profile-page main.profile-page {
   }
 
   .welcome-box {
-    background-size: cover;
+    background-size: contain;
     background-position: center center;
   }
 
