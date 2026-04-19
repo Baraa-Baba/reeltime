@@ -2,8 +2,9 @@
     $title       = e($movie['title'] ?? '');
     $movieId     = e($movie['movie_id'] ?? '');
     $description = e($movie['description'] ?? '');
-    $rating      = $movie['rating'] ?? '-';
-    $ratingDisplay = is_numeric($rating) ? $rating : '-';
+    $ratingRaw   = $movie['rating'] ?? null;
+    $ratingDisplay = is_numeric($ratingRaw) ? $ratingRaw : '-';
+    $showRating  = !is_numeric($ratingRaw) || (float) $ratingRaw > 0;
     $runtime     = e($movie['time'] ?? '');
     $cast        = is_array($movie['cast'] ?? null) ? e(implode(', ', $movie['cast'])) : e($movie['cast'] ?? '');
     $genres      = is_array($movie['genres'] ?? null) ? e(implode(', ', $movie['genres'])) : e($movie['genres'] ?? '');
@@ -26,14 +27,18 @@
     data-this-movie-is="{{ $mood }}"
     data-time="{{ $runtime }}"
     data-showtimes='@json($showtimes)'>
-    <span class="rating-overlay">{{ $ratingDisplay }} / 5</span>
+    @if($showRating)
+        <span class="rating-overlay">{{ $ratingDisplay }} / 5</span>
+    @endif
     <img src="{{ $posterUrl }}" alt="{{ $title }} poster" onerror="this.src='{{ asset('imgs/default-movie.jpg') }}'">
     <div class="movie-overlay">
         <p class="movie-overlay-title">{{ $title }}</p>
         <p class="movie-overlay-desc">{{ $description }}</p>
         <div class="movie-overlay-bottom">
             <span class="film-overlay">{{ $runtime }}</span>
-            <span class="movie-overlay-rating">{{ $ratingDisplay }} / 5 ★</span>
+            @if($showRating)
+                <span class="movie-overlay-rating">{{ $ratingDisplay }} / 5 ★</span>
+            @endif
         </div>
     </div>
 </figure>

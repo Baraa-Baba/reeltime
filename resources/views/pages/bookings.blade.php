@@ -150,6 +150,11 @@ bookings-page
       <section class="gallery2" id="gallery2">
         <div class="movie" id="movie">
           @forelse($featuredMovies as $movie)
+            @php
+              $ratingValue = $movie['rating'] ?? null;
+              $ratingDisplay = $ratingValue !== null ? number_format($ratingValue, 1) : '-';
+              $showRating = !is_numeric($ratingValue) || (float) $ratingValue > 0;
+            @endphp
             <figure class="movie-card"
               role="button"
               tabindex="0"
@@ -160,7 +165,7 @@ bookings-page
               data-cast="{{ implode(', ', $movie['cast']) }}"
               data-genres="{{ implode(', ', $movie['genres']) }}"
               data-this-movie-is="{{ implode(', ', $movie['tags']) }}"
-              data-rating="{{ $movie['rating'] !== null ? number_format($movie['rating'], 1) : '-' }}"
+              data-rating="{{ $ratingDisplay }}"
               data-time="{{ $movie['time'] ?? 'N/A' }}"
               data-showtimes='@json($movie['modal_showtimes'])'>
               <img src="{{ $movie['poster_url'] }}" alt="{{ $movie['title'] }} poster">
@@ -170,7 +175,9 @@ bookings-page
                 <p class="movie-overlay-desc">{{ $movie['description'] }}</p>
                 <div class="movie-overlay-bottom">
                   <span class="film-overlay">{{ $movie['time'] ?? 'N/A' }}</span>
-                  <span class="movie-overlay-rating">{{ $movie['rating'] !== null ? number_format($movie['rating'], 1) : '-' }} / 5 stars</span>
+                  @if($showRating)
+                    <span class="movie-overlay-rating">{{ $ratingDisplay }} / 5 stars</span>
+                  @endif
                 </div>
               </div>
             </figure>

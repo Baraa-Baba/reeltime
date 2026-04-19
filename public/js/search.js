@@ -110,6 +110,8 @@ $(function () {
             const title = movie.title || "";
             const description = movie.description || movie.overview || "";
             const rating = movie.rating ?? "-";
+            const ratingValue = Number(rating);
+            const showRating = Number.isFinite(ratingValue) ? ratingValue > 0 : true;
             const runtime = movie.time || (movie.duration ? `${movie.duration} min` : "");
             const cast = Array.isArray(movie.cast) ? movie.cast.join(", ") : (movie.cast || "");
             const genres = Array.isArray(movie.genres) ? movie.genres.join(", ") : (movie.genre || movie.genres || "");
@@ -134,7 +136,7 @@ $(function () {
                     data-this-movie-is="${escapeHtml(mood)}"
                     data-time="${escapeHtml(runtime)}"
                     data-showtimes='${escapeHtml(JSON.stringify(modalShowtimes))}'>
-                    <span class="rating-overlay">${escapeHtml(rating)} / 5</span>
+                    ${showRating ? `<span class="rating-overlay">${escapeHtml(rating)} / 5</span>` : ""}
                     <button class="watch-flag ${inWatchlist ? "in-watchlist" : ""}" type="button"
                         data-movie-id="${escapeHtml(movieId || '')}"
                         data-title="${escapeHtml(title)}"
@@ -147,7 +149,7 @@ $(function () {
                         <p class="movie-overlay-desc">${escapeHtml(description)}</p>
                         <div class="movie-overlay-bottom">
                             <span class="film-overlay">${escapeHtml(runtime)}</span>
-                            <span class="movie-overlay-rating">${escapeHtml(rating)} / 5 stars</span>
+                            ${showRating ? `<span class="movie-overlay-rating">${escapeHtml(rating)} / 5 stars</span>` : ""}
                         </div>
                     </div>
                 </figure>
