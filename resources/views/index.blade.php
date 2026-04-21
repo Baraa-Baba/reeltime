@@ -47,20 +47,26 @@ home-page
     </div>
   </section>
 
-  <div class="welcome-box" id="heroBox">
-    <button class="hero-btn prev" onclick="prevImage()">&#10094;</button>
-    <button class="hero-btn next" onclick="nextImage()">&#10095;</button>
+@php
+    $banners = collect($heroBanners ?? [])->filter();
+@endphp
 
-    @foreach($heroBanners ?? [] as $banner)
-      <div
-        class="hero-slide {{ $loop->first ? 'active' : '' }}"
-        data-position="{{ $banner->position }}"
-        data-image="{{ Illuminate\Support\Str::startsWith($banner->background_image, ['http://', 'https://', '//']) ? $banner->background_image : asset(ltrim($banner->background_image, '/')) }}"
-      >
-        
-      </div>
-    @endforeach
-  </div>
+@if($banners->isNotEmpty())
+    <div class="welcome-box" id="heroBox">
+        <button class="hero-btn prev" onclick="prevImage()">&#10094;</button>
+        <button class="hero-btn next" onclick="nextImage()">&#10095;</button>
+
+        @foreach($banners as $banner)
+            <div
+                class="hero-slide {{ $loop->first ? 'active' : '' }}"
+                data-position="{{ $banner->position }}"
+                data-image="{{ Illuminate\Support\Str::startsWith($banner->background_image, ['http://', 'https://', '//']) ? $banner->background_image : asset(ltrim($banner->background_image, '/')) }}"
+            >
+                
+            </div>
+        @endforeach
+    </div>
+@endif
 
   <section class="gallery" id="gallery">
     @foreach($categories->sortByDesc(fn($cat) => count($cat['movies']))->take(3) as $category)
