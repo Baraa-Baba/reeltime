@@ -50,11 +50,12 @@ home-page
 @php
     $banners = collect($heroBanners ?? [])->filter();
 @endphp
-
 @if($banners->isNotEmpty())
     <div class="welcome-box" id="heroBox">
-        <button class="hero-btn prev" onclick="prevImage()">&#10094;</button>
-        <button class="hero-btn next" onclick="nextImage()">&#10095;</button>
+        @if($banners->count() > 1)
+            <button class="hero-btn prev" onclick="prevImage()">&#10094;</button>
+            <button class="hero-btn next" onclick="nextImage()">&#10095;</button>
+        @endif
 
         @foreach($banners as $banner)
             <div
@@ -62,7 +63,6 @@ home-page
                 data-position="{{ $banner->position }}"
                 data-image="{{ Illuminate\Support\Str::startsWith($banner->background_image, ['http://', 'https://', '//']) ? $banner->background_image : asset(ltrim($banner->background_image, '/')) }}"
             >
-                
             </div>
         @endforeach
     </div>
