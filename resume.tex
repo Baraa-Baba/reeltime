@@ -1,0 +1,183 @@
+%-------------------------
+% Resume in Latex
+% Author : Jake Gutierrez
+%------------------------
+
+\documentclass[letterpaper,11pt]{article}
+
+\usepackage{latexsym}
+\usepackage[empty]{fullpage}
+\usepackage{titlesec}
+\usepackage{marvosym}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{fancyhdr}
+\usepackage[english]{babel}
+\usepackage{tabularx}
+\usepackage{setspace}
+\input{glyphtounicode}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\addtolength{\oddsidemargin}{-0.5in}
+\addtolength{\evensidemargin}{-0.5in}
+\addtolength{\textwidth}{1in}
+\addtolength{\topmargin}{-.5in}
+\addtolength{\textheight}{1.0in}
+
+\urlstyle{same}
+\raggedbottom
+\raggedright
+\setlength{\tabcolsep}{0in}
+\setstretch{1.1}
+
+\titleformat{\section}{
+  \vspace{-2pt}\scshape\raggedright\large
+}{}{0em}{}[\color{black}\titlerule \vspace{-2pt}]
+
+\pdfgentounicode=1
+
+%-------------------------
+% Custom commands
+\newcommand{\resumeItem}[1]{\item\small{#1 \vspace{-1pt}}}
+\newcommand{\resumeSubheading}[4]{
+  \vspace{0pt}\item
+    \begin{tabular*}{0.97\textwidth}[t]{l@{\extracolsep{\fill}}r}
+      \textbf{#1} & #2 \\
+      \textit{\small#3} & \textit{\small #4} \\
+    \end{tabular*}\vspace{-3pt}
+}
+\newcommand{\resumeProjectHeading}[2]{
+    \item
+    \begin{tabular*}{0.97\textwidth}{l@{\extracolsep{\fill}}r}
+      \small#1 & #2 \\
+    \end{tabular*}\vspace{-3pt}
+}
+\renewcommand\labelitemii{$\vcenter{\hbox{\tiny$\bullet$}}$}
+
+\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=0.15in, label={}, itemsep=0.2em, topsep=0.2em]}
+\newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
+\newcommand{\resumeItemListStart}{\begin{itemize}[itemsep=0.2em, topsep=0.2em]}
+\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{-2pt}}
+
+%-------------------------------------------
+%%%%%%  RESUME STARTS HERE  %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+%----------HEADING----------
+\begin{center}
+    \textbf{\Huge \scshape Baraa Bilal El Baba} \\ \vspace{1pt}
+    \small Full-Stack Developer (Frontend-Focused) \\ \vspace{1pt}
+    \small Saida, Lebanon $|$ 76-032-809 $|$ 
+    \href{mailto:baraababawork@gmail.com}{\underline{baraababawork@gmail.com}} $|$ 
+    \href{https://www.linkedin.com/in/baraa-el-baba-336262264/}{\underline{linkedin.com/in/baraa-baba}} $|$
+    \href{https://github.com/Baraa-Baba}{\underline{github.com/Baraa-Baba}} 
+\end{center}
+ 
+
+%-----------EDUCATION-----------
+\section*{Education}
+\textbf{Rafik Hariri University (RHU)} \hfill Saida, Lebanon \\
+\textit{Bachelor of Science in Computer Science} \hfill \textit{August 2024 -- May 2027} \\
+\vspace{-0.2em}
+{\footnotesize
+\resumeItemListStart
+    \resumeItem{\textbf{CGPA:} 91/100, Ranked 1st in Computer Science}
+    \resumeItem{\textbf{Scholarship:} 50\% merit scholarship for high school web competition}
+\resumeItemListEnd
+\vspace{-2pt}
+}
+
+%-----------EXPERIENCE-----------
+\section{Experience}
+\resumeSubHeadingListStart
+
+\resumeSubheading
+  {Front-End Web Developer}{May 2023 -- Present}
+  {OctaSolutions.co}{Saida, Lebanon}
+  \resumeItemListStart 
+    \resumeItem{Designed and developed a reusable, design-agnostic e-commerce library using Vue.js (cart, checkout, product state, authentication).}  
+    \resumeItem{Built the frontend of \href{https://octadine.com/restaurant}{OctaDine}, a digital menu web app using Vue, Leaflet, and Git.}
+    \resumeItem{Developed 30+ webpages for \href{https://parisaline.com/}{parisaline.com} and \href{https://renaissance-translations.com/}{renaissance-translations.com}.} 
+    \resumeItem{Maintained legacy code for an internal company framework.}
+    \resumeItem{Replicated an existing company app in Flutter for training purposes.}
+    \resumeItem{Set up a CodePush standalone server using SSH and Docker.}
+  \resumeItemListEnd
+
+\resumeSubheading
+  {Full-Stack Web Developer}{}
+  {Freelance}{Online}
+  \resumeItemListStart 
+    \resumeItem{Built \href{https://chatandplay.onrender.com/}{Chat \& Play}, a real-time social web app with peer-to-peer communication and multiplayer games like chess.} 
+    \resumeItem{Developed and deployed \href{https://modelonetrading.com}{modelonetrading.com} (React) and \href{https://duratex.co}{duratex.co} (Vue.js), including domain and email setup, and scraped products from the orignal website for \href{https://duratex.co}{duratex.co}.} 
+    \resumeItem{Built and deployed \href{https://fancy-clancy.com}{fancy-clancy.com}, a Vue.js e-commerce website with Supabase backend, including an admin dashboard and WhatsApp-based ordering.}
+    \resumeItem{Consulted with 10+ clients to debug production issues and implement features, improving stability and UX.}   
+  \resumeItemListEnd
+
+\resumeSubHeadingListEnd
+\section{Projects}
+\resumeSubHeadingListStart
+
+\resumeProjectHeading
+{\textbf{E-commerce Core Logic Library} $|$ \emph{Vue.js, JavaScript, Git}}{September 2025 -- Present}
+\resumeItemListStart 
+    \resumeItem{Designed a reusable e-commerce core logic library abstracting cart, checkout, product state, and authentication.} 
+    \resumeItem{Integrated with multiple UI systems to enable rapid storefront development.}
+    \resumeItem{Used to build 5+ production e-commerce websites, reducing duplicated logic.}
+\resumeItemListEnd
+
+\resumeProjectHeading
+{\textbf{\href{https://metro.octadine.com}{OctaDine}} $|$ \emph{Vue, Leaflet, Git}}{December 2024 -- March 2025}
+\resumeItemListStart
+    \resumeItem{Developed core features including reservations, ratings, and ordering workflows.}
+    \resumeItem{Built a responsive digital menu with RTL support.}
+    \resumeItem{Integrated Leaflet to define delivery zones and dynamic pricing.}  
+    \resumeItem{Implemented a screen mode for in-store menu displays.}
+    \resumeItem{Used across 25+ restaurants.}
+\resumeItemListEnd
+
+\resumeProjectHeading
+{\textbf{ReelTime} $|$ \emph{Laravel, PHP, MySQL, Blade, JavaScript}}{February 2026 -- April 2026}
+\resumeItemListStart
+    \resumeItem{Designed database schema, migrations, seeders, and Eloquent models, and built initial API endpoints.}
+    \resumeItem{Implemented authentication with email verification via signed routes and role-based middleware for admin and profile access.}
+    \resumeItem{Built the home page, watchlist frontend, and rating display logic across profile and admin views.}
+    \resumeItem{Integrated the game API with leaderboard score tracking.}
+\resumeItemListEnd
+
+\resumeProjectHeading
+{\textbf{\href{https://chatandplay.onrender.com/}{chatNplay}} $|$ \emph{React.js, Socket.io, Node.js, Express, Firebase, WebRTC, three.js, Sass}}{June 2022 -- December 2022}
+\resumeItemListStart
+    \resumeItem{Built a real-time app supporting video, audio, and text communication.}
+    \resumeItem{Implemented authentication using Firebase.}
+    \resumeItem{Developed multiplayer games using real-time socket communication.}
+    \resumeItem{Added live face filters using three.js.}
+\resumeItemListEnd
+\resumeProjectHeading
+{\textbf{\href{https://masters-finder.streamlit.app/}{Masters Finder}} $|$ \emph{Python, Selenium, scikit-learn, Streamlit}}{February 2025 -- April 2025}
+\resumeItemListStart
+    \resumeItem{Scraped and cleaned 1,000+ masters programs across 150+ universities from multiple sources using Selenium and BeautifulSoup.}
+    \resumeItem{Built a TF-IDF + cosine similarity AI recommender and a funding classifier with feature importance reporting.}
+    \resumeItem{Generated an interactive t-SNE course similarity map grouping programs by field and content proximity.}
+    \resumeItem{Delivered a Streamlit dashboard with market visualizations and an acceptance probability calculator.}
+\resumeItemListEnd
+
+\resumeSubHeadingListEnd
+\section{Technical Skills}
+\begin{itemize}[leftmargin=0.15in, label={}]
+\small{\item{
+    \textbf{Programming:} HTML, CSS, JavaScript/TypeScript, Dart, Python, C/C++/C\#, SQL, PHP \\
+    \textbf{Frameworks:} Next.js, React, Vue.js, Node.js, Express.js, Flutter, Shopify (Liquid), Laravel \\
+    \textbf{Libraries:} Leaflet.js, Three.js, Tailwind CSS, Sass/SCSS, Bootstrap, jQuery, Axios, React Router, Socket.io, WebRTC, scikit-learn, pandas, BeautifulSoup (bs4), Streamlit \\
+    \textbf{Tools:} Git, Docker, Firebase, Supabase, Selenium \\
+    \textbf{Infrastructure:} DNS \& Domain Management, Email Configuration, Deployment (Netlify, Cloudflare Pages, Render) \\
+    \textbf{Languages:} English, Arabic
+}}
+\end{itemize}
+\end{document}
