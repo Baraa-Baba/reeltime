@@ -16,5 +16,5 @@ services:
           property: connectionString
 
 databases:
-  - name: laravel-db
+  - name: reeltime
     plan: free
