@@ -42,7 +42,12 @@ profile-page
                 <div class="online-status"></div>
             </div>
             <div class="profile-info-modern">
-                <h1>{{ $user->username }}</h1>
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <h1>{{ $user->username }}</h1>
+                    <button class="icon-btn" id="editProfileBtn" aria-label="Edit profile">
+                        <i class="fas fa-pen"></i>
+                    </button>
+                </div>
                 <p class="profile-meta">{{ $user->email }}</p>
                 <p class="profile-meta">{{ $user->user_id }}</p>
                 <div class="profile-stats">
@@ -183,4 +188,50 @@ profile-page
         @endforelse
     </div>
     </main>
+    // Edit Profile Modal
+        <div id="editProfileModal" class="admin-modal">
+        <div class="surface-card admin-modal-shell" style="max-width: 500px;">
+            <button type="button" class="modal-close-btn" onclick="closeEditProfileModal()">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="section-header">
+                <span class="eyebrow">Profile Settings</span>
+                <h2>Edit Your Info</h2>
+                <p>Update your username, email, or profile picture.</p>
+            </div>
+            <form id="editProfileForm">
+            <div style="display: grid; gap: 1.25rem;">
+                <div style="text-align: center;">
+                    <div style="position: relative; display: inline-block;">
+                        <img id="editAvatarPreview" src="{{ $user->profile_image ?? ('https://robohash.org/' . urlencode($user->username)) }}" 
+                             alt="Avatar" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid var(--accent);">
+                        <label for="editAvatarInput" style="position: absolute; bottom: 0; right: 0; background: var(--accent); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                            <i class="fas fa-camera" style="font-size: 14px;"></i>
+                        </label>
+                        <input type="file" id="editAvatarInput" accept="image/*" style="display: none;">
+                    </div>
+                    <p class="text-muted small mt-2">Click the camera to upload a new image</p>
+                </div>
+
+                <div>
+                    <label>Username</label>
+                    <input type="text" id="editUsername" name="username" class="form-control" 
+                           value="{{ $user->username }}" required>
+                </div>
+
+                <div>
+                    <label>Email</label>
+                    <input type="email" id="editEmail" name="email" class="form-control" 
+                           value="{{ $user->email }}" required>
+                </div>
+
+                <div id="editProfileMessage" class="alert" style="display: none;"></div>
+            </div>
+        </form>
+        <div class="admin-actions" style="justify-content: flex-end; gap: 1rem; margin-top: 1.5rem;">
+            <button class="button button-secondary" onclick="closeEditProfileModal()">Cancel</button>
+            <button class="button button-primary" id="saveProfileBtn">Save Changes</button>
+        </div>
+    </div>
+</div>
 @endsection

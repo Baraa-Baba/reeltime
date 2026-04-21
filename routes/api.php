@@ -39,6 +39,7 @@ Route::get('/hero-banners', [HeroBannerController::class, 'index']);
 Route::middleware('web')->group(function () {  
     Route::get('/user', [UserController::class, 'profile']);
     Route::put('/user', [UserController::class, 'update']);
+    Route::post('/user/profile-image', [UserController::class, 'uploadProfileImage']);
     Route::post('/user/logout', [UserController::class, 'logout']);
         
     Route::get('/watchlist', [WatchlistController::class, 'index']);

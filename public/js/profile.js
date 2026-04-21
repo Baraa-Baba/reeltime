@@ -945,4 +945,125 @@ function setupProfileSearch() {
         updateEmptyMessage(watchContainer, watchCards, "Watchlist");
         updateEmptyMessage(ratedContainer, ratedCards, "Rated Movies");
     });
+    let editProfileModal = document.getElementById('editProfileModal');
+    let editProfileBtn = document.getElementById('editProfileBtn');
+    let avatarInput = document.getElementById('editAvatarInput');
+    let avatarPreview = document.getElementById('editAvatarPreview');
+    let saveBtn = document.getElementById('saveProfileBtn');
+    let editUsername = document.getElementById('editUsername');
+    let editEmail = document.getElementById('editEmail');
+    let messageDiv = document.getElementById('editProfileMessage');
+
+    editProfileBtn.addEventListener('click', () => {
+        editUsername.value = window.authUser.username;
+        editEmail.value = window.authUser.email;
+        avatarPreview.src = window.authUser.img;
+        messageDiv.style.display = 'none';
+        editProfileModal.classList.add('is-open');
+        document.body.classList.add('modal-open');
+    });
+
+    window.closeEditProfileModal = function() {
+        editProfileModal.classList.remove('is-open');
+        document.body.classList.remove('modal-open');
+    };
+
+    avatarInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                avatarPreview.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+    saveBtn.addEventListener('click', async () => {
+        const username = editUsername.value.trim();
+        const email = editEmail.value.trim();
+        const avatarFile = avatarInput.files[0];
+
+        if (!username || !email) {
+            showToast('Username and email are required.', 'error');
+            return;
+        }
+
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+        messageDiv.style.display = 'none';
+
+        try {
+            const infoResponse = await fetch('/api/user', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify({ username, email })
+            });
+            const infoData = await infoResponse.json();
+            if (!infoData.success) {
+                throw new Error(infoData.message || 'Failed to update profile');
+            }
+
+            window.authUser.username = infoData.user.username;
+            window.authUser.email = infoData.user.email;
+            window.authUser.img = infoData.user.img;
+            sessionStorage.setItem('loggedInUser', JSON.stringify(window.authUser));
+
+           if (avatarFile) {
+                const formData = new FormData();
+                formData.append('profile_image', avatarFile);
+                const avatarResponse = await fetch('/api/user/profile-image', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: formData
+                });
+                const avatarData = await avatarResponse.json();
+                if (!avatarData.success) {
+                    throw new Error(avatarData.message || 'Failed to update profile image');
+                }
+                window.authUser.img = avatarData.profile_image;
+                sessionStorage.setItem('loggedInUser', JSON.stringify(window.authUser));
+            }
+
+            const nameEl = document.querySelector('.profile-info-modern h1');
+            if (nameEl) nameEl.textContent = window.authUser.username;
+            const emailEl = document.querySelector('.profile-info-modern .profile-meta:first-of-type');
+            if (emailEl) emailEl.textContent = window.authUser.email;
+            const avatarEl = document.querySelector('.user-avatar');
+            if (avatarEl) avatarEl.src = window.authUser.img;
+
+            const modalPreview = document.getElementById('editAvatarPreview');
+            if (modalPreview) modalPreview.src = window.authUser.img;
+
+            showToast('Profile updated successfully!', 'success');
+            closeEditProfileModal();
+        } catch (error) {
+            messageDiv.textContent = error.message;
+            messageDiv.style.display = 'block';
+            messageDiv.style.background = 'rgba(251, 113, 133, 0.2)';
+            messageDiv.style.color = '#fb7185';
+            showToast(error.message, 'error');
+        } finally {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = 'Save Changes';
+        }
+    });
+
+   editProfileModal.addEventListener('click', function(e) {
+        if (e.target === editProfileModal) closeEditProfileModal();
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && editProfileModal.classList.contains('is-open')) {
+            closeEditProfileModal();
+        }
+    });
 }
