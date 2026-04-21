@@ -19,6 +19,7 @@ class HeroBannerSeeder extends Seeder
             'cta_route_name'   => 'about',
             'background_image' => 'imgs/for welcome page.png', // adjust if your file name differs
             'position'         => 1,
+            'is_active'       => true, 
         ]);
 
         // 2) Discover movies banner
@@ -29,6 +30,7 @@ class HeroBannerSeeder extends Seeder
             'cta_route_name'   => 'search',
             'background_image' => 'imgs/premiere.png', // use an existing image or add one
             'position'         => 2,
+            'is_active'       => true, 
         ]);
 
         // 3) Book and Play banner
@@ -39,6 +41,7 @@ class HeroBannerSeeder extends Seeder
             'cta_route_name'   => 'bookings',
             'background_image' => 'imgs/RT.png', // use an existing image or add one
             'position'         => 3,
+            'is_active'       => true,
         ]);
     }
 }

@@ -18,5 +18,6 @@ class HeroBanner extends Model
         'cta_route_name',
         'background_image',
         'position',
+        'is_active',
     ];
 }

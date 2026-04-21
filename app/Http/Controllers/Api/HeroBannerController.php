@@ -49,7 +49,9 @@ class HeroBannerController extends Controller
         $imagePath = '/imgs/' . $filename;
         
         $maxPosition = HeroBanner::max('position') ?? 0;
-        
+
+        $activeCount = HeroBanner::where('is_active', true)->count();
+        $isActive = ($activeCount == 0); 
         $banner = HeroBanner::create([
             'title' => $request->title,
             'subtitle' => $request->subtitle,
@@ -57,7 +59,7 @@ class HeroBannerController extends Controller
             'cta_route_name' => $request->cta_route_name,
             'background_image' => $imagePath,
             'position' => $request->position ?? $maxPosition + 1,
-            'is_active' => false,
+            'is_active' => $isActive,
         ]);
         
         return response()->json([
@@ -127,7 +129,12 @@ public function update(Request $request, $id)
     {
         $banner = HeroBanner::findOrFail($id);
         $activeCount = HeroBanner::where('is_active', true)->count();
-        
+        if ($banner->is_active && $activeCount == 1) {
+            return response()->json([
+                'success' => false,
+                'message' => 'At least one banner must be active. Cannot deactivate the only active banner.'
+            ], 422);
+        }
         if (!$banner->is_active && $activeCount >= 3) {
             return response()->json([
                 'success' => false,
@@ -152,6 +159,13 @@ public function update(Request $request, $id)
 {
     $banner = HeroBanner::findOrFail($id);
     
+    $activeCount = HeroBanner::where('is_active', true)->count();
+    if ($banner->is_active && $activeCount == 1) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Cannot delete the only active banner. Please activate another banner first.'
+        ], 422);
+    }
     // Delete image file from public/imgs/
     if ($banner->background_image && file_exists(public_path($banner->background_image))) {
         unlink(public_path($banner->background_image));

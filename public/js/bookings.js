@@ -205,14 +205,15 @@
         showStep(stepNumber);
     }
 
-    function showDateMessage(message) {
+    function showDateMessage(message ,isSuccess = false) {
         if (!message) {
             $("#datecompletestep").empty();
             return;
         }
+        const color = isSuccess ? "#2ecc71" : "#ff6b6b";
 
         $("#datecompletestep").html(
-            `<span style="color:#ff6b6b; position: relative; top:10px; bottom:10px;">${message}</span>`
+            `<span style="color:${isSuccess ? '#2ecc71' : '#ff6b6b'}; position: relative; top:10px; bottom:10px;">${message}</span>`
         );
     }
 
@@ -409,6 +410,21 @@
     }
 
     function showLoginPrompt() {
+        const pendingBooking = {
+        cinemaId: state.cinemaId,
+        movieId: state.movieId,
+        date: state.date,
+        time: state.time,
+        selectedSeats: [...selectedSeats],
+        customerName: $("#Name").val().trim(),
+        customerEmail: $("#Email").val().trim(),
+        customerPhone: $("#PhoneNumber").val().trim(),
+        paymentMethod: $("#PaymentMethod").val(),
+        cardNumber: $("#CardNumber").val().trim(),
+        cardCvv: $("#CVV").val().trim(),
+    };
+    sessionStorage.setItem('pendingBooking', JSON.stringify(pendingBooking));
+    
         $("#confirmation").html(`
             <div style="text-align: center; padding: 20px;">
                 <p style="color: #ff6b6b; margin-bottom: 15px;">
@@ -435,6 +451,66 @@
                 openAuthModal("login");
             });
         }, 100);
+        
+    }
+    function restoreBooking() {
+        const saved = sessionStorage.getItem('pendingBooking');
+        if (!saved) return;
+
+        try {
+            const b = JSON.parse(saved);
+            if (!b.cinemaId) return;
+
+            state.cinemaId = b.cinemaId;
+            $("#cinemasSelect").val(b.cinemaId).trigger('change');
+
+            setTimeout(() => {
+                if (b.movieId) {
+                    state.movieId = b.movieId;
+                    $("#movieselect").val(b.movieId).trigger('change');
+                }
+                setTimeout(() => {
+                    if (b.date) {
+                        state.date = b.date;
+                        $("#dateselect").val(b.date).trigger('change');
+                    }
+                    setTimeout(() => {
+                        if (b.time) {
+                            state.time = b.time;
+                            $("#timeselect").val(b.time).trigger('change');
+                            syncSelectedShowtime();
+                        }
+                        setTimeout(() => {
+                            if (state.selectedShowtime) {
+                                renderSeatMap(state.selectedShowtime);
+                            }
+                            if (b.selectedSeats && b.selectedSeats.length) {
+                                b.selectedSeats.forEach(id => {
+                                    $(`.seat[data-seat-id="${id}"]`).addClass('selected');
+                                    selectedSeats.add(id);
+                                });
+                                updateCheckoutSummary();
+                                $("#reserveBtn").prop("disabled", false);
+                            }
+
+                            $("#Name").val(b.customerName || '');
+                            $("#Email").val(b.customerEmail || '');
+                            $("#PhoneNumber").val(b.customerPhone || '');
+                            $("#PaymentMethod").val(b.paymentMethod || '').trigger('change');
+                            $("#CardNumber").val(b.cardNumber || '');
+                            $("#CVV").val(b.cardCvv || '');
+
+                            unlockStep(5);
+                        }, 300);
+                    }, 100);
+                }, 100);
+            }, 100);
+
+            sessionStorage.removeItem('pendingBooking');
+        } catch (e) {
+            console.warn('Could not restore booking', e);
+            sessionStorage.removeItem('pendingBooking');
+        }
     }
 
     function handleConfirmBooking() {
@@ -561,6 +637,7 @@
     };
 
     $(function () {
+        restoreBooking();
         window.current = 1;
         window.movieComments = window.movieComments || {};
 
@@ -630,7 +707,7 @@
             }
 
             showDateMessage(
-                `${state.selectedShowtime.display_time} selected at ${state.selectedShowtime.cinema_name}.`
+                `${state.selectedShowtime.display_time} selected at ${state.selectedShowtime.cinema_name}.`,true
             );
         });
 

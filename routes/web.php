@@ -7,6 +7,7 @@ use App\Http\Controllers\BookingController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\SearchController;
+use Illuminate\Support\Facades\DB;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -61,3 +62,11 @@ Route::post('/email/verification-notification', [AuthController::class, 'resendV
     ->name('verification.send');
 
 Route::get('/auth/user', [AuthController::class, 'currentUser'])->name('auth.user');
+
+Route::get('/debug-cloud', function () {
+ return [
+ 'environment' => app()->environment(),
+ 'database_connection' => DB::connection()->getDatabaseName(),
+ ];
+});
+

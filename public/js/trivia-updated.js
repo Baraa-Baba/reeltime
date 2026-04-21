@@ -289,7 +289,7 @@ function closeGame() {
 
 // Go to movies
 function goToMovies() {
-    window.location.href = "../../index.html";
+    window.location.href = window.routes.home ;
 }
 
 // Save game round to backend

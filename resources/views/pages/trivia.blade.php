@@ -43,7 +43,7 @@ trivia-page
       <div class="empty-icon"><i class="fas fa-gamepad" aria-hidden="true"></i></div>
       <h3>Please log in</h3>
       <p>You need to be signed in to play games and keep your score on the leaderboard.</p>
-      <a href="{{ route('home') }}" class="button button-secondary">Go to login</a>
+      <button type="button" class="button button-secondary" onclick="openAuthModal('login')">Go to login</button>
     </div>
   </div>
 
