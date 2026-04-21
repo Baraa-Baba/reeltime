@@ -11,22 +11,22 @@
     <nav class="main-nav d-none d-lg-flex" aria-label="Primary navigation">
       <ul class="navbar-nav flex-row align-items-center justify-content-center">
         <li class="nav-item">
-          <a href="{{ route('home') }}" class="@class(['button button-secondary header-menu-link ', 'is-active' => Route::is('home')])">Home</a>
+          <a href="{{ route('home') }}" @class(['header-menu-link', 'is-active' => request()->routeIs('home')]) @if(request()->routeIs('home')) aria-current="page" @endif>Home</a>
         </li>
         <li class="nav-item">
-          <a href="{{ route('bookings') }}" class="@class(['button button-secondary header-menu-link rounded-pill', 'is-active' => Route::is('bookings')])">Bookings</a>
+          <a href="{{ route('bookings') }}" @class(['header-menu-link rounded-pill', 'is-active' => request()->routeIs('bookings*')]) @if(request()->routeIs('bookings*')) aria-current="page" @endif>Bookings</a>
         </li>
         <li class="nav-item">
-          <a href="{{ route('trivia') }}" class="@class(['button button-secondary header-menu-link rounded-pill', 'is-active' => Route::is('trivia')])">Games</a>
+          <a href="{{ route('trivia') }}" @class(['header-menu-link rounded-pill', 'is-active' => request()->routeIs('trivia*')]) @if(request()->routeIs('trivia*')) aria-current="page" @endif>Games</a>
         </li>
         <li class="nav-item">
-          <a href="{{ route('about') }}" class="@class(['button button-secondary header-menu-link rounded-pill', 'is-active' => Route::is('about')])">About</a>
+          <a href="{{ route('about') }}" @class(['header-menu-link rounded-pill', 'is-active' => request()->routeIs('about')]) @if(request()->routeIs('about')) aria-current="page" @endif>About</a>
         </li>
       </ul>
     </nav>
 
     <div class="header-actions d-none d-lg-flex">
-      <a href="{{ route('search') }}" class="@class(['button button-secondary header-action-btn header-action-icon', 'is-active' => Route::is('search')])" aria-label="Search movies">
+      <a href="{{ route('search') }}" @class(['button button-secondary header-action-btn header-action-icon', 'is-active' => request()->routeIs('search*')]) aria-label="Search movies" @if(request()->routeIs('search*')) aria-current="page" @endif>
         <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
         <span class="visually-hidden">Search</span>
       </a>
@@ -70,14 +70,14 @@
 
   <div class="offcanvas-body header-drawer-body">
     <nav class="header-drawer-nav" aria-label="Mobile navigation">
-      <a href="{{ route('home') }}" class="@class(['button button-secondary header-drawer-link rounded-pill', 'is-active' => Route::is('home')])">Home</a>
-      <a href="{{ route('bookings') }}" class="@class(['button button-secondary header-drawer-link rounded-pill', 'is-active' => Route::is('bookings')])">Bookings</a>
-      <a href="{{ route('trivia') }}" class="@class(['button button-secondary header-drawer-link rounded-pill', 'is-active' => Route::is('trivia')])">Games</a>
-      <a href="{{ route('about') }}" class="@class(['button button-secondary header-drawer-link rounded-pill', 'is-active' => Route::is('about')])">About</a>
+      <a href="{{ route('home') }}" @class(['button button-secondary header-drawer-link rounded-pill', 'is-active' => request()->routeIs('home')]) @if(request()->routeIs('home')) aria-current="page" @endif>Home</a>
+      <a href="{{ route('bookings') }}" @class(['button button-secondary header-drawer-link rounded-pill', 'is-active' => request()->routeIs('bookings*')]) @if(request()->routeIs('bookings*')) aria-current="page" @endif>Bookings</a>
+      <a href="{{ route('trivia') }}" @class(['button button-secondary header-drawer-link rounded-pill', 'is-active' => request()->routeIs('trivia*')]) @if(request()->routeIs('trivia*')) aria-current="page" @endif>Games</a>
+      <a href="{{ route('about') }}" @class(['button button-secondary header-drawer-link rounded-pill', 'is-active' => request()->routeIs('about')]) @if(request()->routeIs('about')) aria-current="page" @endif>About</a>
     </nav>
 
     <div class="header-drawer-actions">
-      <a href="{{ route('search') }}" class="@class(['button button-secondary header-drawer-link header-action-icon rounded-pill', 'is-active' => Route::is('search')])" aria-label="Search movies">
+      <a href="{{ route('search') }}" @class(['button button-secondary header-drawer-link header-action-icon rounded-pill', 'is-active' => request()->routeIs('search*')]) aria-label="Search movies" @if(request()->routeIs('search*')) aria-current="page" @endif>
         <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
         <span>Search</span>
       </a>

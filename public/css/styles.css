@@ -404,10 +404,12 @@ header.site-header .logo img,
   padding: 0.65rem 1rem;
   font-size: 0.92rem;
   letter-spacing: 0.01em;
+  position: relative;
 }
 
 .header-menu-link,
 .header-drawer-link {
+    border-radius: none !important;
   text-align: center;
 }
 
@@ -423,12 +425,9 @@ header.site-header .logo img,
 .header-menu-link.is-active,
 .header-action-btn.is-active,
 .header-drawer-link.is-active {
-  color: var(--text-color);
-  border-color: rgba(249, 115, 22, 0.35);
-  background: rgba(249, 115, 22, 0.12);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
-}
-
+    color: var(--accent-3);
+ }
+ 
 .nav-link {
   display: inline-flex;
   align-items: center;
@@ -3891,7 +3890,7 @@ body.profile-page main.profile-page {
 
 .full-width {
   grid-column: span 2;
-}
+} 
 
 @media (max-width: 640px) {
   .hero-slide {
