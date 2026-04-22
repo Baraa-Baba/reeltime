@@ -52,6 +52,8 @@
                 <input type="password" id="loginPassword" name="password" placeholder="Enter your password" required>
               </div>
 
+              <button type="button" class="button button-secondary" id="showForgotPanelBtn">Forgot password?</button>
+
               <button type="submit" class="button button-primary login-submit" id="loginSubmitBtn">
                 <span class="btn-text">Log In</span>
                 <span class="btn-loader" style="display:none;"><i class="fas fa-spinner fa-spin me-1"></i>Logging in...</span>
@@ -94,6 +96,61 @@
               </button>
               <p id="signupError" class="login-error" aria-live="polite"></p>
               <p id="signupSuccess" class="login-success" aria-live="polite"></p>
+            </form>
+          </div>
+
+          <div class="auth-panel" id="forgotPanel" style="display: none;">
+            <div class="panel-copy">
+              <h3>Reset your password</h3>
+              <p>Enter your account email and we will send a reset link.</p>
+            </div>
+
+            <form class="login-form" id="forgotPasswordForm">
+              <div>
+                <label for="forgotEmail">Email</label>
+                <input type="email" id="forgotEmail" placeholder="Enter your account email" required>
+              </div>
+
+              <button type="submit" class="button button-primary login-submit" id="forgotSubmitBtn">
+                <span class="btn-text">Send Reset Link</span>
+                <span class="btn-loader" style="display:none;"><i class="fas fa-spinner fa-spin me-1"></i>Sending...</span>
+              </button>
+              <button type="button" class="button button-secondary" id="backToLoginBtn">Back to Login</button>
+              <p id="forgotError" class="login-error" aria-live="polite"></p>
+              <p id="forgotSuccess" class="login-success" aria-live="polite"></p>
+            </form>
+          </div>
+
+          <div class="auth-panel" id="resetPanel" style="display: none;">
+            <div class="panel-copy">
+              <h3>Create a new password</h3>
+              <p>Set a new password for your account.</p>
+            </div>
+
+            <form class="login-form" id="resetPasswordForm">
+              <input type="hidden" id="resetToken" name="token">
+              <div>
+                <label for="resetEmail">Email</label>
+                <input type="email" id="resetEmail" name="email" placeholder="Enter your account email" required>
+              </div>
+
+              <div>
+                <label for="resetPassword">New Password</label>
+                <input type="password" id="resetPassword" name="password" placeholder="Enter new password" required minlength="6">
+              </div>
+
+              <div>
+                <label for="resetPasswordConfirm">Confirm Password</label>
+                <input type="password" id="resetPasswordConfirm" name="password_confirmation" placeholder="Confirm new password" required minlength="6">
+              </div>
+
+              <button type="submit" class="button button-primary login-submit" id="resetSubmitBtn">
+                <span class="btn-text">Update Password</span>
+                <span class="btn-loader" style="display:none;"><i class="fas fa-spinner fa-spin me-1"></i>Updating...</span>
+              </button>
+              <button type="button" class="button button-secondary" id="resetBackToLoginBtn">Back to Login</button>
+              <p id="resetError" class="login-error" aria-live="polite"></p>
+              <p id="resetSuccess" class="login-success" aria-live="polite"></p>
             </form>
           </div>
         </section>

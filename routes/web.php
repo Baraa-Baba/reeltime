@@ -46,6 +46,9 @@ Route::middleware(['check.auth'])->group(function () {
 Route::middleware(['guest'])->group(function () {
     Route::post('/auth/login', [AuthController::class, 'login'])->name('auth.login');
     Route::post('/auth/register', [AuthController::class, 'register'])->name('auth.register');
+    Route::post('/auth/forgot-password', [AuthController::class, 'forgotPassword'])->name('password.email');
+    Route::get('/reset-password/{token}', [AuthController::class, 'showResetPassword'])->name('password.reset');
+    Route::post('/auth/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
 });
 
 // Email verification routes

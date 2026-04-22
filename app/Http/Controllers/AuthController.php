@@ -6,6 +6,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -154,6 +156,79 @@ class AuthController extends Controller
         return response()->json([
             'authenticated' => false,
         ]);
+    }
+
+    /**
+     * Send reset password link via email.
+     */
+    public function forgotPassword(Request $request)
+    {
+        $request->validate([
+            'email' => ['required', 'email'],
+        ]);
+
+        $status = Password::sendResetLink([
+            'email' => $request->email,
+        ]);
+
+        if ($status === Password::RESET_LINK_SENT) {
+            return response()->json([
+                'success' => true,
+                'message' => 'If this email exists, a reset link has been sent.',
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => __($status),
+        ], 422);
+    }
+
+    /**
+     * Redirect reset links back into the auth modal flow.
+     */
+    public function showResetPassword(Request $request, string $token)
+    {
+        $email = $request->query('email', '');
+
+        return redirect()->route('home', [
+            'reset_token' => $token,
+            'email' => $email,
+        ]);
+    }
+
+    /**
+     * Update password using reset token.
+     */
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'token' => ['required', 'string'],
+            'email' => ['required', 'email'],
+            'password' => ['required', 'string', 'min:6', 'confirmed'],
+        ]);
+
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function (User $user, string $password) {
+                $user->forceFill([
+                    'password' => $password,
+                    'remember_token' => Str::random(60),
+                ])->save();
+            }
+        );
+
+        if ($status === Password::PASSWORD_RESET) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Password reset successful. You can now log in.',
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => __($status),
+        ], 422);
     }
 
     /**

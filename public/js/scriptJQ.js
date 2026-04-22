@@ -6,18 +6,29 @@ let SEAT_PRICE = 7;  //7$ l price la el seat
 window.movieComments = {};
 
 function setAuthTab(tab) {
-    let isLogin = tab !== "signup";
+    const panels = {
+        login: '#loginPanel',
+        signup: '#signupPanel',
+        forgot: '#forgotPanel',
+        reset: '#resetPanel'
+    };
+
+    const nextTab = panels[tab] ? tab : 'login';
 
     $('[data-tab]').each(function () {
-        let isActive = $(this).data('tab') === tab;
+        let isActive = nextTab === 'login' || nextTab === 'signup'
+            ? $(this).data('tab') === nextTab
+            : false;
         $(this)
             .toggleClass('is-active', isActive)
             .attr('aria-selected', isActive ? 'true' : 'false');
     });
 
-    $('#loginPanel').toggle(isLogin);
-    $('#signupPanel').toggle(!isLogin);
-    $('#loginError, #signupError, #loginSuccess, #signupSuccess').text('');
+    Object.entries(panels).forEach(([key, selector]) => {
+        $(selector).toggle(key === nextTab);
+    });
+
+    $('#loginError, #signupError, #loginSuccess, #signupSuccess, #forgotError, #forgotSuccess, #resetError, #resetSuccess').text('');
 }
 
 function openAuthModal(tab = "login") {
@@ -263,6 +274,14 @@ $(function () {
             setAuthTab(tab);
         });
 
+        $(document).on('click', '#showForgotPanelBtn', function () {
+            setAuthTab('forgot');
+        });
+
+        $(document).on('click', '#backToLoginBtn, #resetBackToLoginBtn', function () {
+            setAuthTab('login');
+        });
+
         // Login toggle button click
         $(document).on('click', '.login-toggle-btn', function (e) {
             e.preventDefault();
@@ -465,6 +484,138 @@ $(function () {
                 }
             });
         });
+
+        $('#forgotPasswordForm').on('submit', function (e) {
+            e.preventDefault();
+
+            let $btn = $('#forgotSubmitBtn');
+            let $btnText = $btn.find('.btn-text');
+            let $btnLoader = $btn.find('.btn-loader');
+            let email = $('#forgotEmail').val().trim();
+
+            if (!email) {
+                $('#forgotError').text('Please enter your email.');
+                return;
+            }
+
+            $btn.prop('disabled', true);
+            $btnText.hide();
+            $btnLoader.show();
+            $('#forgotError').text('');
+            $('#forgotSuccess').text('');
+
+            $.ajax({
+                url: '/auth/forgot-password',
+                method: 'POST',
+                data: { email },
+                success: function (response) {
+                    $('#forgotSuccess').text(response.message || 'If this email exists, a reset link has been sent.');
+                    $('#forgotError').text('');
+                },
+                error: function (xhr) {
+                    let msg = 'Could not send reset link. Please try again.';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        msg = typeof xhr.responseJSON.message === 'string'
+                            ? xhr.responseJSON.message
+                            : Object.values(xhr.responseJSON.message).flat().join(' ');
+                    }
+                    $('#forgotError').text(msg);
+                },
+                complete: function () {
+                    $btn.prop('disabled', false);
+                    $btnText.show();
+                    $btnLoader.hide();
+                }
+            });
+        });
+
+        $('#resetPasswordForm').on('submit', function (e) {
+            e.preventDefault();
+
+            let $btn = $('#resetSubmitBtn');
+            let $btnText = $btn.find('.btn-text');
+            let $btnLoader = $btn.find('.btn-loader');
+
+            let token = $('#resetToken').val().trim();
+            let email = $('#resetEmail').val().trim();
+            let password = $('#resetPassword').val();
+            let passwordConfirm = $('#resetPasswordConfirm').val();
+
+            if (!token || !email || !password || !passwordConfirm) {
+                $('#resetError').text('Please fill in all fields.');
+                return;
+            }
+
+            if (password !== passwordConfirm) {
+                $('#resetError').text('Passwords do not match.');
+                return;
+            }
+
+            if (password.length < 6) {
+                $('#resetError').text('Password must be at least 6 characters.');
+                return;
+            }
+
+            $btn.prop('disabled', true);
+            $btnText.hide();
+            $btnLoader.show();
+            $('#resetError').text('');
+            $('#resetSuccess').text('');
+
+            $.ajax({
+                url: '/auth/reset-password',
+                method: 'POST',
+                data: {
+                    token: token,
+                    email: email,
+                    password: password,
+                    password_confirmation: passwordConfirm
+                },
+                success: function (response) {
+                    $('#resetSuccess').text(response.message || 'Password reset successful.');
+                    $('#resetError').text('');
+                    $('#resetPassword').val('');
+                    $('#resetPasswordConfirm').val('');
+
+                    setTimeout(function () {
+                        setAuthTab('login');
+                    }, 1000);
+                },
+                error: function (xhr) {
+                    let msg = 'Could not reset password. Please try again.';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        msg = typeof xhr.responseJSON.message === 'string'
+                            ? xhr.responseJSON.message
+                            : Object.values(xhr.responseJSON.message).flat().join(' ');
+                    }
+                    $('#resetError').text(msg);
+                },
+                complete: function () {
+                    $btn.prop('disabled', false);
+                    $btnText.show();
+                    $btnLoader.hide();
+                }
+            });
+        });
+
+        const params = new URLSearchParams(window.location.search);
+        const resetToken = params.get('reset_token');
+        const resetEmail = params.get('email');
+
+        if (resetToken) {
+            $('#resetToken').val(resetToken);
+            if (resetEmail) {
+                $('#resetEmail').val(resetEmail);
+            }
+
+            openAuthModal('reset');
+
+            params.delete('reset_token');
+            params.delete('email');
+            const queryString = params.toString();
+            const newUrl = `${window.location.pathname}${queryString ? '?' + queryString : ''}${window.location.hash}`;
+            window.history.replaceState({}, document.title, newUrl);
+        }
 
         updateLoginStatus();
     });
