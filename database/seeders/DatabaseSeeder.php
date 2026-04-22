@@ -52,14 +52,7 @@ class DatabaseSeeder extends Seeder
         $movies = Movie::all();
         $cinemas = Cinema::all();
 
-        foreach ($users->random(10) as $user) {
-            foreach ($movies->random(3) as $movie) {
-                Rating::factory()->create([
-                    'user_id' => $user->user_id,
-                    'movie_id' => $movie->movie_id,
-                ]);
-            }
-        }
+        
 
         foreach ($users->random(10) as $user) {
             foreach ($movies->random(2) as $movie) {

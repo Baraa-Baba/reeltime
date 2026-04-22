@@ -333,18 +333,31 @@ function saveGameRound(score) {
 // Load leaderboard from backend
 function loadLeaderboard() {
     fetch('/api/game-rounds/leaderboard')
-        .then(response => {
-            console.log('Leaderboard response status:', response.status);
-            return response.json();
-        })
+        .then(response => response.json())
         .then(leaderboard => {
-            console.log('Leaderboard data:', leaderboard);
-            let leaderboardHTML = leaderboard.map((entry, index) => {
+            const top5 = leaderboard.slice(0, 5); 
+            let leaderboardHTML = top5.map((entry, index) => {
+                const rank = index + 1;
+                let rankClass = '';
+                let crownIcon = '';
+                if (rank === 1) {
+                    rankClass = 'rank-1';
+                    crownIcon = '<i class="fas fa-crown"></i> ';
+                } else if (rank === 2) {
+                    rankClass = 'rank-2';
+                } else if (rank === 3) {
+                    rankClass = 'rank-3';
+                }
+                
+                const playerName = escapeHtml(entry.player_name || 'Anonymous');
+                
                 return `
-                    <div class="leaderboard-item">
-                        <span class="rank">#${entry.rank}</span>
-                        <span class="player">${entry.player_name}</span>
-                        <span class="score">${entry.score} pts</span>
+                    <div class="leaderboard-item ${rankClass}">
+                        <div class="leaderboard-rank">#${rank}</div>
+                        <div class="leaderboard-name">
+                            ${crownIcon}${playerName}
+                        </div>
+                        <div class="leaderboard-score">${entry.score} pts</div>
                     </div>
                 `;
             }).join('');
@@ -354,6 +367,16 @@ function loadLeaderboard() {
         .catch(error => {
             console.error('Error loading leaderboard:', error);
             $('#leaderboard').html('<p>Error loading leaderboard</p>');
+        });
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
         });
 }
 

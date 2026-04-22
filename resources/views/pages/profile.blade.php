@@ -188,7 +188,7 @@ profile-page
         @endforelse
     </div>
     </main>
-    // Edit Profile Modal
+    <!--  Edit Profile Modal -->
         <div id="editProfileModal" class="admin-modal">
         <div class="surface-card admin-modal-shell" style="max-width: 500px;">
             <button type="button" class="modal-close-btn" onclick="closeEditProfileModal()">

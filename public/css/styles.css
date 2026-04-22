@@ -3955,3 +3955,169 @@ body.profile-page main.profile-page {
     background: rgba(255, 255, 255, 0.1);
     color: var(--accent-3);
 }
+/* Leaderboard styling */
+.leaderboard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.leaderboard-item {
+    display: grid;
+    grid-template-columns: 60px 1fr 80px;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.8rem 1.2rem;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    transition: all 0.25s ease;
+    width: 90%;
+}
+
+.leaderboard-item:nth-child(1) { width: 95%; }  
+.leaderboard-item:nth-child(2) { width: 85%; }
+.leaderboard-item:nth-child(3) { width: 75%; }
+.leaderboard-item:nth-child(4) { width: 68%; }
+.leaderboard-item:nth-child(5) { width: 62%; }
+.leaderboard-item:nth-child(n+6) { width: 55%; }
+
+.leaderboard-item:nth-child(1) .leaderboard-rank {
+    width: 56px;
+    height: 56px;
+    font-size: 1.4rem;
+}
+
+.leaderboard-item:nth-child(1) {
+    padding: 1rem 1.5rem;
+    gap: 1.5rem;
+}
+
+.leaderboard-item.rank-1 .leaderboard-rank {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    color: #0a0d11;
+    box-shadow: 0 0 16px rgba(251, 191, 36, 0.5);
+}
+
+.leaderboard-item.rank-2 .leaderboard-rank {
+    background: linear-gradient(135deg, #94a3b8, #64748b);
+    color: #0a0d11;
+    box-shadow: 0 0 8px rgba(148, 163, 184, 0.3);
+}
+
+.leaderboard-item.rank-3 .leaderboard-rank {
+    background: linear-gradient(135deg, #cd7f56, #b45309);
+    color: #0a0d11;
+    box-shadow: 0 0 8px rgba(205, 127, 86, 0.3);
+}
+
+.leaderboard-score {
+    font-weight: 800;
+    font-size: 1.25rem;
+    font-family: 'Space Grotesk', monospace;
+    background: linear-gradient(135deg, var(--accent-2), var(--accent));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-align: right;
+}
+
+.leaderboard-name i.fa-crown {
+    color: #fbbf24;
+    margin-right: 0.3rem;
+    filter: drop-shadow(0 0 3px gold);
+}
+
+.leaderboard-item:hover {
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(249, 115, 22, 0.3);
+    transform: scale(1.01);
+}
+
+/*booking in profile*/
+.booked-card-modern {
+    display: flex;
+    flex-direction: column;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 1rem;
+    gap: 0.75rem;
+}
+
+.booked-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.booked-movie-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--text-color) !important;
+    display: block !important;
+    line-height: 1.4;
+}
+
+.booked-status {
+    position: relative !important;
+    top: auto !important;
+    right: auto !important;
+    display: inline-flex !important;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    width: fit-content;
+}
+
+.booked-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.booked-meta span {
+    display: inline-flex;
+    gap: 0.25rem;
+}
+
+.booked-extra {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.booked-extra strong {
+    color: var(--text-color);
+}
+
+.status-upcoming {
+    background: rgba(249, 115, 22, 0.15);
+    color: var(--accent-3);
+}
+
+.status-cancelled {
+    background: rgba(251, 113, 133, 0.15);
+    color: var(--danger);
+}
+
+.status-watched {
+    background: rgba(74, 222, 128, 0.15);
+    color: var(--success);
+}
+
+#editProfileModal {
+    z-index: 10001 !important;
+}
+
+#editProfileModal .admin-modal-shell {
+    z-index: 10002 !important;
+}

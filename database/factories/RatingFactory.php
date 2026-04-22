@@ -17,10 +17,10 @@ class RatingFactory extends Factory
     public function definition(): array
     {
         return [
-            'user_id' => \App\Models\User::factory(),
-            'movie_id' => \App\Models\Movie::factory(),
-            'score' => fake()->randomElement([1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5]),
-            'comment' => fake()->sentence(),
+            // 'user_id' => \App\Models\User::factory(),
+            // 'movie_id' => \App\Models\Movie::factory(),
+            // 'score' => fake()->randomElement([1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5]),
+            // 'comment' => fake()->sentence(),
         ];
     }
 }

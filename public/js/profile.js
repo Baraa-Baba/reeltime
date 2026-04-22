@@ -1,4 +1,5 @@
 const MAX_COMMENT_CHARS = 100;
+let originalBookings = []
 $(document).ready(function () {
     initializeProfile();
     initializeToastStyles();
@@ -20,9 +21,9 @@ $(document).ready(function () {
         loadWatchlist(user);
         loadBookedMovies(user);
         //.off to remove previous handlers and .on to add new handler and rerender booked movies
-        $(document).off('change', '#booked-sort').on('change', '#booked-sort', function () {
-            loadBookedMovies(user);
-        });
+        // $(document).off('change', '#booked-sort').on('change', '#booked-sort', function () {
+        //     loadBookedMovies(user);
+        // });
         setupProfileSearch();
     }
 
@@ -140,6 +141,7 @@ $(document).ready(function () {
 
 
     function loadBookedMovies(user) {
+        originalBookings = [];
     setupBookingSorting();
     
     // Cancel button handlers
@@ -150,24 +152,54 @@ $(document).ready(function () {
 }
 
 function setupBookingSorting() {
+    if (originalBookings.length === 0) {
+        originalBookings = $('#booked-grid .booked-card-modern').toArray();
+    }
+
     $('#booked-sort').off('change').on('change', function() {
-        const sortMode = $(this).val();
-        const $grid = $('#booked-grid');
-        const $bookings = $grid.children('.booked-card-modern').toArray();
-        
-        $bookings.sort(function(a, b) {
-            const dateA = $(a).find('.booked-meta span:first').text().replace('Date:', '').trim();
-            const dateB = $(b).find('.booked-meta span:first').text().replace('Date:', '').trim();
-            
-            if (sortMode === 'nearest') {
+        const mode = $(this).val();
+        let filteredBookings = [...originalBookings];
+
+        if (mode === 'upcoming') {
+            filteredBookings = filteredBookings.filter(card => {
+                const statusElem = $(card).find('.booked-status');
+                return statusElem.hasClass('status-upcoming') || 
+                       statusElem.hasClass('status-confirmed') || 
+                       statusElem.hasClass('status-pending');
+            });
+        } else if (mode === 'watched') {
+            filteredBookings = filteredBookings.filter(card => 
+                $(card).find('.booked-status').hasClass('status-watched')
+            );
+        } else if (mode === 'cancelled') {
+            filteredBookings = filteredBookings.filter(card => 
+                $(card).find('.booked-status').hasClass('status-cancelled')
+            );
+        }
+
+        if (mode === 'nearest') {
+            filteredBookings.sort((a, b) => {
+                const dateA = $(a).find('.booked-meta span:first').text().replace('Date:', '').trim();
+                const dateB = $(b).find('.booked-meta span:first').text().replace('Date:', '').trim();
                 return new Date(dateA) - new Date(dateB);
-            } else if (sortMode === 'latest') {
+            });
+        } else if (mode === 'latest') {
+            filteredBookings.sort((a, b) => {
+                const dateA = $(a).find('.booked-meta span:first').text().replace('Date:', '').trim();
+                const dateB = $(b).find('.booked-meta span:first').text().replace('Date:', '').trim();
                 return new Date(dateB) - new Date(dateA);
-            }
-            return 0;
-        });
+            });
+        }
+        const $grid = $('#booked-grid');
+        $grid.empty().append(filteredBookings);
+        const visibleCount = filteredBookings.length;
+        const totalCount = originalBookings.length;
         
-        $grid.empty().append($bookings);
+        if (mode === 'upcoming' || mode === 'watched' || mode === 'cancelled') {
+            $('#booked-counter').text(`${visibleCount} / ${totalCount} bookings`);
+        } else {
+            $('#booked-counter').text(`${visibleCount} bookings`);
+        }
     });
 }
     // Add after loadBookedMovies function in profile.js
