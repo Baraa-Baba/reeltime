@@ -327,7 +327,7 @@ admin-page
                   <td>
                     <img src="{{ asset($booking->showtime->movie->poster) }}" class="admin-thumb" alt="Poster">
                   </td>
-                  <td>{{ $booking->booking_date }}</td>
+                  <td>{{ $booking->booking_date ? \Carbon\Carbon::parse($booking->booking_date)->format('M j, Y') : '-' }}</td>
                   <td>
                     <span class="admin-badge {{ 'status-' . $bookingStatus }}">{{ $booking->status }}</span>
                   </td>
@@ -407,7 +407,7 @@ admin-page
                   </td>
                   <td>{{ $member->username }}</td>
                   <td>{{ $member->email }}</td>
-                  <td>{{ $member->member_since ? \Carbon\Carbon::parse($member->member_since)->format('Y-m-d') : '-' }}</td>
+                  <td>{{ $member->member_since ? \Carbon\Carbon::parse($member->member_since)->format('M j, Y') : '-' }}</td>
                   <td>
                     <span class="admin-badge {{ $member->role === 'admin' ? 'role-admin' : 'role-user' }}">{{ $member->role }}</span>
                   </td>

@@ -333,7 +333,7 @@
         renderDateOptions();
         renderTimeOptions();
 
-        $("#Name, #Email, #PhoneNumber, #PaymentMethod, #CardNumber, #CVV").val("");
+        $("#Name, #PhoneNumber, #PaymentMethod, #CardNumber, #CVV").val("");
         $("#confirmation").empty();
         $("#Datebtn").prop("disabled", true);
         showDateMessage("");
@@ -389,14 +389,12 @@
 
     function validateCheckoutFields() {
         const name = $("#Name").val().trim();
-        const email = $("#Email").val().trim();
         const phone = $("#PhoneNumber").val().trim();
         const paymentMethod = $("#PaymentMethod").val();
         const card = $("#CardNumber").val().trim();
         const cvv = $("#CVV").val().trim();
 
         if (!name) return "Please enter your full name.";
-        if (!email) return "Please enter your email.";
         if (!phone) return "Please enter your phone number.";
         if (!/^[0-9]+$/.test(phone)) return "Please enter a valid phone number.";
         if (!paymentMethod) return "Please choose a payment method.";
@@ -417,7 +415,6 @@
         time: state.time,
         selectedSeats: [...selectedSeats],
         customerName: $("#Name").val().trim(),
-        customerEmail: $("#Email").val().trim(),
         customerPhone: $("#PhoneNumber").val().trim(),
         paymentMethod: $("#PaymentMethod").val(),
         cardNumber: $("#CardNumber").val().trim(),
@@ -494,7 +491,6 @@
                             }
 
                             $("#Name").val(b.customerName || '');
-                            $("#Email").val(b.customerEmail || '');
                             $("#PhoneNumber").val(b.customerPhone || '');
                             $("#PaymentMethod").val(b.paymentMethod || '').trigger('change');
                             $("#CardNumber").val(b.cardNumber || '');
@@ -554,7 +550,6 @@
                 showtime_id: state.selectedShowtime.id,
                 seats: selectedSeats.size,
                 customer_name: $("#Name").val().trim(),
-                customer_email: $("#Email").val().trim(),
                 customer_phone: $("#PhoneNumber").val().trim(),
                 payment_method: $("#PaymentMethod").val(),
                 selected_seats: [...selectedSeats],

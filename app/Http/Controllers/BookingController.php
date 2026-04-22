@@ -80,7 +80,6 @@ class BookingController extends Controller
             'showtime_id' => ['required', 'integer', 'exists:showtimes,showtime_id'],
             'seats' => ['required', 'integer', 'min:1', 'max:' . self::SEAT_MAP_CAPACITY],
             'customer_name' => ['required', 'string', 'max:255'],
-            'customer_email' => ['required', 'email', 'max:255'],
             'customer_phone' => ['required', 'string', 'max:30'],
             'payment_method' => ['required', 'string', 'in:card,cash'],
             'selected_seats' => ['nullable', 'array'],
@@ -96,6 +95,15 @@ class BookingController extends Controller
         }
 
         $payload = $validator->validated();
+        $customerEmail = Auth::user()?->email;
+
+        if (! $customerEmail) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unable to resolve the authenticated user email.',
+            ], 422);
+        }
+
         $seatCount = (int) $payload['seats'];
         $selectedSeats = $payload['selected_seats'] ?? [];
 
@@ -146,7 +154,7 @@ class BookingController extends Controller
                 'status' => 'confirmed',
                 'customer_info' => json_encode([
                     'name' => $payload['customer_name'],
-                    'email' => $payload['customer_email'],
+                    'email' => $customerEmail,
                     'phone' => $payload['customer_phone'],
                     'payment_method' => $payload['payment_method'],
                     'selected_seats' => $selectedSeats,

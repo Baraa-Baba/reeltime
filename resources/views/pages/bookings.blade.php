@@ -121,7 +121,6 @@ bookings-page
         <div class="step-content" id="step5">
           <div class="checkout-fields">
             <input type="text" id="Name" class="form-control mb-2" placeholder="Enter your full name">
-            <input type="text" id="Email" class="form-control mb-2" placeholder="Enter your email">
             <input type="text" id="PhoneNumber" class="form-control mb-2" placeholder="Enter your phone number">
             <select id="PaymentMethod" class="form-select mb-2" aria-label="Choose payment method">
               <option value="">Choose a payment method</option>

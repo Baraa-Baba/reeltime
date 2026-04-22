@@ -36,6 +36,13 @@
           <i class="fas fa-user me-1" aria-hidden="true"></i>
           <span>{{ Auth::user()->username }}</span>
         </button>
+        <form action="{{ route('auth.logout') }}" method="POST" class="m-0 header-logout-form">
+          @csrf
+          <button class="button button-secondary header-action-btn header-logout-btn" type="submit" aria-label="Log out">
+            <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
+            <span class="header-logout-label">Logout</span>
+          </button>
+        </form>
       @else
         <button class="button button-secondary header-action-btn login-toggle-btn" type="button">
           <i class="fas fa-user me-1" aria-hidden="true"></i>
@@ -87,6 +94,13 @@
           <i class="fas fa-user me-1" aria-hidden="true"></i>
           <span>{{ Auth::user()->username }}</span>
         </button>
+        <form action="{{ route('auth.logout') }}" method="POST" class="m-0">
+          @csrf
+          <button class="button button-secondary header-drawer-link header-drawer-login" type="submit" aria-label="Log out">
+            <i class="fas fa-sign-out-alt me-1" aria-hidden="true"></i>
+            <span>Logout</span>
+          </button>
+        </form>
       @else
         <button class="button button-secondary header-drawer-link header-drawer-login login-toggle-btn" type="button">
           <i class="fas fa-user me-1" aria-hidden="true"></i>

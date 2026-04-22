@@ -422,6 +422,41 @@ header.site-header .logo img,
   padding-inline: 0.85rem;
 }
 
+.header-actions .header-logout-form {
+  display: flex;
+}
+
+.header-actions .header-logout-btn {
+  width: 42px;
+  min-width: 42px;
+  padding-inline: 0.85rem;
+  overflow: hidden;
+  white-space: nowrap;
+  justify-content: center;
+  transition: width 0.28s ease, justify-content 0.28s ease;
+}
+
+.header-actions .header-logout-label {
+  max-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  transform: translateX(-6px);
+  transition: max-width 0.28s ease, opacity 0.2s ease, transform 0.28s ease;
+}
+
+.header-actions .header-logout-btn:hover,
+.header-actions .header-logout-btn:focus-visible {
+  width: 110px;
+  justify-content: center;
+}
+
+.header-actions .header-logout-btn:hover .header-logout-label,
+.header-actions .header-logout-btn:focus-visible .header-logout-label {
+  max-width: 64px;
+  opacity: 1;
+  transform: translateX(0);
+}
+
 .header-menu-link.is-active,
 .header-action-btn.is-active,
 .header-drawer-link.is-active {
