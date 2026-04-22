@@ -548,6 +548,72 @@ function escapeHtml(str) {
         return m;
     });
 }
+
+function formatFriendlyDate(value) {
+    if (!value) {
+        return 'N/A';
+    }
+
+    const normalized = typeof value === 'string' ? value.replace(' ', 'T') : value;
+    const parsedDate = new Date(normalized);
+
+    if (Number.isNaN(parsedDate.getTime())) {
+        return String(value);
+    }
+
+    return parsedDate.toLocaleDateString(undefined, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+    });
+}
+
+function formatFriendlyDateTime(value) {
+    if (!value) {
+        return 'N/A';
+    }
+
+    const normalized = typeof value === 'string' ? value.replace(' ', 'T') : value;
+    const parsedDate = new Date(normalized);
+
+    if (Number.isNaN(parsedDate.getTime())) {
+        return String(value);
+    }
+
+    return parsedDate.toLocaleString(undefined, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+    });
+}
+
+function formatFriendlyTime(value) {
+    if (!value) {
+        return 'N/A';
+    }
+
+    const timeMatch = String(value).match(/^(\d{1,2}):(\d{2})/);
+    if (!timeMatch) {
+        return String(value);
+    }
+
+    const hours = Number(timeMatch[1]);
+    const minutes = Number(timeMatch[2]);
+
+    if (Number.isNaN(hours) || Number.isNaN(minutes)) {
+        return String(value);
+    }
+
+    const baseDate = new Date();
+    baseDate.setHours(hours, minutes, 0, 0);
+
+    return baseDate.toLocaleTimeString(undefined, {
+        hour: 'numeric',
+        minute: '2-digit',
+    });
+}
 // in the hero banner image click to show larger preview
 function handleBannerImageClick(e) {
     e.stopPropagation();
@@ -1291,13 +1357,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
         let showtimeValue = 'N/A';
         if (showtime.show_date && showtime.show_time) {
-           const date = new Date(showtime.show_date);
-            const timeStr = showtime.show_time.substring(0, 5); 
-            showtimeValue = `${date.toLocaleDateString()} at ${timeStr}`;
+            showtimeValue = `${formatFriendlyDate(showtime.show_date)} at ${formatFriendlyTime(showtime.show_time)}`;
         } else if (showtime.show_date) {
-            showtimeValue = showtime.show_date;
+            showtimeValue = formatFriendlyDate(showtime.show_date);
         } else if (showtime.show_time) {
-            showtimeValue = showtime.show_time;
+            showtimeValue = formatFriendlyTime(showtime.show_time);
         }
 
        let seatsDisplay = '—';
@@ -1340,7 +1404,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
                 <div class="booking-detail-row">
                     <span class="detail-label">Booking Date:</span>
-                    <span class="detail-value">${escapeHtml(booking.booking_date)}</span>
+                    <span class="detail-value">${escapeHtml(formatFriendlyDateTime(booking.booking_date))}</span>
                 </div>
                 <div class="booking-detail-row">
                     <span class="detail-label">Status:</span>
@@ -1443,7 +1507,7 @@ function renderUserDetails(user) {
             </div>
             <div class="booking-detail-row">
                 <span class="detail-label">Member Since:</span>
-                <span class="detail-value">${escapeHtml(user.member_since)}</span>
+                <span class="detail-value">${escapeHtml(formatFriendlyDate(user.member_since))}</span>
             </div>
         </div>
     `;
