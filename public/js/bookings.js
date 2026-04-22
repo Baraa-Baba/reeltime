@@ -32,6 +32,81 @@
         }
     }
 
+    function getContactStorageKey(user) {
+        if (!user) {
+            return "";
+        }
+
+        const userKey = user.id || user.user_id || user.username;
+        if (!userKey) {
+            return "";
+        }
+
+        return `bookingContact:${userKey}`;
+    }
+
+    function getSavedContact(user) {
+        const storageKey = getContactStorageKey(user);
+        if (!storageKey) {
+            return { fullName: "", phone: "" };
+        }
+
+        try {
+            const parsed = JSON.parse(localStorage.getItem(storageKey) || "{}");
+            return {
+                fullName: (parsed.fullName || "").trim(),
+                phone: (parsed.phone || "").trim(),
+            };
+        } catch (error) {
+            return { fullName: "", phone: "" };
+        }
+    }
+
+    function saveContact(user, fullName, phone) {
+        const storageKey = getContactStorageKey(user);
+        if (!storageKey) {
+            return;
+        }
+
+        const payload = {
+            fullName: (fullName || "").trim(),
+            phone: (phone || "").trim(),
+        };
+
+        localStorage.setItem(storageKey, JSON.stringify(payload));
+
+        try {
+            const userSnapshot = getLoggedInUser() || {};
+            userSnapshot.fullName = payload.fullName;
+            userSnapshot.phone = payload.phone;
+            sessionStorage.setItem("loggedInUser", JSON.stringify(userSnapshot));
+        } catch (error) {
+            // Ignore session sync failures and keep local contact persisted.
+        }
+    }
+
+    function autofillContactFields() {
+        const user = getLoggedInUser();
+        if (!user) {
+            return;
+        }
+
+        const saved = getSavedContact(user);
+        const fallbackName = (user.fullName || user.name || user.username || "").trim();
+        const fallbackPhone = (user.phone || "").trim();
+
+        const fullName = saved.fullName || fallbackName;
+        const phone = saved.phone || fallbackPhone;
+
+        if (!$("#Name").val().trim() && fullName) {
+            $("#Name").val(fullName);
+        }
+
+        if (!$("#PhoneNumber").val().trim() && phone) {
+            $("#PhoneNumber").val(phone);
+        }
+    }
+
     function paymentMethodLabel(paymentMethod) {
         return paymentMethod === "cash" ? "Pay at cinema" : "Card";
     }
@@ -338,6 +413,7 @@
         $("#Datebtn").prop("disabled", true);
         showDateMessage("");
         togglePaymentFields();
+        autofillContactFields();
 
         renderSeatMap(null);
 
@@ -561,6 +637,7 @@
                     return;
                 }
 
+                saveContact(user, $("#Name").val().trim(), $("#PhoneNumber").val().trim());
                 cacheBookingLocally(user, response.booking);
                 updateLocalAvailability(response.showtime.id, response.showtime.available_seats);
 
@@ -729,6 +806,15 @@
 
         $("#PaymentMethod").on("change", function () {
             togglePaymentFields();
+        });
+
+        $("#Name, #PhoneNumber").on("blur", function () {
+            const user = getLoggedInUser();
+            if (!user) {
+                return;
+            }
+
+            saveContact(user, $("#Name").val().trim(), $("#PhoneNumber").val().trim());
         });
 
         $(document).on("click", ".showShowTimes-btn", function (event) {
