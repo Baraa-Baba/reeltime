@@ -50,9 +50,10 @@
               <div>
                 <label for="loginPassword">Password</label>
                 <input type="password" id="loginPassword" name="password" placeholder="Enter your password" required>
+                <div style="text-align: left; margin-top: 0.35rem;">
+                  <button type="button" id="showForgotPanelBtn" style="background:none; border:none; padding:0; color: var(--accent); text-decoration: underline; cursor: pointer; font-size: 0.9rem;">Forgot password?</button>
+                </div>
               </div>
-
-              <button type="button" class="button button-secondary" id="showForgotPanelBtn">Forgot password?</button>
 
               <button type="submit" class="button button-primary login-submit" id="loginSubmitBtn">
                 <span class="btn-text">Log In</span>
