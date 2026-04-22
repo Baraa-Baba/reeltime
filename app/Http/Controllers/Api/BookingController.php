@@ -82,6 +82,8 @@ class BookingController extends Controller
             ], 404);
         }
 
+        $booking->refreshWatchedStatus();
+
         return response()->json([
             'success' => true,
             'data'    => $booking

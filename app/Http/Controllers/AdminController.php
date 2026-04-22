@@ -20,7 +20,8 @@ class AdminController extends Controller
         $userCount = User::count();
         $users=User::latest()->get();
         $bookingCount= Booking::count();
-        $bookings=Booking::latest()->get();
+        $bookings=Booking::with(['user', 'showtime.movie', 'showtime.cinema'])->latest()->get();
+        Booking::syncWatchedStatuses($bookings);
         return view('pages.admin', compact('user','movieCount','movies','gameCount','userCount','users','bookingCount','bookings','games'));
        
     }
