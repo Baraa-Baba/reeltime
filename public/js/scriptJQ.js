@@ -317,6 +317,72 @@ $(function () {
             e.preventDefault();
             closeAuthModal();
         });
+        //Logout Confirmation
+        $(document).on('submit', '.header-logout-form', function(e) {
+            e.preventDefault();
+            const modalHtml = `
+                <div class="custom-confirm-overlay" id="logoutConfirmOverlay">
+                    <div class="custom-confirm-modal">
+                        <div class="custom-confirm-icon">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </div>
+                        <h3>Logout</h3>
+                        <p>Are you sure you want to logout from ReelTime?</p>
+                        <div class="custom-confirm-buttons">
+                            <button class="btn-confirm-no" id="logoutCancelBtn">Cancel</button>
+                            <button class="btn-confirm-yes" id="logoutConfirmBtn">Yes, Logout</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            $('body').append(modalHtml);
+            
+            const overlay = $('#logoutConfirmOverlay');
+            overlay.addClass('active');
+            
+             $('#logoutCancelBtn').on('click', function() {
+                overlay.removeClass('active');
+                setTimeout(() => overlay.remove(), 300);
+            });
+            
+            $('#logoutConfirmBtn').on('click', function() {
+                overlay.removeClass('active');
+                setTimeout(() => overlay.remove(), 300);
+                
+                $.ajax({
+                    url: '/auth/logout',
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function() {
+                        sessionStorage.removeItem('loggedInUser');
+                        window.authUser = null;
+                        window.location.href = '/';
+                    },
+                    error: function() {
+                        sessionStorage.removeItem('loggedInUser');
+                        window.location.href = '/';
+                    }
+                });
+            });
+            
+            $(document).on('keydown.logoutConfirm', function(e) {
+                if (e.key === 'Escape') {
+                    overlay.removeClass('active');
+                    setTimeout(() => overlay.remove(), 300);
+                    $(document).off('keydown.logoutConfirm');
+                }
+            });
+            
+            overlay.on('click', function(e) {
+                if (e.target === overlay[0]) {
+                    overlay.removeClass('active');
+                    setTimeout(() => overlay.remove(), 300);
+                }
+            });
+        });
 
         // Close modal on background click
         $('.login-background').click(function (e) {
@@ -905,5 +971,5 @@ $("#confirmbtn").on("click", function () {
             $confirmBtn.prop("disabled", false);
             $confirmBtn.text("Confirm");
         }, 10000);
-    }, 3000); // Simulate processing delay
+    }, 3000); 
 });

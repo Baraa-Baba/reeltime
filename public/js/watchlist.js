@@ -226,7 +226,7 @@ function toggleWatchlistAPI(movieId, $button) {
             return;
         }
         
-        fetch(`/api/watchlist/${watchlistItem.watchlist_id}`, {
+        fetch(`/api/watchlist/${movieId}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
@@ -342,7 +342,7 @@ function toggleWatchlistFromCardAPI(movieId, $flag, userData) {
         // REMOVE from watchlist
         if (!watchlistItem.watchlist_id) return;
 
-        fetch(`/api/watchlist/${watchlistItem.watchlist_id}`, {
+        fetch(`/api/watchlist/${movieId}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
