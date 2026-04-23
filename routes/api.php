@@ -95,3 +95,6 @@ Route::middleware(['web', 'auth', 'admin'])->prefix('admin-api')->group(function
     //users
     Route::get('/users/{user_id}', [AdminController_Api::class, 'showUser']);
 });
+Route::middleware(['web', 'auth'])->group(function () {
+    Route::put('/user/change-password', [App\Http\Controllers\Api\UserController::class, 'changePassword']);
+});

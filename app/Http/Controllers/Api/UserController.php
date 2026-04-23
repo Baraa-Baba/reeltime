@@ -114,4 +114,41 @@ class UserController extends Controller
 
         return response()->json(['message' => 'Logged out successfully']);
     }
+    /**
+     * Change user password
+     */
+    public function changePassword(Request $request)
+    {
+        try {
+            $user = $request->user();
+            
+            $validated = $request->validate([
+                'current_password' => 'required|string',
+                'new_password' => 'required|string|min:6|confirmed',
+            ]);
+            
+           
+            if (!\Illuminate\Support\Facades\Hash::check($validated['current_password'], $user->password)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Current password is incorrect.'
+                ], 422);
+            }
+            
+           
+            $user->password = \Illuminate\Support\Facades\Hash::make($validated['new_password']);
+            $user->save();
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Password changed successfully!'
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to change password: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

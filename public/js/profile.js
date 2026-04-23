@@ -1014,10 +1014,28 @@ function setupProfileSearch() {
         const username = editUsername.value.trim();
         const email = editEmail.value.trim();
         const avatarFile = avatarInput.files[0];
+        const currentPassword = document.getElementById('current_password')?.value || '';
+        const newPassword = document.getElementById('new_password')?.value || '';
+        const newPasswordConfirm = document.getElementById('new_password_confirmation')?.value || '';
 
         if (!username || !email) {
             showToast('Username and email are required.', 'error');
             return;
+        }
+
+        if (currentPassword || newPassword || newPasswordConfirm) {
+            if (!currentPassword) {
+                showToast('Please enter your current password to change it.', 'error');
+                return;
+            }
+            if (newPassword.length < 6) {
+                showToast('New password must be at least 6 characters.', 'error');
+                return;
+            }
+            if (newPassword !== newPasswordConfirm) {
+                showToast('New passwords do not match.', 'error');
+                return;
+            }
         }
 
         saveBtn.disabled = true;
@@ -1040,10 +1058,28 @@ function setupProfileSearch() {
                 throw new Error(infoData.message || 'Failed to update profile');
             }
 
-            window.authUser.username = infoData.user.username;
-            window.authUser.email = infoData.user.email;
-            window.authUser.img = infoData.user.img;
-            sessionStorage.setItem('loggedInUser', JSON.stringify(window.authUser));
+            if (currentPassword && newPassword) {
+                const passwordResponse = await fetch('/api/user/change-password', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        current_password: currentPassword,
+                        new_password: newPassword,
+                        new_password_confirmation: newPasswordConfirm
+                    })
+                });
+                
+                const passwordData = await passwordResponse.json();
+                if (!passwordData.success) {
+                    throw new Error(passwordData.message || 'Failed to update password');
+                }
+                showToast('Password changed successfully!', 'success');
+            }
 
            if (avatarFile) {
                 const formData = new FormData();
@@ -1064,6 +1100,10 @@ function setupProfileSearch() {
                 window.authUser.img = avatarData.profile_image;
                 sessionStorage.setItem('loggedInUser', JSON.stringify(window.authUser));
             }
+            window.authUser.username = infoData.user.username;
+            window.authUser.email = infoData.user.email;
+            window.authUser.img = infoData.user.img;
+            sessionStorage.setItem('loggedInUser', JSON.stringify(window.authUser));
 
             const nameEl = document.querySelector('.profile-info-modern h1');
             if (nameEl) nameEl.textContent = window.authUser.username;
@@ -1076,6 +1116,11 @@ function setupProfileSearch() {
             if (modalPreview) modalPreview.src = window.authUser.img;
 
             showToast('Profile updated successfully!', 'success');
+           if (document.getElementById('current_password')) {
+                document.getElementById('current_password').value = '';
+                document.getElementById('new_password').value = '';
+                document.getElementById('new_password_confirmation').value = '';
+            }
             closeEditProfileModal();
         } catch (error) {
             messageDiv.textContent = error.message;
@@ -1098,4 +1143,271 @@ function setupProfileSearch() {
             closeEditProfileModal();
         }
     });
+
+    function setupPasswordToggles() {
+        const toggles = document.querySelectorAll('.toggle-password');
+        console.log('Found toggles:', toggles.length);
+        
+        toggles.forEach(toggle => {
+            toggle.removeEventListener('click', handlePasswordToggle);
+            toggle.addEventListener('click', handlePasswordToggle);
+        });
+    }
+
+    function handlePasswordToggle(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const button = e.currentTarget;
+        const targetId = button.getAttribute('data-target');
+        const input = document.getElementById(targetId);
+        
+        if (input) {
+            const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+            input.setAttribute('type', type);
+            const icon = button.querySelector('i');
+            if (icon) {
+                icon.classList.toggle('fa-eye');
+                icon.classList.toggle('fa-eye-slash');
+            }
+        }
+    }
+
+    
+    function showModalError(message) {
+        const messageDiv = document.getElementById('editProfileMessage');
+        if (messageDiv) {
+            messageDiv.textContent = message;
+            messageDiv.style.display = 'block';
+            messageDiv.style.background = 'rgba(251, 113, 133, 0.2)';
+            messageDiv.style.border = '1px solid rgba(251, 113, 133, 0.3)';
+            messageDiv.style.color = '#fb7185';
+            messageDiv.style.padding = '0.75rem';
+            messageDiv.style.borderRadius = '12px';
+            messageDiv.style.marginTop = '0.5rem';
+            
+            
+            setTimeout(() => {
+                if (messageDiv) {
+                    messageDiv.style.display = 'none';
+                }
+            }, 5000);
+        }
+    }
+
+    function showModalSuccess(message) {
+        const messageDiv = document.getElementById('editProfileMessage');
+        if (messageDiv) {
+            messageDiv.textContent = message;
+            messageDiv.style.display = 'block';
+            messageDiv.style.background = 'rgba(74, 222, 128, 0.2)';
+            messageDiv.style.border = '1px solid rgba(74, 222, 128, 0.3)';
+            messageDiv.style.color = '#4ade80';
+            messageDiv.style.padding = '0.75rem';
+            messageDiv.style.borderRadius = '12px';
+            messageDiv.style.marginTop = '0.5rem';
+        }
+    }
+
+    function clearModalMessage() {
+        const messageDiv = document.getElementById('editProfileMessage');
+        if (messageDiv) {
+            messageDiv.style.display = 'none';
+            messageDiv.textContent = '';
+        }
+    }
+
+    const originalOpenEditProfile = window.openEditProfileModal;
+    window.openEditProfileModal = function() {
+        if (originalOpenEditProfile) {
+            originalOpenEditProfile();
+        }
+        clearModalMessage();
+        setTimeout(() => {
+            setupPasswordToggles();
+        }, 150);
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const editProfileBtn = document.getElementById('editProfileBtn');
+        if (editProfileBtn) {
+            editProfileBtn.addEventListener('click', function() {
+                clearModalMessage();
+                setTimeout(() => {
+                    setupPasswordToggles();
+                }, 200);
+            });
+        }
+    });
+
+     const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.attributeName === 'class') {
+                const modal = document.getElementById('editProfileModal');
+                if (modal && modal.classList.contains('is-open')) {
+                    clearModalMessage();
+                    setTimeout(() => {
+                        setupPasswordToggles();
+                    }, 100);
+                }
+            }
+        });
+    });
+
+    const modal = document.getElementById('editProfileModal');
+    if (modal) {
+        observer.observe(modal, { attributes: true });
+    }
+
+    function initSaveButtonHandler() {
+        const saveBtn = document.getElementById('saveProfileBtn');
+        if (!saveBtn) return;
+ 
+        const newSaveBtn = saveBtn.cloneNode(true);
+        saveBtn.parentNode.replaceChild(newSaveBtn, saveBtn);
+        
+        newSaveBtn.addEventListener('click', async function(e) {
+            e.preventDefault();
+            
+            const editUsername = document.getElementById('editUsername');
+            const editEmail = document.getElementById('editEmail');
+            const avatarInput = document.getElementById('editAvatarInput');
+            const messageDiv = document.getElementById('editProfileMessage');
+            
+            const username = editUsername?.value.trim() || '';
+            const email = editEmail?.value.trim() || '';
+            const avatarFile = avatarInput?.files[0];
+
+            const currentPassword = document.getElementById('current_password')?.value || '';
+            const newPassword = document.getElementById('new_password')?.value || '';
+            const newPasswordConfirm = document.getElementById('new_password_confirmation')?.value || '';
+
+            clearModalMessage();
+
+            if (!username || !email) {
+                showModalError('Username and email are required.');
+                return;
+            }
+
+            if (currentPassword || newPassword || newPasswordConfirm) {
+                if (!currentPassword) {
+                    showModalError('Please enter your current password to change it.');
+                    return;
+                }
+                if (newPassword.length < 6) {
+                    showModalError('New password must be at least 6 characters.');
+                    return;
+                }
+                if (newPassword !== newPasswordConfirm) {
+                    showModalError('New passwords do not match.');
+                    return;
+                }
+            }
+
+            const originalText = newSaveBtn.innerHTML;
+            newSaveBtn.disabled = true;
+            newSaveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+            try {
+                const infoResponse = await fetch('/api/user', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                        'Accept': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ username, email })
+                });
+                
+                const infoData = await infoResponse.json();
+                if (!infoData.success) {
+                    throw new Error(infoData.message || 'Failed to update profile');
+                }
+
+                if (currentPassword && newPassword) {
+                    const passwordResponse = await fetch('/api/user/change-password', {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                            'Accept': 'application/json'
+                        },
+                        credentials: 'include',
+                        body: JSON.stringify({
+                            current_password: currentPassword,
+                            new_password: newPassword,
+                            new_password_confirmation: newPasswordConfirm
+                        })
+                    });
+                    
+                    const passwordData = await passwordResponse.json();
+                    if (!passwordData.success) {
+                        throw new Error(passwordData.message || 'Failed to update password');
+                    }
+                }
+
+                if (avatarFile) {
+                    const formData = new FormData();
+                    formData.append('profile_image', avatarFile);
+                    const avatarResponse = await fetch('/api/user/profile-image', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                            'Accept': 'application/json'
+                        },
+                        credentials: 'include',
+                        body: formData
+                    });
+                    const avatarData = await avatarResponse.json();
+                    if (!avatarData.success) {
+                        throw new Error(avatarData.message || 'Failed to update profile image');
+                    }
+                    window.authUser.img = avatarData.profile_image;
+                    sessionStorage.setItem('loggedInUser', JSON.stringify(window.authUser));
+                }
+
+                window.authUser.username = infoData.user.username;
+                window.authUser.email = infoData.user.email;
+                window.authUser.img = infoData.user.img;
+                sessionStorage.setItem('loggedInUser', JSON.stringify(window.authUser));
+
+                const nameEl = document.querySelector('.profile-info-modern h1');
+                if (nameEl) nameEl.textContent = window.authUser.username;
+                const emailEl = document.querySelector('.profile-info-modern .profile-meta:first-of-type');
+                if (emailEl) emailEl.textContent = window.authUser.email;
+                const avatarEl = document.querySelector('.user-avatar');
+                if (avatarEl) avatarEl.src = window.authUser.img;
+
+                const modalPreview = document.getElementById('editAvatarPreview');
+                if (modalPreview) modalPreview.src = window.authUser.img;
+
+                showModalSuccess('Profile updated successfully!');
+                
+                const currentPwdField = document.getElementById('current_password');
+                const newPwdField = document.getElementById('new_password');
+                const newPwdConfirmField = document.getElementById('new_password_confirmation');
+                if (currentPwdField) currentPwdField.value = '';
+                if (newPwdField) newPwdField.value = '';
+                if (newPwdConfirmField) newPwdConfirmField.value = '';
+                
+                setTimeout(() => {
+                    closeEditProfileModal();
+                    showToast('Profile updated successfully!', 'success');
+                }, 1500);
+                
+            } catch (error) {
+                console.error('Save error:', error);
+                showModalError(error.message || 'An error occurred while saving. Please try again.');
+            } finally {
+                newSaveBtn.disabled = false;
+                newSaveBtn.innerHTML = originalText;
+            }
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initSaveButtonHandler);
+    } else {
+        initSaveButtonHandler();
+    }
 }

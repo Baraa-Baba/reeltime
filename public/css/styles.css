@@ -4156,3 +4156,33 @@ body.profile-page main.profile-page {
 #editProfileModal .admin-modal-shell {
     z-index: 10002 !important;
 }
+.toggle-password {
+    transition: color 0.2s ease;
+}
+
+.toggle-password:hover {
+    color: var(--accent-3);
+}
+
+.toggle-password i {
+    font-size: 1rem;
+}
+.admin-modal-shell {
+    position: relative;
+    width: min(560px, 100%);
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 0 !important; 
+}
+.admin-modal.is-open {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#editProfileModal .admin-modal-shell {
+    max-width: 500px;
+    width: 100%;
+}

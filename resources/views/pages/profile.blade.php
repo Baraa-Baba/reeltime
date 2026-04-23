@@ -190,15 +190,16 @@ profile-page
     </main>
     <!--  Edit Profile Modal -->
         <div id="editProfileModal" class="admin-modal">
-        <div class="surface-card admin-modal-shell" style="max-width: 500px;">
-            <button type="button" class="modal-close-btn" onclick="closeEditProfileModal()">
+        <div class="surface-card admin-modal-shell" style="max-width: 500px; max-height: 90vh; display: flex; flex-direction: column; padding: 0;">
+            <button type="button" class="modal-close-btn" onclick="closeEditProfileModal()" style="position: absolute; top: 1rem; right: 1rem; z-index: 10;">
                 <i class="fas fa-times"></i>
             </button>
-            <div class="section-header">
+            <div class="section-header" style="padding: 1.5rem 1.5rem 0 1.5rem; flex-shrink: 0;">
                 <span class="eyebrow">Profile Settings</span>
                 <h2>Edit Your Info</h2>
-                <p>Update your username, email, or profile picture.</p>
             </div>
+            
+            <div style="flex: 1; overflow-y: auto; padding: 0 1.5rem 1rem 1.5rem;">
             <form id="editProfileForm">
             <div style="display: grid; gap: 1.25rem;">
                 <div style="text-align: center;">
@@ -210,27 +211,85 @@ profile-page
                         </label>
                         <input type="file" id="editAvatarInput" accept="image/*" style="display: none;">
                     </div>
-                    <p class="text-muted small mt-2">Click the camera to upload a new image</p>
+                    <p class="text-muted small mt-2" style="margin-top: 0.5rem; font-size: 0.75rem;">Click the camera to upload a new image</p>
                 </div>
 
                 <div>
-                    <label>Username</label>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Username</label>
                     <input type="text" id="editUsername" name="username" class="form-control" 
-                           value="{{ $user->username }}" required>
-                </div>
+                           value="{{ $user->username }}" required
+                                style="width: 100%; padding: 0.75rem 1rem; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white;">
+                 </div>
 
                 <div>
-                    <label>Email</label>
-                    <input type="email" id="editEmail" name="email" class="form-control" 
-                           value="{{ $user->email }}" required>
-                </div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Email</label>
+                        <input type="email" id="editEmail" name="email" class="form-control" 
+                            value="{{ $user->email }}" required
+                                style="width: 100%; padding: 0.75rem 1rem; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white;">
+                        </div>
 
-                <div id="editProfileMessage" class="alert" style="display: none;"></div>
+                        <div style="border-top: 1px solid rgba(255,255,255,0.1); margin: 0.5rem 0;"></div>
+                        
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+                                <i class="fas fa-key" style="color: var(--accent-3);"></i>
+                                <label style="font-weight: 600; margin: 0;">Change Password</label>
+                               </div>
+                            
+                            <div style="display: grid; gap: 0.85rem;">
+                                <div>
+                                    <label style="font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">Current Password</label>
+                                    <div style="position: relative;">
+                                        <input type="password" id="current_password" name="current_password" class="form-control" 
+                                            placeholder="Enter current password" autocomplete="off" 
+                                            style="width: 100%; padding: 0.75rem 1rem; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; padding-right: 40px;">
+                                        <button type="button" class="toggle-password" data-target="current_password" 
+                                                style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer;">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label style="font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">New Password</label>
+                                    <div style="position: relative;">
+                                        <input type="password" id="new_password" name="new_password" class="form-control" 
+                                            placeholder="Enter new password (min 6 characters)" autocomplete="off" minlength="6" 
+                                            style="width: 100%; padding: 0.75rem 1rem; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; padding-right: 40px;">
+                                        <button type="button" class="toggle-password" data-target="new_password" 
+                                                style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer;">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                 <div>
+                                    <label style="font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">Confirm New Password</label>
+                                    <div style="position: relative;">
+                                        <input type="password" id="new_password_confirmation" name="new_password_confirmation" class="form-control" 
+                                            placeholder="Confirm new password" autocomplete="off" minlength="6" 
+                                            style="width: 100%; padding: 0.75rem 1rem; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; padding-right: 40px;">
+                                        <button type="button" class="toggle-password" data-target="new_password_confirmation" 
+                                                style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer;">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="editProfileMessage" class="alert" style="display: none; padding: 0.75rem; border-radius: 12px;"></div>
+                    </div>
+                </form>
             </div>
-        </form>
-        <div class="admin-actions" style="justify-content: flex-end; gap: 1rem; margin-top: 1.5rem;">
-            <button class="button button-secondary" onclick="closeEditProfileModal()">Cancel</button>
-            <button class="button button-primary" id="saveProfileBtn">Save Changes</button>
+            
+            <div class="admin-actions" style="display: flex; justify-content: flex-end; gap: 1rem; padding: 1rem 1.5rem; border-top: 1px solid rgba(255,255,255,0.1); flex-shrink: 0;">
+                <button class="button button-secondary" onclick="closeEditProfileModal()">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button class="button button-primary" id="saveProfileBtn">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
         </div>
     </div>
 </div>
