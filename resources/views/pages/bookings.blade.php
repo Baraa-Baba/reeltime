@@ -119,21 +119,30 @@ bookings-page
         </div>
 
         <div class="step-content" id="step5">
-          <div class="checkout-fields">
-            <input type="text" id="Name" class="form-control mb-2" placeholder="Enter your full name">
-            <input type="text" id="PhoneNumber" class="form-control mb-2" placeholder="Enter your phone number">
-            <select id="PaymentMethod" class="form-select mb-2" aria-label="Choose payment method">
-              <option value="">Choose a payment method</option>
-              <option value="card">Card</option>
-              <option value="cash">Pay at cinema</option>
-            </select>
-            <div id="cardPaymentFields" class="booking-payment-fields" hidden>
-              <input type="text" id="CardNumber" class="form-control mb-2" placeholder="Enter your card number">
-              <input type="text" id="CVV" class="form-control mb-2" placeholder="Enter your CVV">
+          <div class="checkout-layout">
+            <div class="checkout-fields">
+              <div class="checkout-copy">
+                <span class="eyebrow">Your Details</span>
+                <h3>Complete your booking</h3>
+                <p>Add your contact info and payment method. Your seats and total update on the right as you book.</p>
+              </div>
+
+              <input type="text" id="Name" class="form-control mb-2" placeholder="Enter your full name">
+              <input type="text" id="PhoneNumber" class="form-control mb-2" placeholder="Enter your phone number">
+              <select id="PaymentMethod" class="form-select mb-2" aria-label="Choose payment method">
+                <option value="">Choose a payment method</option>
+                <option value="card">Card</option>
+                <option value="cash">Pay at cinema</option>
+              </select>
+              <div id="cardPaymentFields" class="booking-payment-fields" hidden>
+                <input type="text" id="CardNumber" class="form-control mb-2" placeholder="Enter your card number">
+                <input type="text" id="CVV" class="form-control mb-2" placeholder="Enter your CVV">
+              </div>
+              <button class="button button-primary" type="button" id="confirmbtn">Confirm</button>
             </div>
-            <button class="button button-primary" type="button" id="confirmbtn">Confirm</button>
+
+            <aside id="TotalPrice" class="checkout-summary" aria-live="polite"></aside>
           </div>
-          <div id="TotalPrice"></div>
           <div id="confirmation"></div>
         </div>
       </div>

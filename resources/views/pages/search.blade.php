@@ -76,7 +76,7 @@ search-page
       </div>
     </div>
 
-    <div id="searchResults" aria-live="polite"></div>
+    <div id="searchResults" class="movie search-results-grid" aria-live="polite"></div>
 
     <div id="searchEmpty" class="surface-card search-empty" style="display:none;">
       <h3>No results found</h3>
@@ -101,6 +101,8 @@ search-page
         <p><strong>Cast:</strong> <span id="modal-cast"></span></p>
         <p><strong>Genres:</strong> <span id="modal-genres"></span></p>
         <p><strong>This movie is:</strong> <span id="modal-this-movie-is"></span></p>
+        <p class="movieshowtime"><strong>Showtimes:</strong></p>
+        <div class="showtimes" id="modal-showtimes"></div>
       </div>
     </div>
 

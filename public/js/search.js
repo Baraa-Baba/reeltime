@@ -118,7 +118,6 @@ $(function () {
             const mood = Array.isArray(movie.tags) ? movie.tags.join(", ") : (movie.thisMovieIs || movie.tags || "");
             const imgSrc = resolveImagePath(movie.poster_url || movie.image);
             const movieId = movie.movie_id || null;
-            const inWatchlist = movieId ? watchlistTitles.has(movieId) : false;
             const trailerUrl = movie.trailer_url || "";
             const modalShowtimes = Array.isArray(movie.showtimes)
                 ? movie.showtimes.map((showtime) => showtime.display).filter(Boolean)
@@ -126,6 +125,8 @@ $(function () {
 
             const $card = $(`
                 <figure class="movie-card search-result-card"
+                    role="button"
+                    tabindex="0"
                     data-title="${escapeHtml(title)}"
                     data-movie-id="${escapeHtml(movieId || '')}"
                     data-description="${escapeHtml(description)}"
@@ -137,13 +138,8 @@ $(function () {
                     data-time="${escapeHtml(runtime)}"
                     data-showtimes='${escapeHtml(JSON.stringify(modalShowtimes))}'>
                     ${showRating ? `<span class="rating-overlay">${escapeHtml(rating)} / 5</span>` : ""}
-                    <button class="watch-flag ${inWatchlist ? "in-watchlist" : ""}" type="button"
-                        data-movie-id="${escapeHtml(movieId || '')}"
-                        data-title="${escapeHtml(title)}"
-                        aria-label="Toggle ${escapeHtml(title)} watchlist status">
-                        <i class="${inWatchlist ? "fa-solid" : "fa-regular"} fa-heart" aria-hidden="true"></i>
-                    </button>
                     <img src="${imgSrc}" alt="${escapeHtml(title)} poster" onerror="this.src='../imgs/default-movie.jpg'">
+                    <button class="showShowTimes-btn" type="button">View showtimes</button>
                     <div class="movie-overlay">
                         <p class="movie-overlay-title">${escapeHtml(title)}</p>
                         <p class="movie-overlay-desc">${escapeHtml(description)}</p>
@@ -198,11 +194,32 @@ $(function () {
     $input.on("input", triggerSearch);
     $sort.on("change", triggerSearch);
 
+    $(document).on("click", "#searchResults .showShowTimes-btn", function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (typeof openMovieModal === "function") {
+            openMovieModal(this);
+        }
+    });
+
     // Handle movie card clicks to open modal
     $(document).on("click", "#searchResults .movie-card", function(e) {
-        if ($(e.target).closest('.watch-flag').length) {
+        if ($(e.target).closest('.showShowTimes-btn').length) {
             return;
         }
+        if (typeof openMovieModal === "function") {
+            openMovieModal(this);
+        }
+    });
+
+    $(document).on("keydown", "#searchResults .movie-card", function(e) {
+        if (e.key !== "Enter" && e.key !== " ") {
+            return;
+        }
+
+        e.preventDefault();
+
         if (typeof openMovieModal === "function") {
             openMovieModal(this);
         }

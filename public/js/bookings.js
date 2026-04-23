@@ -20,6 +20,25 @@
         selectedShowtime: null,
     };
 
+    function notify(message, type = "success") {
+        if (!message) {
+            return;
+        }
+
+        if (typeof window.showToast === "function") {
+            window.showToast(message, type);
+        }
+    }
+
+    function showBookingError(message) {
+        if (!message) {
+            return;
+        }
+
+        $("#confirmation").html(`<span style="color:#ff6b6b;">${message}</span>`);
+        notify(message, "error");
+    }
+
     function seatCapacity() {
         return Number(bookingData.seat_map_capacity) || 130;
     }
@@ -349,18 +368,60 @@
             return;
         }
 
+        const seats = [...selectedSeats].sort((left, right) => left.localeCompare(right, undefined, { numeric: true }));
         const seatCount = selectedSeats.size;
         const pricePerSeat = Number(state.selectedShowtime.price_seat) || 0;
         const total = (seatCount * pricePerSeat).toFixed(2);
+        const paymentMethod = $("#PaymentMethod").val();
+        const paymentLabel = paymentMethod ? paymentMethodLabel(paymentMethod) : "Choose a payment method";
+        const seatMarkup = seats.length
+            ? seats.map((seat) => `<span class="checkout-seat-chip">${seat}</span>`).join("")
+            : '<span class="checkout-summary-empty">Select seats to see them here.</span>';
 
         sessionStorage.setItem("selectedSeats", JSON.stringify([...selectedSeats]));
         sessionStorage.setItem("totalPrice", total);
 
         $("#TotalPrice").html(`
-            <p><strong>Seats Selected:</strong> ${seatCount}</p>
-            <p><strong>Price Per Seat:</strong> $${pricePerSeat.toFixed(2)}</p>
-            <p><strong>Total Price:</strong> $${total}</p>
-            <hr>
+            <div class="checkout-summary-card">
+                <span class="eyebrow">Booking Summary</span>
+                <h3>${state.selectedShowtime.movie_title || "Your booking"}</h3>
+                <div class="checkout-summary-meta">
+                    <div class="checkout-summary-row">
+                        <span>Cinema</span>
+                        <strong>${state.selectedShowtime.cinema_name || "TBD"}</strong>
+                    </div>
+                    <div class="checkout-summary-row">
+                        <span>Date</span>
+                        <strong>${state.selectedShowtime.display_date || "TBD"}</strong>
+                    </div>
+                    <div class="checkout-summary-row">
+                        <span>Time</span>
+                        <strong>${state.selectedShowtime.display_time || "TBD"}</strong>
+                    </div>
+                    <div class="checkout-summary-row">
+                        <span>Payment</span>
+                        <strong>${paymentLabel}</strong>
+                    </div>
+                </div>
+                <div class="checkout-summary-seats">
+                    <span class="checkout-summary-label">Selected Seats</span>
+                    <div class="checkout-seat-list">${seatMarkup}</div>
+                </div>
+                <div class="checkout-summary-totals">
+                    <div class="checkout-summary-row">
+                        <span>Seats</span>
+                        <strong>${seatCount}</strong>
+                    </div>
+                    <div class="checkout-summary-row">
+                        <span>Price per seat</span>
+                        <strong>$${pricePerSeat.toFixed(2)}</strong>
+                    </div>
+                    <div class="checkout-summary-row checkout-summary-row-total">
+                        <span>Total</span>
+                        <strong>$${total}</strong>
+                    </div>
+                </div>
+            </div>
         `);
     }
 
@@ -416,6 +477,7 @@
         autofillContactFields();
 
         renderSeatMap(null);
+        updateCheckoutSummary();
 
         $(".step-content").removeClass("default");
         $("#step1").addClass("default");
@@ -485,19 +547,21 @@
 
     function showLoginPrompt() {
         const pendingBooking = {
-        cinemaId: state.cinemaId,
-        movieId: state.movieId,
-        date: state.date,
-        time: state.time,
-        selectedSeats: [...selectedSeats],
-        customerName: $("#Name").val().trim(),
-        customerPhone: $("#PhoneNumber").val().trim(),
-        paymentMethod: $("#PaymentMethod").val(),
-        cardNumber: $("#CardNumber").val().trim(),
-        cardCvv: $("#CVV").val().trim(),
-    };
-    sessionStorage.setItem('pendingBooking', JSON.stringify(pendingBooking));
-    
+            cinemaId: state.cinemaId,
+            movieId: state.movieId,
+            date: state.date,
+            time: state.time,
+            selectedSeats: [...selectedSeats],
+            customerName: $("#Name").val().trim(),
+            customerPhone: $("#PhoneNumber").val().trim(),
+            paymentMethod: $("#PaymentMethod").val(),
+            cardNumber: $("#CardNumber").val().trim(),
+            cardCvv: $("#CVV").val().trim(),
+        };
+
+        sessionStorage.setItem("pendingBooking", JSON.stringify(pendingBooking));
+        notify("Please log in to finish your booking.", "info");
+
         $("#confirmation").html(`
             <div style="text-align: center; padding: 20px;">
                 <p style="color: #ff6b6b; margin-bottom: 15px;">
@@ -524,8 +588,8 @@
                 openAuthModal("login");
             });
         }, 100);
-        
     }
+
     function restoreBooking() {
         const saved = sessionStorage.getItem('pendingBooking');
         if (!saved) return;
@@ -593,18 +657,18 @@
         }
 
         if (!state.selectedShowtime) {
-            $("#confirmation").html(`<span style="color:#ff6b6b;">Please choose a valid showtime first.</span>`);
+            showBookingError("Please choose a valid showtime first.");
             return;
         }
 
         if (!selectedSeats.size) {
-            $("#confirmation").html(`<span style="color:#ff6b6b;">Please select at least one seat.</span>`);
+            showBookingError("Please select at least one seat.");
             return;
         }
 
         const validationMessage = validateCheckoutFields();
         if (validationMessage) {
-            $("#confirmation").html(`<span style="color:#ff6b6b;">${validationMessage}</span>`);
+            showBookingError(validationMessage);
             return;
         }
 
@@ -632,7 +696,7 @@
             },
             success(response) {
                 if (!response.success) {
-                    $("#confirmation").html(`<span style="color:#ff6b6b;">${response.message || "Booking failed."}</span>`);
+                    showBookingError(response.message || "Booking failed.");
                     $confirmButton.prop("disabled", false).text("Confirm");
                     return;
                 }
@@ -640,6 +704,7 @@
                 saveContact(user, $("#Name").val().trim(), $("#PhoneNumber").val().trim());
                 cacheBookingLocally(user, response.booking);
                 updateLocalAvailability(response.showtime.id, response.showtime.available_seats);
+                notify(response.message || "Booking confirmed.", "success");
 
                 $("#confirmation").html(`
                     <p>Thank you, <strong>${$("#Name").val().trim()}</strong>!</p>
@@ -666,7 +731,7 @@
                     xhr.responseJSON?.message ||
                     "Booking failed. Please try another showtime.";
 
-                $("#confirmation").html(`<span style="color:#ff6b6b;">${message}</span>`);
+                showBookingError(message);
                 $confirmButton.prop("disabled", false).text("Confirm");
             },
         });
@@ -699,7 +764,7 @@
 
         if (window.current === 4) {
             if (!selectedSeats.size) {
-                $("#confirmation").html(`<span style="color:#ff6b6b;">Please select at least one seat.</span>`);
+                showBookingError("Please select at least one seat.");
                 return;
             }
 
@@ -806,6 +871,7 @@
 
         $("#PaymentMethod").on("change", function () {
             togglePaymentFields();
+            updateCheckoutSummary();
         });
 
         $("#Name, #PhoneNumber").on("blur", function () {

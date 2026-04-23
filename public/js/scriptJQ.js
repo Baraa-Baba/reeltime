@@ -5,13 +5,41 @@ let SEAT_PRICE = 7;  //7$ l price la el seat
 //movie comments
 window.movieComments = {};
 
-function setAuthTab(tab) {
-    const panels = {
+function getAuthPanels() {
+    return {
         login: '#loginPanel',
         signup: '#signupPanel',
         forgot: '#forgotPanel',
         reset: '#resetPanel'
     };
+}
+
+function getPasswordToggleLabel(targetId, isVisible) {
+    const isConfirmation = /confirm/i.test(targetId || '');
+    if (isConfirmation) {
+        return isVisible ? 'Hide password confirmation' : 'View password confirmation';
+    }
+
+    return isVisible ? 'Hide password' : 'View password';
+}
+
+function resetAuthPasswordVisibility() {
+    $('.auth-input-password input').attr('type', 'password');
+
+    $('.auth-password-toggle').each(function () {
+        const $toggle = $(this);
+        const targetId = $toggle.data('passwordTarget');
+        $toggle
+            .removeClass('is-visible')
+            .attr('aria-pressed', 'false')
+            .attr('aria-label', getPasswordToggleLabel(targetId, false));
+
+        $toggle.find('.fa-eye-slash').removeClass('fa-eye-slash').addClass('fa-eye');
+    });
+}
+
+function setAuthTab(tab) {
+    const panels = getAuthPanels();
 
     const nextTab = panels[tab] ? tab : 'login';
 
@@ -28,19 +56,19 @@ function setAuthTab(tab) {
         $(selector).toggle(key === nextTab);
     });
 
-    $('#loginError, #signupError, #loginSuccess, #signupSuccess, #forgotError, #forgotSuccess, #resetError, #resetSuccess').text('');
+    resetAuthPasswordVisibility();
 }
 
 function openAuthModal(tab = "login") {
+    const panels = getAuthPanels();
     setAuthTab(tab);
     $('html, body').addClass('login-open');
     $('.login')
         .stop(true, true)
         .attr('aria-hidden', 'false')
         .fadeIn(240, function () {
-            let $firstInput = tab === 'signup'
-                ? $('#signupPanel input:visible').first()
-                : $('#loginPanel input:visible').first();
+            let targetPanel = panels[tab] || panels.login;
+            let $firstInput = $(`${targetPanel} input:visible`).not('[type="hidden"]').first();
 
             if ($firstInput.length) {
                 $firstInput.trigger('focus');
@@ -49,6 +77,7 @@ function openAuthModal(tab = "login") {
 }
 
 function closeAuthModal() {
+    resetAuthPasswordVisibility();
     $('html, body').removeClass('login-open');
     $('.login')
         .stop(true, true)
@@ -64,8 +93,16 @@ function showToast(message, type = 'success') {
 
     $('.toast').remove();
 
+    const role = type === 'error' ? 'alert' : 'status';
+    const liveMode = type === 'error' ? 'assertive' : 'polite';
+
     let $toast = $('<div class="toast"></div>')
         .addClass(`toast-${type}`)
+        .attr({
+            role: role,
+            'aria-live': liveMode,
+            'aria-atomic': 'true'
+        })
         .text(message)
         .appendTo('body');
 
@@ -282,6 +319,30 @@ $(function () {
             setAuthTab('login');
         });
 
+        $(document).on('click', '.auth-password-toggle', function (e) {
+            e.preventDefault();
+
+            const $toggle = $(this);
+            const targetId = $toggle.data('passwordTarget');
+            const input = document.getElementById(targetId);
+
+            if (!input) {
+                return;
+            }
+
+            const makeVisible = input.type === 'password';
+            input.type = makeVisible ? 'text' : 'password';
+
+            $toggle
+                .toggleClass('is-visible', makeVisible)
+                .attr('aria-pressed', makeVisible ? 'true' : 'false')
+                .attr('aria-label', getPasswordToggleLabel(targetId, makeVisible));
+
+            $toggle.find('i')
+                .toggleClass('fa-eye', !makeVisible)
+                .toggleClass('fa-eye-slash', makeVisible);
+        });
+
         // Login toggle button click
         $(document).on('click', '.login-toggle-btn', function (e) {
             e.preventDefault();
@@ -409,7 +470,8 @@ $(function () {
             let password = $('#loginPassword').val();
 
             if (!username || !password) {
-                $('#loginError').text('Please fill in all fields.');
+                const message = 'Please fill in all fields.';
+                showToast(message, 'error');
                 return;
             }
 
@@ -417,8 +479,6 @@ $(function () {
             $btn.prop('disabled', true);
             $btnText.hide();
             $btnLoader.show();
-            $('#loginError').text('');
-            $('#loginSuccess').text('');
 
             $.ajax({
                 url: '/auth/login',
@@ -431,12 +491,14 @@ $(function () {
                     if (response.success) {
                         currentUser = response.user.username;
                         window.authUser = response.user;
+                        const successMessage = sessionStorage.getItem('pendingBooking')
+                            ? 'Login successful. Continue your booking below.'
+                            : (response.message || 'Login successful!');
 
                         // Mirror to sessionStorage for backward compatibility
                         sessionStorage.setItem('loggedInUser', JSON.stringify(response.user));
 
-                        $('#loginSuccess').text(response.message);
-                        $('#loginError').text('');
+                        queueToast(successMessage, 'success');
 
                         updateLoginStatus();
 
@@ -444,19 +506,22 @@ $(function () {
                             closeAuthModal();
                             $('#loginUsername').val('');
                             $('#loginPassword').val('');
-                            $('#loginSuccess').text('');
                             location.reload();
                         }, 800);
                     }
                 },
                 error: function (xhr) {
                     let msg = 'Login failed. Please try again.';
+                    let type = 'error';
                     if (xhr.responseJSON && xhr.responseJSON.message) {
                         msg = typeof xhr.responseJSON.message === 'string'
                             ? xhr.responseJSON.message
                             : Object.values(xhr.responseJSON.message).flat().join(' ');
+                        if (xhr.responseJSON.requires_verification) {
+                            type = 'info';
+                        }
                     }
-                    $('#loginError').text(msg);
+                    showToast(msg, type);
                 },
                 complete: function () {
                     $btn.prop('disabled', false);
@@ -481,17 +546,20 @@ $(function () {
 
             // Client-side validations
             if (!username || !email || !password || !passwordConfirm) {
-                $('#signupError').text('Please fill in all fields.');
+                const message = 'Please fill in all fields.';
+                showToast(message, 'error');
                 return;
             }
 
             if (password !== passwordConfirm) {
-                $('#signupError').text('Passwords do not match.');
+                const message = 'Passwords do not match.';
+                showToast(message, 'error');
                 return;
             }
 
             if (password.length < 6) {
-                $('#signupError').text('Password must be at least 6 characters.');
+                const message = 'Password must be at least 6 characters.';
+                showToast(message, 'error');
                 return;
             }
 
@@ -499,8 +567,6 @@ $(function () {
             $btn.prop('disabled', true);
             $btnText.hide();
             $btnLoader.show();
-            $('#signupError').text('');
-            $('#signupSuccess').text('');
 
             $.ajax({
                 url: '/auth/register',
@@ -513,23 +579,14 @@ $(function () {
                 },
                 success: function (response) {
                     if (response.success) {
-                        currentUser = response.user.username;
-                        window.authUser = response.user;
-
-                        sessionStorage.setItem('loggedInUser', JSON.stringify(response.user));
-
-                        $('#signupSuccess').text(response.message);
-                        $('#signupError').text('');
-                        queueToast(response.message, 'success');
-
-                        updateLoginStatus();
+                        const successMessage = response.message || 'Account created successfully!';
+                        showToast(successMessage, 'success');
 
                         setTimeout(function () {
                             closeAuthModal();
                             $('#signupUsername, #signupEmail, #signupPassword, #signupPasswordConfirm').val('');
-                            $('#signupSuccess').text('');
-                            location.reload();
-                        }, 1200);
+                            setAuthTab('login');
+                        }, 900);
                     }
                 },
                 error: function (xhr) {
@@ -541,7 +598,7 @@ $(function () {
                             msg = xhr.responseJSON.message;
                         }
                     }
-                    $('#signupError').text(msg);
+                    showToast(msg, 'error');
                 },
                 complete: function () {
                     $btn.prop('disabled', false);
@@ -560,23 +617,20 @@ $(function () {
             let email = $('#forgotEmail').val().trim();
 
             if (!email) {
-                $('#forgotError').text('Please enter your email.');
+                showToast('Please enter your email.', 'error');
                 return;
             }
 
             $btn.prop('disabled', true);
             $btnText.hide();
             $btnLoader.show();
-            $('#forgotError').text('');
-            $('#forgotSuccess').text('');
 
             $.ajax({
                 url: '/auth/forgot-password',
                 method: 'POST',
                 data: { email },
                 success: function (response) {
-                    $('#forgotSuccess').text(response.message || 'If this email exists, a reset link has been sent.');
-                    $('#forgotError').text('');
+                    showToast(response.message || 'If this email exists, a reset link has been sent.', 'success');
                 },
                 error: function (xhr) {
                     let msg = 'Could not send reset link. Please try again.';
@@ -585,7 +639,7 @@ $(function () {
                             ? xhr.responseJSON.message
                             : Object.values(xhr.responseJSON.message).flat().join(' ');
                     }
-                    $('#forgotError').text(msg);
+                    showToast(msg, 'error');
                 },
                 complete: function () {
                     $btn.prop('disabled', false);
@@ -608,25 +662,23 @@ $(function () {
             let passwordConfirm = $('#resetPasswordConfirm').val();
 
             if (!token || !email || !password || !passwordConfirm) {
-                $('#resetError').text('Please fill in all fields.');
+                showToast('Please fill in all fields.', 'error');
                 return;
             }
 
             if (password !== passwordConfirm) {
-                $('#resetError').text('Passwords do not match.');
+                showToast('Passwords do not match.', 'error');
                 return;
             }
 
             if (password.length < 6) {
-                $('#resetError').text('Password must be at least 6 characters.');
+                showToast('Password must be at least 6 characters.', 'error');
                 return;
             }
 
             $btn.prop('disabled', true);
             $btnText.hide();
             $btnLoader.show();
-            $('#resetError').text('');
-            $('#resetSuccess').text('');
 
             $.ajax({
                 url: '/auth/reset-password',
@@ -638,8 +690,7 @@ $(function () {
                     password_confirmation: passwordConfirm
                 },
                 success: function (response) {
-                    $('#resetSuccess').text(response.message || 'Password reset successful.');
-                    $('#resetError').text('');
+                    showToast(response.message || 'Password reset successful.', 'success');
                     $('#resetPassword').val('');
                     $('#resetPasswordConfirm').val('');
 
@@ -654,7 +705,7 @@ $(function () {
                             ? xhr.responseJSON.message
                             : Object.values(xhr.responseJSON.message).flat().join(' ');
                     }
-                    $('#resetError').text(msg);
+                    showToast(msg, 'error');
                 },
                 complete: function () {
                     $btn.prop('disabled', false);

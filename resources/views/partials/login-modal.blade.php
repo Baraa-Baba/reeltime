@@ -2,28 +2,7 @@
   <div class="login-background">
     <div class="login-content-panel surface-card">
       <div class="login-shell">
-        <aside class="login-hero">
-          <span class="eyebrow">Member access</span>
-          <h2 id="authModalTitle">One account for watchlists, bookings, and trivia.</h2>
-          <p>Sign in once and keep your movie night moving across every part of ReelTime.</p>
-
-          <div class="login-benefits">
-            <div class="login-benefit">
-              <i class="fa-solid fa-check" aria-hidden="true"></i>
-              <span>Save and revisit watchlists</span>
-            </div>
-            <div class="login-benefit">
-              <i class="fa-solid fa-check" aria-hidden="true"></i>
-              <span>Book seats without re-entering your details</span>
-            </div>
-            <div class="login-benefit">
-              <i class="fa-solid fa-check" aria-hidden="true"></i>
-              <span>Track ratings and game scores in one place</span>
-            </div>
-          </div>
-        </aside>
-
-        <section class="login-panel">
+        <section class="login-panel" aria-labelledby="authModalTitle">
           <div class="login-toolbar">
             <div class="login-tabs" role="tablist" aria-label="Authentication tabs">
               <button class="button button-secondary auth-tab is-active" data-tab="login" type="button" aria-selected="true">Log In</button>
@@ -35,123 +14,144 @@
             </button>
           </div>
 
-          <div class="auth-panel" id="loginPanel">
-            <div class="panel-copy">
-              <h3>Welcome back</h3>
-              <p>Enter your details to pick up where you left off.</p>
-            </div>
+          <h2 id="authModalTitle" class="visually-hidden">Account Access</h2>
 
+          <div class="auth-panel" id="loginPanel">
             <form class="login-form" id="loginForm">
-              <div>
+              <h2 class="auth-panel-title">Account Access</h2>
+              <div class="auth-field">
                 <label for="loginUsername">Username</label>
-                <input id="loginUsername" placeholder="Enter your username" required>
+                <div class="auth-input">
+                  <i class="fa-regular fa-user" aria-hidden="true"></i>
+                  <input id="loginUsername" placeholder="Enter your username" required>
+                </div>
               </div>
 
-              <div>
+              <div class="auth-field">
                 <label for="loginPassword">Password</label>
-                <input type="password" id="loginPassword" name="password" placeholder="Enter your password" required>
-                <div style="text-align: left; margin-top: 0.35rem;">
-                  <button type="button" id="showForgotPanelBtn" style="background:none; border:none; padding:0; color: var(--accent); text-decoration: underline; cursor: pointer; font-size: 0.9rem;">Forgot password?</button>
+                <div class="auth-input auth-input-password">
+                  <i class="fa-solid fa-lock" aria-hidden="true"></i>
+                  <input type="password" id="loginPassword" name="password" placeholder="Enter your password" required>
+                  <button type="button" class="auth-password-toggle" data-password-target="loginPassword" aria-label="View password" aria-pressed="false">
+                    <i class="fa-regular fa-eye" aria-hidden="true"></i>
+                  </button>
                 </div>
+                <button type="button" id="showForgotPanelBtn" class="auth-inline-link">Forgot password?</button>
               </div>
 
               <button type="submit" class="button button-primary login-submit" id="loginSubmitBtn">
                 <span class="btn-text">Log In</span>
                 <span class="btn-loader" style="display:none;"><i class="fas fa-spinner fa-spin me-1"></i>Logging in...</span>
               </button>
-              <p id="loginError" class="login-error" aria-live="polite"></p>
-              <p id="loginSuccess" class="login-success" aria-live="polite"></p>
             </form>
           </div>
 
           <div class="auth-panel" id="signupPanel" style="display: none;">
-            <div class="panel-copy">
-              <h3>Join ReelTime</h3>
-              <p>Create your account and start building your list.</p>
-            </div>
-
             <form class="login-form" id="signupForm">
-              <div>
+              <h2 class="auth-panel-title">Create Account</h2>
+              <div class="auth-field">
                 <label for="signupUsername">Username</label>
-                <input id="signupUsername" placeholder="Choose a username" required minlength="3" maxlength="30">
+                <div class="auth-input">
+                  <i class="fa-regular fa-user" aria-hidden="true"></i>
+                  <input id="signupUsername" placeholder="Choose a username" required minlength="3" maxlength="30">
+                </div>
               </div>
 
-              <div>
+              <div class="auth-field">
                 <label for="signupEmail">Email</label>
-                <input type="email" id="signupEmail" placeholder="Enter your email" required>
+                <div class="auth-input">
+                  <i class="fa-regular fa-envelope" aria-hidden="true"></i>
+                  <input type="email" id="signupEmail" placeholder="Enter your email" required>
+                </div>
               </div>
 
-              <div>
+              <div class="auth-field">
                 <label for="signupPassword">Password</label>
-                <input type="password" id="signupPassword" placeholder="Create a password (min 6 chars)" required minlength="6">
+                <div class="auth-input auth-input-password">
+                  <i class="fa-solid fa-lock" aria-hidden="true"></i>
+                  <input type="password" id="signupPassword" placeholder="Create a password (min 6 chars)" required minlength="6">
+                  <button type="button" class="auth-password-toggle" data-password-target="signupPassword" aria-label="View password" aria-pressed="false">
+                    <i class="fa-regular fa-eye" aria-hidden="true"></i>
+                  </button>
+                </div>
               </div>
 
-              <div>
+              <div class="auth-field">
                 <label for="signupPasswordConfirm">Confirm Password</label>
-                <input type="password" id="signupPasswordConfirm" placeholder="Confirm your password" required minlength="6">
+                <div class="auth-input auth-input-password">
+                  <i class="fa-solid fa-key" aria-hidden="true"></i>
+                  <input type="password" id="signupPasswordConfirm" placeholder="Confirm your password" required minlength="6">
+                  <button type="button" class="auth-password-toggle" data-password-target="signupPasswordConfirm" aria-label="View password confirmation" aria-pressed="false">
+                    <i class="fa-regular fa-eye" aria-hidden="true"></i>
+                  </button>
+                </div>
               </div>
 
               <button type="submit" class="button button-primary login-submit" id="signupSubmitBtn">
                 <span class="btn-text">Create Account</span>
                 <span class="btn-loader" style="display:none;"><i class="fas fa-spinner fa-spin me-1"></i>Creating...</span>
               </button>
-              <p id="signupError" class="login-error" aria-live="polite"></p>
-              <p id="signupSuccess" class="login-success" aria-live="polite"></p>
             </form>
           </div>
 
           <div class="auth-panel" id="forgotPanel" style="display: none;">
-            <div class="panel-copy">
-              <h3>Reset your password</h3>
-              <p>Enter your account email and we will send a reset link.</p>
-            </div>
-
             <form class="login-form" id="forgotPasswordForm">
-              <div>
+              <h2 class="auth-panel-title">Reset Password</h2>
+              <div class="auth-field">
                 <label for="forgotEmail">Email</label>
-                <input type="email" id="forgotEmail" placeholder="Enter your account email" required>
+                <div class="auth-input">
+                  <i class="fa-regular fa-envelope" aria-hidden="true"></i>
+                  <input type="email" id="forgotEmail" placeholder="Enter your account email" required>
+                </div>
               </div>
 
               <button type="submit" class="button button-primary login-submit" id="forgotSubmitBtn">
                 <span class="btn-text">Send Reset Link</span>
                 <span class="btn-loader" style="display:none;"><i class="fas fa-spinner fa-spin me-1"></i>Sending...</span>
               </button>
-              <button type="button" class="button button-secondary" id="backToLoginBtn">Back to Login</button>
-              <p id="forgotError" class="login-error" aria-live="polite"></p>
-              <p id="forgotSuccess" class="login-success" aria-live="polite"></p>
+              <button type="button" class="button button-secondary login-secondary-btn" id="backToLoginBtn">Back to Login</button>
             </form>
           </div>
 
           <div class="auth-panel" id="resetPanel" style="display: none;">
-            <div class="panel-copy">
-              <h3>Create a new password</h3>
-              <p>Set a new password for your account.</p>
-            </div>
-
             <form class="login-form" id="resetPasswordForm">
+              <h2 class="auth-panel-title">Create New Password</h2>
               <input type="hidden" id="resetToken" name="token">
-              <div>
+              <div class="auth-field">
                 <label for="resetEmail">Email</label>
-                <input type="email" id="resetEmail" name="email" placeholder="Enter your account email" required>
+                <div class="auth-input">
+                  <i class="fa-regular fa-envelope" aria-hidden="true"></i>
+                  <input type="email" id="resetEmail" name="email" placeholder="Enter your account email" required>
+                </div>
               </div>
 
-              <div>
+              <div class="auth-field">
                 <label for="resetPassword">New Password</label>
-                <input type="password" id="resetPassword" name="password" placeholder="Enter new password" required minlength="6">
+                <div class="auth-input auth-input-password">
+                  <i class="fa-solid fa-lock" aria-hidden="true"></i>
+                  <input type="password" id="resetPassword" name="password" placeholder="Enter new password" required minlength="6">
+                  <button type="button" class="auth-password-toggle" data-password-target="resetPassword" aria-label="View password" aria-pressed="false">
+                    <i class="fa-regular fa-eye" aria-hidden="true"></i>
+                  </button>
+                </div>
               </div>
 
-              <div>
+              <div class="auth-field">
                 <label for="resetPasswordConfirm">Confirm Password</label>
-                <input type="password" id="resetPasswordConfirm" name="password_confirmation" placeholder="Confirm new password" required minlength="6">
+                <div class="auth-input auth-input-password">
+                  <i class="fa-solid fa-key" aria-hidden="true"></i>
+                  <input type="password" id="resetPasswordConfirm" name="password_confirmation" placeholder="Confirm new password" required minlength="6">
+                  <button type="button" class="auth-password-toggle" data-password-target="resetPasswordConfirm" aria-label="View password confirmation" aria-pressed="false">
+                    <i class="fa-regular fa-eye" aria-hidden="true"></i>
+                  </button>
+                </div>
               </div>
 
               <button type="submit" class="button button-primary login-submit" id="resetSubmitBtn">
                 <span class="btn-text">Update Password</span>
                 <span class="btn-loader" style="display:none;"><i class="fas fa-spinner fa-spin me-1"></i>Updating...</span>
               </button>
-              <button type="button" class="button button-secondary" id="resetBackToLoginBtn">Back to Login</button>
-              <p id="resetError" class="login-error" aria-live="polite"></p>
-              <p id="resetSuccess" class="login-success" aria-live="polite"></p>
+              <button type="button" class="button button-secondary login-secondary-btn" id="resetBackToLoginBtn">Back to Login</button>
             </form>
           </div>
         </section>
