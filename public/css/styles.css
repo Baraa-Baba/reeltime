@@ -4292,3 +4292,139 @@ body.profile-page main.profile-page {
     transform: translateY(-2px);
     box-shadow: 0 12px 28px rgba(250, 204, 21, 0.35);
 }
+
+/* FIX ALL ADMIN MODALS  */
+.admin-modal-shell {
+    position: relative;
+    width: min(560px, 100%);
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: linear-gradient(180deg, rgba(16, 20, 31, 0.98), rgba(12, 15, 24, 0.98));
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    box-shadow: var(--shadow-strong);
+    padding: 0 !important;
+}
+
+
+.admin-modal-shell .section-header {
+    padding: 1.5rem 1.5rem 1.5rem 1.5rem !important;
+    margin: 0 !important;
+    flex-shrink: 0;
+}
+
+
+.admin-modal-shell > div:not(.section-header):not(.admin-actions),
+.admin-modal-shell form {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem 1.5rem !important;
+}
+
+
+.admin-modal-shell .admin-actions {
+    padding: 1rem 1.5rem !important;
+    margin: 0 !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
+    background: inherit;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+
+.admin-modal-shell .modal-close-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 10;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.admin-modal-shell .modal-close-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: scale(1.05);
+}
+
+.admin-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: rgba(4, 6, 10, 0.85);
+    backdrop-filter: blur(18px);
+}
+
+.admin-modal.is-open {
+    display: flex !important;
+}
+
+body.modal-open {
+    overflow: hidden !important;
+}
+
+#addMovieModal .admin-modal-shell,
+#editMovieModal .admin-modal-shell {
+    max-width: 700px;
+}
+
+#questionsModal .admin-modal-shell {
+    max-width: 900px;
+}
+
+#heroBannerModal .admin-modal-shell,
+#gameModal .admin-modal-shell,
+#questionFormModal .admin-modal-shell {
+    max-width: 600px;
+}
+
+#deleteConfirmModal .admin-modal-shell,
+#cancelBookingModal .admin-modal-shell,
+#bookingDetailsModal .admin-modal-shell,
+#userDetailsModal .admin-modal-shell {
+    max-width: 500px;
+}
+
+#imagePreviewModal .admin-modal-shell {
+    max-width: 800px;
+    text-align: center;
+}
+.admin-modal-shell input,
+.admin-modal-shell textarea,
+.admin-modal-shell select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.admin-modal-shell input:focus,
+.admin-modal-shell textarea:focus,
+.admin-modal-shell select:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.admin-modal-shell label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--text-color);
+}
