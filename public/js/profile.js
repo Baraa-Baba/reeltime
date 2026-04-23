@@ -57,7 +57,7 @@ $(document).ready(function () {
     $('#member-since').text(user.since);
     
     const watchlistCount = window.watchlistCount || 0;
-    const ratedCount = window.ratedMoviesCount || 0;
+    const ratedCount = window.ratedCount || 0;
     const bookingsCount = window.bookingsCount || 0;
     
     $('#watchlist-count').text(watchlistCount);

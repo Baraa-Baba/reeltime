@@ -68,9 +68,6 @@ profile-page
                         <span class="stat-label">Member Since</span>
                     </div>
                 </div>
-                <button class="logout-btn" id="logoutBtn">
-                    <i class="fas fa-sign-out-alt"></i> Log Out
-                </button>
             </div>
         </div>
         
