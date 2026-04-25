@@ -279,28 +279,34 @@ admin-page
 
     <section id="bookingsTab" class="admin-tab-pane d-none">
       <div class="section-header">
-        <div class="filter-bar" style="display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; align-items: center;">
+        <form method="GET" action="{{ route('admin') }}" class="filter-bar" style="display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; align-items: center;">
+    <input type="hidden" name="tab" value="bookings">
     <div style="flex: 2; min-width: 200px; position: relative;">
         <i class="fas fa-search" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #9ca3af; pointer-events: none;"></i>
-        <input type="text" id="bookingSearch" placeholder="Search by user, movie or booking ID..." 
+        <input type="text" id="bookingSearch" name="booking_search" value="{{ $bookingSearch ?? '' }}" placeholder="Search by user, movie or booking ID..." 
                class="form-control" 
                style="width: 100%; padding: 0.6rem 1rem 0.6rem 2.5rem; border-radius: 40px;">
     </div>
     <div style="flex: 1; min-width: 150px;">
-        <select id="bookingStatusFilter" class="form-control" style="border-radius: 40px;">
+        <select id="bookingStatusFilter" name="booking_status" class="form-control" style="border-radius: 40px;">
             <option value="">All Statuses</option>
-            <option value="pending">Pending</option>
-            <option value="confirmed">Confirmed</option>
-            <option value="watched">Watched</option>
-            <option value="cancelled">Cancelled</option>
+            <option value="pending" {{ ($bookingStatus ?? '') === 'pending' ? 'selected' : '' }}>Pending</option>
+            <option value="confirmed" {{ ($bookingStatus ?? '') === 'confirmed' ? 'selected' : '' }}>Confirmed</option>
+            <option value="watched" {{ ($bookingStatus ?? '') === 'watched' ? 'selected' : '' }}>Watched</option>
+            <option value="cancelled" {{ ($bookingStatus ?? '') === 'cancelled' ? 'selected' : '' }}>Cancelled</option>
         </select>
     </div>
     <div>
-        <button id="clearBookingFilters" class="button button-secondary" style="border-radius: 40px;">
-            <i class="fas fa-eraser"></i> Clear
+        <button type="submit" class="button button-secondary" style="border-radius: 40px;">
+            <i class="fas fa-filter"></i> Apply
         </button>
     </div>
-</div>
+    <div>
+        <a id="clearBookingFilters" href="{{ route('admin', ['tab' => 'bookings']) }}" class="button button-secondary" style="border-radius: 40px;">
+            <i class="fas fa-eraser"></i> Clear
+        </a>
+    </div>
+</form>
         
       </div>
 
@@ -353,7 +359,9 @@ admin-page
             </tbody>
           </table>
         </div>
-        <div id="bookingPagination" class="pagination"></div>
+                <div id="bookingPagination" class="pagination">
+                    {{ $bookings->links() }}
+                </div>
       </div>
     </section>
 

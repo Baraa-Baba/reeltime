@@ -2,7 +2,6 @@ const ITEMS_PER_PAGE = 50;
 document.addEventListener('DOMContentLoaded', function() {
     filterMovies();
     filterGames();
-    filterBookings();
     filterUsers();
     function showToast(message, type) {
         const toast = document.createElement('div');
@@ -504,7 +503,8 @@ document.addEventListener('keydown', function(e) {
     }
 
     
-    switchTab('movies');
+    const initialTab = new URLSearchParams(window.location.search).get('tab') || 'movies';
+    switchTab(initialTab);
   
 // Load hero banners into table
 function loadHeroBanners() {
@@ -1671,24 +1671,7 @@ function filterMovies() {
     paginateTable(filtered, 1, 'gamePagination', '#gamesTab tbody tr');
 }
 function filterBookings() {
-    const search = document.getElementById('bookingSearch').value.toLowerCase();
-    const status = document.getElementById('bookingStatusFilter').value.toLowerCase();
-
-    const rows = Array.from(document.querySelectorAll('#bookingsTab tbody tr'));
-
-    const filtered = rows.filter(row => {
-        const user = row.children[1].innerText.toLowerCase();
-        const movie = row.children[2].innerText.toLowerCase();
-        const id = row.children[0].innerText.toLowerCase();
-        const rowStatus = row.children[5].innerText.toLowerCase();
-
-        return (
-            (user.includes(search) || movie.includes(search) || id.includes(search)) &&
-            (status === '' || rowStatus.includes(status))
-        );
-    });
-
-    paginateTable(filtered, 1, 'bookingPagination', '#bookingsTab tbody tr');
+    // Booking search/status filters are handled server-side.
 }function filterUsers() {
     const search = document.getElementById('userSearch').value.toLowerCase();
     const role = document.getElementById('userRoleFilter').value.toLowerCase();
@@ -1741,16 +1724,7 @@ function initFilters() {
         filterGames();
     });
 
-    const bookingSearch = document.getElementById('bookingSearch');
-    const bookingStatus = document.getElementById('bookingStatusFilter');
-    const clearBooking = document.getElementById('clearBookingFilters');
-    if (bookingSearch) bookingSearch.addEventListener('input', debounce(filterBookings, 300));
-    if (bookingStatus) bookingStatus.addEventListener('change', filterBookings);
-    if (clearBooking) clearBooking.addEventListener('click', () => {
-        if (bookingSearch) bookingSearch.value = '';
-        if (bookingStatus) bookingStatus.value = '';
-        filterBookings();
-    });
+    // Booking filters submit as a regular GET form for server-side pagination/filtering.
 
     const userSearch = document.getElementById('userSearch');
     const userRole = document.getElementById('userRoleFilter');
