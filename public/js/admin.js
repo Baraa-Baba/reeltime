@@ -1,4 +1,5 @@
 const ITEMS_PER_PAGE = 50;
+const PAGINATION_WINDOW_SIZE = 5;
 document.addEventListener('DOMContentLoaded', function() {
     filterMovies();
     filterGames();
@@ -1652,11 +1653,10 @@ function filterMovies() {
     });
     paginateTable(filtered, 1, 'moviePagination','#moviesTab .movie-row');
 }function filterGames() {
-    const ITEMS_PER_PAGE = 50;
     const search = document.getElementById('gameSearch').value.toLowerCase();
     const type = document.getElementById('gameTypeFilter').value.toLowerCase();
 
-    const rows = Array.from(document.querySelectorAll('#gamesTab tbody tr'));
+    const rows = Array.from(document.querySelectorAll('#gamesTab tbody tr')).filter(row => !row.querySelector('.admin-empty'));
 
     const filtered = rows.filter(row => {
         const title = row.children[2].innerText.toLowerCase();
@@ -1676,7 +1676,7 @@ function filterBookings() {
     const search = document.getElementById('userSearch').value.toLowerCase();
     const role = document.getElementById('userRoleFilter').value.toLowerCase();
 
-    const rows = Array.from(document.querySelectorAll('#usersTab tbody tr'));
+    const rows = Array.from(document.querySelectorAll('#usersTab tbody tr')).filter(row => !row.querySelector('.admin-empty'));
 
     const filtered = rows.filter(row => {
         const username = row.children[2].innerText.toLowerCase();
@@ -1756,7 +1756,100 @@ window.loadGames = function() {
     }, 100);
 };
 
+function replaceBookingsSectionFromHtml(htmlText, url) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlText, 'text/html');
+
+    const newBody = doc.querySelector('#bookingsTab .admin-table tbody');
+    const newPagination = doc.getElementById('bookingPagination');
+    const currentBody = document.querySelector('#bookingsTab .admin-table tbody');
+    const currentPagination = document.getElementById('bookingPagination');
+
+    if (!newBody || !newPagination || !currentBody || !currentPagination) {
+        throw new Error('Could not parse bookings content from response.');
+    }
+
+    currentBody.innerHTML = newBody.innerHTML;
+    currentPagination.innerHTML = newPagination.innerHTML;
+
+    if (url) {
+        window.history.replaceState({}, '', url);
+    }
+}
+
+async function fetchAndSwapBookings(url) {
+    const pagination = document.getElementById('bookingPagination');
+    if (pagination) {
+        pagination.classList.add('is-loading');
+    }
+
+    try {
+        const response = await fetch(url, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            credentials: 'include'
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to load bookings page.');
+        }
+
+        const html = await response.text();
+        replaceBookingsSectionFromHtml(html, url);
+    } finally {
+        if (pagination) {
+            pagination.classList.remove('is-loading');
+        }
+    }
+}
+
+function initBookingsAjaxPagination() {
+    const bookingsPagination = document.getElementById('bookingPagination');
+    if (bookingsPagination) {
+        bookingsPagination.addEventListener('click', function(e) {
+            const link = e.target.closest('a');
+            if (!link || !bookingsPagination.contains(link)) return;
+
+            e.preventDefault();
+            fetchAndSwapBookings(link.href).catch(() => {
+                showToast('Could not change bookings page. Please try again.', 'error');
+            });
+        });
+    }
+
+    const bookingsForm = document.querySelector('#bookingsTab form.filter-bar');
+    if (bookingsForm) {
+        bookingsForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(bookingsForm);
+            const params = new URLSearchParams(formData);
+            const actionUrl = bookingsForm.getAttribute('action') || window.location.pathname;
+            const url = `${actionUrl}?${params.toString()}`;
+
+            fetchAndSwapBookings(url).catch(() => {
+                showToast('Could not apply booking filters. Please try again.', 'error');
+            });
+        });
+    }
+
+    const clearBookingFilters = document.getElementById('clearBookingFilters');
+    if (clearBookingFilters) {
+        clearBookingFilters.addEventListener('click', function(e) {
+            e.preventDefault();
+            const clearUrl = clearBookingFilters.getAttribute('href');
+            if (!clearUrl) return;
+
+            fetchAndSwapBookings(clearUrl).catch(() => {
+                showToast('Could not reset booking filters. Please try again.', 'error');
+            });
+        });
+    }
+}
+
 initFilters();
+initBookingsAjaxPagination();
 const observer = new MutationObserver(() => populateMovieGenres());
 observer.observe(document.querySelector('#moviesTab .admin-table tbody'), { childList: true, subtree: true });
 function populateGameTypeFilter(games) {
@@ -1774,8 +1867,18 @@ function populateGameTypeFilter(games) {
     select.innerHTML = html;
 }
 function paginateTable(rows, page, containerId, tableSelector) {
-    const allRows = document.querySelectorAll(tableSelector);
-    allRows.forEach(row => row.style.display = 'none');
+    const allRows = Array.from(document.querySelectorAll(tableSelector));
+    const emptyRow = allRows.find(row => row.querySelector('.admin-empty'));
+    const dataRows = allRows.filter(row => row !== emptyRow);
+
+    dataRows.forEach(row => {
+        row.style.display = 'none';
+    });
+
+    if (emptyRow) {
+        emptyRow.style.display = rows.length === 0 ? '' : 'none';
+    }
+
     const start = (page - 1) * ITEMS_PER_PAGE;
     const end = start + ITEMS_PER_PAGE;
 
@@ -1785,9 +1888,9 @@ function paginateTable(rows, page, containerId, tableSelector) {
         }
     });
 
-    renderPagination(rows.length, page, containerId, rows);
+    renderPagination(rows.length, page, containerId, rows, tableSelector);
 }
-function renderPagination(totalItems, currentPage, containerId, rows) {
+function renderPagination(totalItems, currentPage, containerId, rows, tableSelector) {
     const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
     const container = document.getElementById(containerId);
     if (!container) return;
@@ -1797,31 +1900,52 @@ function renderPagination(totalItems, currentPage, containerId, rows) {
     if (totalPages <= 1) return;
 
     const prevBtn = document.createElement('button');
+    prevBtn.type = 'button';
     prevBtn.innerHTML = '‹ Prev';
-    prevBtn.className = 'button button-secondary pagination-arrow';
+    prevBtn.className = 'button button-secondary pagination-btn pagination-arrow';
     if (currentPage === 1) prevBtn.disabled = true;
     prevBtn.addEventListener('click', () => {
         if (currentPage > 1) {
-            paginateTable(rows, currentPage - 1, containerId);
+            paginateTable(rows, currentPage - 1, containerId, tableSelector);
         }
     });
 
+    const pagesWrap = document.createElement('div');
+    pagesWrap.className = 'pagination-pages';
+
+    const startPage = Math.max(1, currentPage - Math.floor(PAGINATION_WINDOW_SIZE / 2));
+    const endPage = Math.min(totalPages, startPage + PAGINATION_WINDOW_SIZE - 1);
+    const normalizedStartPage = Math.max(1, endPage - PAGINATION_WINDOW_SIZE + 1);
+
+    for (let page = normalizedStartPage; page <= endPage; page += 1) {
+        const pageBtn = document.createElement('button');
+        pageBtn.type = 'button';
+        pageBtn.className = `button button-secondary pagination-btn pagination-page${page === currentPage ? ' is-active' : ''}`;
+        pageBtn.textContent = String(page);
+        if (page === currentPage) {
+            pageBtn.disabled = true;
+        }
+        pageBtn.addEventListener('click', () => paginateTable(rows, page, containerId, tableSelector));
+        pagesWrap.appendChild(pageBtn);
+    }
+
     const pageIndicator = document.createElement('span');
-    pageIndicator.className = 'pagination-info';
+    pageIndicator.className = 'pagination-status';
     pageIndicator.textContent = `Page ${currentPage} of ${totalPages}`;
 
-    
     const nextBtn = document.createElement('button');
+    nextBtn.type = 'button';
     nextBtn.innerHTML = 'Next ›';
-    nextBtn.className = 'button button-secondary pagination-arrow';
+    nextBtn.className = 'button button-secondary pagination-btn pagination-arrow';
     if (currentPage === totalPages) nextBtn.disabled = true;
     nextBtn.addEventListener('click', () => {
         if (currentPage < totalPages) {
-            paginateTable(rows, currentPage + 1, containerId);
+            paginateTable(rows, currentPage + 1, containerId, tableSelector);
         }
     });
 
     container.appendChild(prevBtn);
+    container.appendChild(pagesWrap);
     container.appendChild(pageIndicator);
     container.appendChild(nextBtn);
 }

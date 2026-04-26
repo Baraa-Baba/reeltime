@@ -360,7 +360,7 @@ admin-page
           </table>
         </div>
                 <div id="bookingPagination" class="pagination">
-                    {{ $bookings->links() }}
+                    {{ $bookings->links('pagination::default') }}
                 </div>
       </div>
     </section>
@@ -1246,31 +1246,89 @@ admin-page
 }
 .pagination {
     display: flex;
-    gap: 0.5rem;
-    justify-content: center;
-    margin-top: 1rem;
-    flex-wrap: wrap;
-}
-
-.pagination button.is-active {
-    background: var(--accent);
-    color: white;
-}
-.pagination {
-    display: flex;
-    gap: 1rem;
+    gap: 0.6rem;
     justify-content: center;
     align-items: center;
     margin-top: 1rem;
+    flex-wrap: wrap;
+    padding-top: 0.25rem;
+}
+
+.pagination.is-loading {
+    opacity: 0.65;
+    pointer-events: none;
+}
+
+.pagination .pagination-pages {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.pagination .pagination-btn,
+.pagination nav a,
+.pagination nav span,
+.pagination nav li > a,
+.pagination nav li > span {
+    min-height: 38px;
+    min-width: 38px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-color);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.45rem 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.pagination .pagination-btn:hover:not([disabled]),
+.pagination nav a:hover,
+.pagination nav li > a:hover {
+    transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.26);
+}
+
+.pagination .pagination-page.is-active,
+.pagination nav span[aria-current="page"],
+.pagination nav li > span[aria-current="page"],
+.pagination nav li.active > span {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    border-color: transparent;
+    color: #fff;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
 }
 
 .pagination-arrow {
-    min-width: 100px;
+    min-width: 96px;
 }
 
-.pagination-info {
+.pagination .pagination-btn[disabled],
+.pagination nav span[aria-disabled="true"],
+.pagination nav li > span[aria-disabled="true"] {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.pagination-status {
     color: var(--text-muted);
     font-size: 0.9rem;
+}
+
+.pagination nav ul {
+    display: flex;
+    gap: 0.6rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.pagination nav {
+    display: flex;
 }
 </style>
 @endsection
